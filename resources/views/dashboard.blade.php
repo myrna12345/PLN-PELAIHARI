@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SIPBO-PLN</title>
+    <title>Dashboard - SIMAS-PLN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    
     <style>
         body, html {
             margin: 0;
@@ -32,8 +34,20 @@
             padding-bottom: 20px;
             border-bottom: 1px solid #4f565d;
         }
-        .sidebar-header img { width: 40px; margin-right: 15px; }
-        .sidebar-header h1 { font-size: 1.3rem; margin: 0; }
+        
+        .sidebar-header .sidebar-logo {
+            width: 75px;     /* Ukuran diperbesar */
+            height: 75px;    /* Ukuran diperbesar */
+            margin-right: 15px;
+            border-radius: 5px; 
+            object-fit: contain; 
+        }
+        .sidebar-header h1 { 
+            font-size: 1.3rem; /* Ukuran teks diperbesar */
+            margin: 0; 
+            font-weight: 600;
+        }
+        
         .sidebar-menu { list-style: none; padding: 0; }
         .sidebar-menu li { margin-bottom: 15px; }
         .sidebar-menu a {
@@ -57,24 +71,28 @@
         .main-content h2 { font-size: 1.8rem; color: #333; margin-top: 0; margin-bottom: 30px; }
         .widget-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
         }
         .widget-card {
             padding: 25px;
             border-radius: 12px;
-            color: #212529; /* Warna teks default untuk semua card */
+            color: #212529; 
             display: flex;
             align-items: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
-        /* Warna latar sesuai desain */
         .widget-card.red { background-color: #f8d7da; border-left: 5px solid #dc3545; }
         .widget-card.yellow { background-color: #fff3cd; border-left: 5px solid #ffc107; }
         .widget-card.blue { background-color: #d1ecf1; border-left: 5px solid #17a2b8; }
         .widget-icon { font-size: 3rem; margin-right: 25px; opacity: 0.7; }
         .widget-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; }
         .widget-info p { margin: 0; font-size: 0.95rem; }
+        
+        .widget-info .retur-list {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -82,56 +100,58 @@
 <div class="container">
     <aside class="sidebar">
         <div class="sidebar-header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Logo_PLN.png" alt="Logo PLN">
-            <h1>SIPBO-PLN</h1>
+            <img src="{{ asset('images/logo-pln.png') }}" alt="Logo PLN" class="sidebar-logo">
+            <h1>SIMAS-PLN</h1>
         </div>
+        
         <ul class="sidebar-menu">
             <li><a href="#"><i class="fas fa-user-circle"></i> Profil</a></li>
-            <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-            <li><a href="{{ route('barang-stand-by.index') }}" class="{{ request()->routeIs('barang-stand-by.*') ? 'active' : '' }}"><i class="fas fa-box-open"></i> Barang Stand By</a></li>
-            <li><a href="#"><i class="fas fa-undo"></i> Barang Retur</a></li>
-            <li><a href="#"><i class="fas fa-tools"></i> Monitoring Pemasangan</a></li>
-            <li><a href="#"><i class="fas fa-chart-pie"></i> Monitoring Barang Sisa</a></li>
+            <li><a href="{{ route('dashboard') }}" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.*') ? 'active' : '' }}"><i class="fas fa-box-open"></i> Material Stand By</a></li>
+            <li><a href="#"><i class="fas fa-undo"></i> Material Retur</a></li>
+            <li><a href="#"><i class="fas fa-tools"></i> Material Keluar</a></li>
+            <li><a href="#"><i class="fas fa-chart-pie"></i> Material Kembali</a></li>
+            <li><a href="#"><i class="fas fa-satellite-dish"></i> Material Siaga Stand By</a></li>
+            <li><a href="#"><i class="fas fa-history"></i> Siaga Kembali</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
-        <h2>Sistem Informasi Pengelolaan Barang Operasional PLN</h2>
+        <h2>Sistem Informasi Pengelolaan Material Stand By di Gudang Kecil-PLN</h2>
         
         <div class="widget-grid">
             <div class="widget-card red">
-                {{-- ICON DIUBAH DI SINI --}}
-                <div class="widget-icon"><i class="fas fa-box-open"></i></div>
+                <div class="widget-icon"><i class="fas fa-box-check"></i></div>
                 <div class="widget-info">
-                    <h3>Barang Stand By</h3>
-                    <p>Barang stand by di ruang server : {{ $totalStandBy ?? 0 }} unit</p>
+                    <h3>Material Stand By</h3>
+                    <p>Material stand by di gudang kecil : {{ $totalStandBy ?? 0 }} unit</p>
                 </div>
             </div>
 
             <div class="widget-card yellow">
-                {{-- ICON DIUBAH DI SINI --}}
                 <div class="widget-icon"><i class="fas fa-tools"></i></div>
                 <div class="widget-info">
-                    <h3>Monitoring Pemasangan</h3>
-                    <p>Pemasangan Hari Ini : {{ $pemasanganHariIni ?? 0 }} Lokasi</p>
+                    <h3>Material Keluar</h3>
+                    <p>Pemasangan Hari ini : {{ $materialKeluarHariIni ?? 0 }} Lokasi</p>
                 </div>
             </div>
 
             <div class="widget-card yellow">
-                {{-- ICON DIUBAH DI SINI --}}
-                <div class="widget-icon"><i class="fas fa-undo"></i></div>
+                <div class="widget-icon"><i class="fas fa-box-recycle"></i></div>
                 <div class="widget-info">
-                    <h3>Barang Retur</h3>
-                    <p>Barang Rusak : {{ $returRusak ?? 0 }}<br>Barang Baik : {{ $returBaik ?? 0 }}</p>
+                    <h3>Material Retur</h3>
+                    <div class="retur-list">
+                        Bekas Andal : {{ $returAndal ?? 0 }}<br>
+                        Rusak : {{ $returAndal ?? 0 }}
+                    </div>
                 </div>
             </div>
 
             <div class="widget-card blue">
-                {{-- ICON DIUBAH DI SINI --}}
-                <div class="widget-icon"><i class="fas fa-chart-pie"></i></div>
+                <div class="widget-icon"><i class="fas fa-wave-square"></i></div>
                 <div class="widget-info">
-                    <h3>Monitoring Barang Sisa</h3>
-                    <p>Barang Sisa: {{ $totalBarangSisa ?? 0 }} unit</p>
+                    <h3>Material Kembali</h3>
+                    <p>Material Kembali: {{ $totalMaterialKembali ?? 0 }} unit</p>
                 </div>
             </div>
         </div>
