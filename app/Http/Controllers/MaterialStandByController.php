@@ -7,10 +7,13 @@ use App\Models\MaterialStandBy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
-// Kita tidak perlu 'use Carbon' lagi di sini
+use App\Exports\MaterialStandByExport; // <-- 1. Impor class Export BARU
+use Maatwebsite\Excel\Facades\Excel; // <-- 2. Impor class Excel BARU
 
 class MaterialStandByController extends Controller
 {
+    // ... (fungsi index, create, store, edit, update, destroy Anda sudah ada di sini) ...
+    
     public function index()
     {
         $items = MaterialStandBy::with('material')->latest()->paginate(10); 
@@ -23,37 +26,20 @@ class MaterialStandByController extends Controller
         return view('material_stand_by.create', compact('materials'));
     }
 
-    /**
-     * ==============================================
-     * === FUNGSI 'store' DIPERBAIKI (DISEDERHANAKAN) ===
-     * ==============================================
-     */
     public function store(Request $request)
     {
-        // 1. Validasi data
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'tanggal' => 'required|date', // 'tanggal' sekarang adalah string UTC dari form
+            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
-
         $path = null;
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('fotos', 'public');
         }
-
-        // 2. Simpan data langsung. 
-        //    'tanggal' sudah dalam format UTC yang benar dari JavaScript.
-        MaterialStandBy::create([
-            'material_id' => $validated['material_id'],
-            'nama_petugas' => $validated['nama_petugas'],
-            'jumlah' => $validated['jumlah'],
-            'tanggal' => $validated['tanggal'], // <-- LANGSUNG SIMPAN
-            'foto_path' => $path
-        ]);
-
+        MaterialStandBy::create($validated + ['foto_path' => $path]);
         return redirect()->route('material-stand-by.index')
                          ->with('success', 'Data Material Stand By berhasil ditambahkan.');
     }
@@ -67,35 +53,21 @@ class MaterialStandByController extends Controller
         ]);
     }
 
-    /**
-     * ==============================================
-     * === FUNGSI 'update' DIPERBAIKI (DISEDERHANAKAN) ===
-     * ==============================================
-     */
     public function update(Request $request, MaterialStandBy $materialStandBy)
     {
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'tanggal' => 'required|date', // 'tanggal' sekarang adalah string UTC
+            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
-
         $path = $materialStandBy->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
             $path = $request->file('foto')->store('fotos', 'public');
         }
-
-        $materialStandBy->update([
-            'material_id' => $validated['material_id'],
-            'nama_petugas' => $validated['nama_petugas'],
-            'jumlah' => $validated['jumlah'],
-            'tanggal' => $validated['tanggal'], // <-- LANGSUNG SIMPAN
-            'foto_path' => $path
-        ]);
-
+        $materialStandBy->update($validated + ['foto_path' => $path]);
         return redirect()->route('material-stand-by.index')
                          ->with('success', 'Data Material Stand By berhasil diperbarui.');
     }
@@ -106,7 +78,6 @@ class MaterialStandByController extends Controller
             Storage::disk('public')->delete($materialStandBy->foto_path);
         }
         $materialStandBy->delete();
-
         return redirect()->route('material-stand-by.index')
                          ->with('success', 'Data Material Stand By berhasil dihapus.');
     }
@@ -121,8 +92,13 @@ class MaterialStandByController extends Controller
         }
     }
     
-    public function downloadPDF(Request $request)
+    /**
+     * --- 3. FUNGSI BARU INI MENGGANTIKAN downloadPDF() ---
+     * Menangani download PDF DAN Excel.
+     */
+    public function downloadReport(Request $request)
     {
+        // Validasi input tanggal
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
@@ -130,20 +106,33 @@ class MaterialStandByController extends Controller
 
         $tanggalMulai = $request->tanggal_mulai;
         $tanggalAkhir = $request->tanggal_akhir;
+        $filename = 'laporan_material_stand_by_' . $tanggalMulai . '_sd_' . $tanggalAkhir;
 
-        $items = MaterialStandBy::with('material')
-                    ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                    ->orderBy('tanggal', 'asc')
-                    ->get();
+        // Cek tombol mana yang diklik (dari nama tombol)
+        if ($request->has('submit_pdf')) {
+            
+            // --- LOGIKA PDF ---
+            $items = MaterialStandBy::with('material')
+                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                        ->orderBy('tanggal', 'asc')
+                        ->get();
+            $data = [
+                'items' => $items,
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_akhir' => $tanggalAkhir,
+            ];
+            $pdf = PDF::loadView('material_stand_by.laporan_pdf', $data);
+            return $pdf->download($filename . '.pdf');
 
-        $data = [
-            'items' => $items,
-            'tanggal_mulai' => $tanggalMulai,
-            'tanggal_akhir' => $tanggalAkhir,
-        ];
-
-        $pdf = PDF::loadView('material_stand_by.laporan_pdf', $data);
-        $filename = 'laporan_material_stand_by_' . $tanggalMulai . '_sd_' . $tanggalAkhir . '.pdf';
-        return $pdf->download($filename);
+        } 
+        
+        if ($request->has('submit_excel')) {
+            
+            // --- LOGIKA EXCEL BARU ---
+            return Excel::download(new MaterialStandByExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
+        
+        }
+        
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
     }
 }

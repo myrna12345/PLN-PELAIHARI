@@ -131,7 +131,10 @@
             font-family: 'Poppins', sans-serif; 
         }
         .btn-edit { background-color: #198754; } 
-        .btn-hapus { background-color: #dc3545; }
+        
+        /* === PERUBAHAN WARNA DI SINI === */
+        .btn-hapus { background-color: #d06368ff; } 
+        
         .btn-foto-download {
             display: inline-flex; 
             align-items: center;
@@ -199,39 +202,31 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
             border-left: none; 
         }
-        
         .widget-card.salmon-red { 
-            background-color: #d06368ff; /* Warna 3 widget pertama */
+            background-color: #d06368ff; 
             color: white; 
         }
         .widget-card.salmon-red .widget-icon { color: white; opacity: 0.8; }
-        
         .widget-card.blue { 
-            background-color: #88c7d2ff; /* Warna 3 widget kedua */
+            background-color: #88c7d2ff; 
             color: #212529; 
         }
         .widget-card.blue .widget-icon { color: #212529; opacity: 0.7; }
-
         .widget-card.purple { 
-            background-color: #88c7d2ff; /* Warna 3 widget kedua */
+            background-color: #88c7d2ff; 
             color: #212529;
         }
         .widget-card.purple .widget-icon { color: #212529; opacity: 0.7; }
-        
         .widget-card.green { 
-            background-color: #88c7d2ff; /* Warna 3 widget kedua */
+            background-color: #88c7d2ff; 
             color: #212529; 
         }
         .widget-card.green .widget-icon { color: #212529; opacity: 0.7; }
-        
-        /* === PERUBAHAN WARNA UNTUK WIDGET TERAKHIR === */
         .widget-card.mauve { 
-            background-color: #dad664ff; /* Warna baru Anda */
-            color: #212529; /* Teks gelap agar terbaca */
+            background-color: #dad664ff; 
+            color: #212529; 
         }
         .widget-card.mauve .widget-icon { color: #212529; opacity: 0.7; }
-        /* =================== */
-
         .widget-icon { 
             font-size: 3rem; 
             margin-right: 25px; 
@@ -250,12 +245,10 @@
             <img src="{{ asset('images/logo-pln.png') }}" alt="Logo PLN" class="sidebar-logo">
             <h1>SIMAS-PLN</h1>
         </div>
+        
         <ul class="sidebar-menu">
             <li><a href="#"><i class="fas fa-user-circle"></i> Profil</a></li>
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> Dashboard</a></li>
-            
-            {{-- PERUBAHAN DIMULAI DI SINI --}}
-
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
                     <i class="fas fa-box-open"></i>
@@ -267,6 +260,13 @@
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
                 </ul>
             </li>
+            
+            <li><a href="#"><i class="fas fa-undo"></i> Material Retur</a></li>
+            <li><a href="#"><i class="fas fa-tools"></i> Material Keluar</a></li>
+            <li><a href="#"><i class="fas fa-chart-pie"></i> Material Kembali</a></li>
+            <li><a href="#"><i class="fas fa-box-archive"></i> Material Siaga Stand By</a></li>
+            <li><a href="#"><i class="fas fa-truck"></i> Siaga Keluar</a></li>
+            <li><a href="#"><i class="fas fa-sync-alt"></i> Siaga Kembali</a></li>
 
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-retur.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
@@ -275,9 +275,7 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-retur.index') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}">Lihat Material Retur</a></li>
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-retur.create') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}">Tambah Material Retur</a></li>
                 </ul>
             </li>
@@ -289,9 +287,7 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-keluar.index') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-keluar.index') ? 'sub-active' : '' }}">Lihat Material Keluar</a></li>
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-keluar.create') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-keluar.create') ? 'sub-active' : '' }}">Tambah Material Keluar</a></li>
                 </ul>
             </li>
@@ -303,9 +299,7 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-kembali.index') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-kembali.index') ? 'sub-active' : '' }}">Lihat Material Kembali</a></li>
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-kembali.create') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-kembali.create') ? 'sub-active' : '' }}">Tambah Material Kembali</a></li>
                 </ul>
             </li>
@@ -317,9 +311,7 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-siaga-stand-by.index') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}">Lihat Material Siaga</a></li>
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('material-siaga-stand-by.create') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}">Tambah Material Siaga</a></li>
                 </ul>
             </li>
@@ -331,9 +323,7 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('siaga-keluar.index') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}">Lihat Siaga Keluar</a></li>
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('siaga-keluar.create') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">Tambah Siaga Keluar</a></li>
                 </ul>
             </li>
@@ -345,14 +335,11 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('siaga-kembali.index') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}">Lihat Siaga Kembali</a></li>
-                    {{-- TODO: Ganti '#' dengan route yang benar, misal: {{ route('siaga-kembali.create') }} --}}
                     <li><a href="#" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}">Tambah Siaga Kembali</a></li>
                 </ul>
             </li>
             
-            {{-- PERUBAHAN SELESAI DI SINI --}}
         </ul>
     </aside>
 
@@ -449,7 +436,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-@stack('scripts') {{-- Tambahkan stack scripts di body --}}
 
 </body>
 </html>

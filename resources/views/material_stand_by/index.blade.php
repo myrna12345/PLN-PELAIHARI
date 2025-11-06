@@ -71,7 +71,8 @@
     </div>
 
     <div class="index-footer-form">
-        <form action="{{ route('material-stand-by.download-pdf') }}" method="GET" class="form-download">
+        <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download">
+            
             <div class="form-group-tanggal">
                 <label for="tanggal_mulai">Dari Tanggal:</label>
                 <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control-tanggal" required>
@@ -80,11 +81,15 @@
                 <label for="tanggal_akhir">Sampai Tanggal:</label>
                 <input type="date" name="tanggal_akhir" id="tanggal_akhir" class="form-control-tanggal" required>
             </div>
-            <button type="submit" class="btn btn-pdf">
+            
+            <button type="submit" name="submit_pdf" value="1" class="btn btn-pdf">
                 <i class="fas fa-file-pdf"></i> Unduh Pdf
             </button>
+            
+            <button type="submit" name="submit_excel" value="1" class="btn btn-excel">
+                <i class="fas fa-file-excel"></i> Unduh Excel
+            </button>
         </form>
-        <a href="#" class="btn btn-excel"><i class="fas fa-file-excel"></i> Unduh Excel</a>
     </div>
 
 </div>
