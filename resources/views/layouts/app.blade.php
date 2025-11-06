@@ -261,13 +261,6 @@
                 </ul>
             </li>
             
-            <li><a href="#"><i class="fas fa-undo"></i> Material Retur</a></li>
-            <li><a href="#"><i class="fas fa-tools"></i> Material Keluar</a></li>
-            <li><a href="#"><i class="fas fa-chart-pie"></i> Material Kembali</a></li>
-            <li><a href="#"><i class="fas fa-box-archive"></i> Material Siaga Stand By</a></li>
-            <li><a href="#"><i class="fas fa-truck"></i> Siaga Keluar</a></li>
-            <li><a href="#"><i class="fas fa-sync-alt"></i> Siaga Kembali</a></li>
-
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-retur.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
                     <i class="fas fa-undo"></i>
