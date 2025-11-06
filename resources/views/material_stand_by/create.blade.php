@@ -9,7 +9,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
+        <div class="alert alert-danger">
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -47,12 +47,11 @@
             
             <div class="form-group-new">
                 <label for="tanggal">Tanggal dan Jam</label>
-                
                 <input type="datetime-local" 
                        name="tanggal" 
                        id="tanggal" 
                        class="form-control-new" 
-                       value="{{ old('tanggal', now()->format('Y-m-d\TH:i')) }}" 
+                       value="{{ old('tanggal', now()->format('Y-m-d\TH:i')) }}"
                        required>
             </div>
 

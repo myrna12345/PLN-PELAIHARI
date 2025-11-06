@@ -2,60 +2,55 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Material; // Model untuk dropdown
+use App\Models\Material;
 use App\Models\MaterialStandBy;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // Untuk mengelola file
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+// Kita tidak perlu 'use Carbon' lagi di sini
 
 class MaterialStandByController extends Controller
 {
-    /**
-     * READ: Menampilkan halaman daftar (laporan).
-     */
     public function index()
     {
-        // 'with('material')' mengambil data relasi agar lebih efisien
         $items = MaterialStandBy::with('material')->latest()->paginate(10); 
         return view('material_stand_by.index', compact('items'));
     }
 
-    /**
-     * CREATE (Form): Menampilkan form tambah data.
-     */
     public function create()
     {
-        // Ambil semua data material untuk mengisi <select> dropdown
         $materials = Material::orderBy('nama_material')->get();
         return view('material_stand_by.create', compact('materials'));
     }
 
     /**
-     * CREATE (Action): Menyimpan data baru ke database.
+     * ==============================================
+     * === FUNGSI 'store' DIPERBAIKI (DISEDERHANAKAN) ===
+     * ==============================================
      */
     public function store(Request $request)
     {
-        // 1. Validasi input
-        $request->validate([
+        // 1. Validasi data
+        $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'tanggal' => 'required|date',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Validasi foto
+            'tanggal' => 'required|date', // 'tanggal' sekarang adalah string UTC dari form
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
-            // 2. Simpan foto ke folder public/storage/fotos
-            // PENTING: Nanti jalankan "php artisan storage:link"
             $path = $request->file('foto')->store('fotos', 'public');
         }
 
-        // 3. Simpan data ke database
+        // 2. Simpan data langsung. 
+        //    'tanggal' sudah dalam format UTC yang benar dari JavaScript.
         MaterialStandBy::create([
-            'material_id' => $request->material_id,
-            'nama_petugas' => $request->nama_petugas,
-            'jumlah' => $request->jumlah,
-            'tanggal' => $request->tanggal,
+            'material_id' => $validated['material_id'],
+            'nama_petugas' => $validated['nama_petugas'],
+            'jumlah' => $validated['jumlah'],
+            'tanggal' => $validated['tanggal'], // <-- LANGSUNG SIMPAN
             'foto_path' => $path
         ]);
 
@@ -63,9 +58,6 @@ class MaterialStandByController extends Controller
                          ->with('success', 'Data Material Stand By berhasil ditambahkan.');
     }
 
-    /**
-     * UPDATE (Form): Menampilkan form untuk edit data.
-     */
     public function edit(MaterialStandBy $materialStandBy)
     {
         $materials = Material::orderBy('nama_material')->get();
@@ -76,54 +68,82 @@ class MaterialStandByController extends Controller
     }
 
     /**
-     * UPDATE (Action): Memperbarui data di database.
+     * ==============================================
+     * === FUNGSI 'update' DIPERBAIKI (DISEDERHANAKAN) ===
+     * ==============================================
      */
     public function update(Request $request, MaterialStandBy $materialStandBy)
     {
-        $request->validate([
-        'material_id' => 'required|exists:materials,id',
-        'nama_petugas' => 'required|string|max:255',
-        'jumlah' => 'required|integer|min:1',
-        'tanggal' => 'required|date', // 'date' sudah bisa menangani format datetime-local
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-    ]);
+        $validated = $request->validate([
+            'material_id' => 'required|exists:materials,id',
+            'nama_petugas' => 'required|string|max:255',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal' => 'required|date', // 'tanggal' sekarang adalah string UTC
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
 
         $path = $materialStandBy->foto_path;
         if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($path) {
-                Storage::disk('public')->delete($path);
-            }
-            // Simpan foto baru
+            if ($path) { Storage::disk('public')->delete($path); }
             $path = $request->file('foto')->store('fotos', 'public');
         }
 
-        $$request->validate([
-        'material_id' => 'required|exists:materials,id',
-        'nama_petugas' => 'required|string|max:255',
-        'jumlah' => 'required|integer|min:1',
-        'tanggal' => 'required|date',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-    ]);
+        $materialStandBy->update([
+            'material_id' => $validated['material_id'],
+            'nama_petugas' => $validated['nama_petugas'],
+            'jumlah' => $validated['jumlah'],
+            'tanggal' => $validated['tanggal'], // <-- LANGSUNG SIMPAN
+            'foto_path' => $path
+        ]);
 
         return redirect()->route('material-stand-by.index')
                          ->with('success', 'Data Material Stand By berhasil diperbarui.');
     }
 
-    /**
-     * DELETE: Menghapus data dari database.
-     */
     public function destroy(MaterialStandBy $materialStandBy)
     {
-        // Hapus foto dari storage
         if ($materialStandBy->foto_path) {
             Storage::disk('public')->delete($materialStandBy->foto_path);
         }
-        
-        // Hapus data dari database
         $materialStandBy->delete();
 
         return redirect()->route('material-stand-by.index')
                          ->with('success', 'Data Material Stand By berhasil dihapus.');
+    }
+
+    public function downloadFoto(MaterialStandBy $materialStandBy)
+    {
+        if ($materialStandBy->foto_path && Storage::disk('public')->exists($materialStandBy->foto_path)) {
+            return Storage::disk('public')->download($materialStandBy->foto_path);
+        } else {
+            return redirect()->route('material-stand-by.index')
+                             ->with('error', 'File foto tidak ditemukan.');
+        }
+    }
+    
+    public function downloadPDF(Request $request)
+    {
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+
+        $tanggalMulai = $request->tanggal_mulai;
+        $tanggalAkhir = $request->tanggal_akhir;
+
+        $items = MaterialStandBy::with('material')
+                    ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                    ->orderBy('tanggal', 'asc')
+                    ->get();
+
+        $data = [
+            'items' => $items,
+            'tanggal_mulai' => $tanggalMulai,
+            'tanggal_akhir' => $tanggalAkhir,
+        ];
+
+        $pdf = PDF::loadView('material_stand_by.laporan_pdf', $data);
+        $filename = 'laporan_material_stand_by_' . $tanggalMulai . '_sd_' . $tanggalAkhir . '.pdf';
+        return $pdf->download($filename);
     }
 }

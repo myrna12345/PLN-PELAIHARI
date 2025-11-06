@@ -17,29 +17,31 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Id</th>
+                    <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Jumlah/Unit</th>
-                    <th>Tanggal (Jam Lokal)</th> <th>Foto</th>
+                    <th>Tanggal (WITA)</th>
+                    <th>Foto & Download</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($items as $item)
                     <tr>
-                        <td>{{ $item->id }}</td>
+                        <td>{{ $items->firstItem() + $loop->index }}</td>
                         <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah }}</td>
                         
-                        <td class="local-datetime" data-timestamp="{{ $item->tanggal->toIso8601String() }}">
-                            Memuat...
-                        </td>
+                        <td>{{ $item->tanggal->format('d M Y, H:i') }}</td>
                         
-                        <td>
+                        <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
                                 <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Material" class="table-foto">
+                                <a href="{{ route('material-stand-by.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
+                                    <i class="fas fa-download"></i> Download Foto
+                                </a>
                             @else
                                 <span>-</span>
                             @endif
@@ -68,45 +70,22 @@
         {{ $items->links() }}
     </div>
 
-    <div class="index-footer">
-        <a href="#" class="btn btn-pdf"><i class="fas fa-file-pdf"></i> Unduh Pdf</a>
+    <div class="index-footer-form">
+        <form action="{{ route('material-stand-by.download-pdf') }}" method="GET" class="form-download">
+            <div class="form-group-tanggal">
+                <label for="tanggal_mulai">Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control-tanggal" required>
+            </div>
+            <div class="form-group-tanggal">
+                <label for="tanggal_akhir">Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" id="tanggal_akhir" class="form-control-tanggal" required>
+            </div>
+            <button type="submit" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Unduh Pdf
+            </button>
+        </form>
         <a href="#" class="btn btn-excel"><i class="fas fa-file-excel"></i> Unduh Excel</a>
     </div>
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    // Jalankan script ini setelah halaman selesai dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-        // Cari semua sel tabel dengan class 'local-datetime'
-        document.querySelectorAll('.local-datetime').forEach(function(cell) {
-            try {
-                // 1. Ambil timestamp server dari atribut data-timestamp
-                const serverTimestamp = cell.dataset.timestamp;
-                
-                // 2. Buat objek Date. Ini otomatis diubah ke ZONA WAKTU DEVICE
-                const localDate = new Date(serverTimestamp);
-
-                // 3. Opsi format (Hari, Bulan, Tahun, Jam, Menit)
-                const options = {
-                    day: 'numeric', 
-                    month: 'short', 
-                    year: 'numeric', 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    hour12: false // Gunakan format 24 jam
-                };
-
-                // 4. Ubah teks di dalam sel menjadi format jam lokal
-                cell.textContent = new Intl.DateTimeFormat('id-ID', options).format(localDate);
-
-            } catch (e) {
-                console.error('Gagal memformat tanggal:', e);
-                cell.textContent = 'Invalid Date'; 
-            }
-        });
-    });
-</script>
-@endpush
