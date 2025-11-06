@@ -316,8 +316,8 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}">Lihat Siaga Keluar</a></li>
-                    <li><a href="#" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">Tambah Siaga Keluar</a></li>
+                    <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}">Lihat Siaga Keluar</a></li>
+                    <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">Tambah Siaga Keluar</a></li>
                 </ul>
             </li>
 
