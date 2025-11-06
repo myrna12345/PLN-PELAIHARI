@@ -10,8 +10,8 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('material-stand-by/download-pdf', [MaterialStandByController::class, 'downloadPDF'])
-     ->name('material-stand-by.download-pdf');
+Route::get('material-stand-by/download-report', [MaterialStandByController::class, 'downloadReport'])
+     ->name('material-stand-by.download-report');
      
 Route::get('material-stand-by/{materialStandBy}/download-foto', [MaterialStandByController::class, 'downloadFoto'])
      ->name('material-stand-by.download-foto');
