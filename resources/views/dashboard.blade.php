@@ -44,7 +44,7 @@
         <div class="widget-card purple"> 
             <div class="widget-icon"><i class="fas fa-box-archive"></i></div>
             <div class="widget-info">
-                <h3>Material Siaga Stand By</h3>
+                <h3>Siaga Stand By</h3>
                 <p>Material Kembali: {{ $totalSiagaStandBy ?? 0 }} unit</p>
             </div>
         </div>
