@@ -20,7 +20,7 @@
                     <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
-                    <th>Jumlah/Unit</th>
+                    <th>Jumlah</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
