@@ -236,6 +236,7 @@
         .widget-info p { margin: 0; font-size: 0.95rem; }
         .widget-info .retur-list { font-size: 0.95rem; line-height: 1.6; }
     </style>
+    @stack('styles') {{-- Tambahkan stack styles di head --}}
 </head>
 <body>
 <div class="container-fluid">
@@ -248,7 +249,6 @@
         <ul class="sidebar-menu">
             <li><a href="#"><i class="fas fa-user-circle"></i> Profil</a></li>
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> Dashboard</a></li>
-            
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
                     <i class="fas fa-box-open"></i>
@@ -267,6 +267,79 @@
             <li><a href="#"><i class="fas fa-box-archive"></i> Material Siaga Stand By</a></li>
             <li><a href="#"><i class="fas fa-truck"></i> Siaga Keluar</a></li>
             <li><a href="#"><i class="fas fa-sync-alt"></i> Siaga Kembali</a></li>
+
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-retur.*') ? 'active open' : '' }}">
+                <a class="dropdown-toggle">
+                    <i class="fas fa-undo"></i>
+                    <span>Material Retur</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}">Lihat Material Retur</a></li>
+                    <li><a href="#" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}">Tambah Material Retur</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-keluar.*') ? 'active open' : '' }}">
+                <a class="dropdown-toggle">
+                    <i class="fas fa-tools"></i>
+                    <span>Material Keluar</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#" class="{{ request()->routeIs('material-keluar.index') ? 'sub-active' : '' }}">Lihat Material Keluar</a></li>
+                    <li><a href="#" class="{{ request()->routeIs('material-keluar.create') ? 'sub-active' : '' }}">Tambah Material Keluar</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-kembali.*') ? 'active open' : '' }}">
+                <a class="dropdown-toggle">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Material Kembali</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#" class="{{ request()->routeIs('material-kembali.index') ? 'sub-active' : '' }}">Lihat Material Kembali</a></li>
+                    <li><a href="#" class="{{ request()->routeIs('material-kembali.create') ? 'sub-active' : '' }}">Tambah Material Kembali</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.*') ? 'active open' : '' }}">
+                <a class="dropdown-toggle">
+                    <i class="fas fa-box-archive"></i>
+                    <span>Siaga Stand By</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}">Lihat Material Siaga</a></li>
+                    <li><a href="#" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}">Tambah Material Siaga</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-keluar.*') ? 'active open' : '' }}">
+                <a class="dropdown-toggle">
+                    <i class="fas fa-truck"></i>
+                    <span>Siaga Keluar</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}">Lihat Siaga Keluar</a></li>
+                    <li><a href="#" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">Tambah Siaga Keluar</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-kembali.*') ? 'active open' : '' }}">
+                <a class="dropdown-toggle">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Siaga Kembali</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}">Lihat Siaga Kembali</a></li>
+                    <li><a href="#" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}">Tambah Siaga Kembali</a></li>
+                </ul>
+            </li>
+            
         </ul>
     </aside>
 
@@ -300,6 +373,15 @@ document.addEventListener('DOMContentLoaded', function() {
         toggle.addEventListener('click', function(event) {
             event.preventDefault(); 
             var parentLi = this.parentElement;
+            
+            // Logika untuk menutup dropdown lain (opsional, tapi bagus)
+            document.querySelectorAll('.sidebar-menu .menu-item-has-dropdown.open').forEach(function(openItem) {
+                if (openItem !== parentLi) {
+                    openItem.classList.remove('open');
+                }
+            });
+
+            // Buka/tutup item yang diklik
             parentLi.classList.toggle('open');
         });
     });
@@ -353,6 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
+
 
 </body>
 </html>
