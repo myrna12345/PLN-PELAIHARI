@@ -93,7 +93,7 @@
         .form-group-new label { display: block; margin-bottom: 10px; font-weight: 600; font-size: 1rem; color: #495057; }
         .form-control-new { width: 100%; padding: 14px 16px; border: 1px solid #ced4da; border-radius: 10px; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 16px 12px; }
         input.form-control-new { appearance: none; background-image: none; }
-        .form-control-new:focus { outline: none; border-color: #198754; box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15); }
+        .form-control-new:focus { outline: none; border-color: #198754; box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15); } /* Fokus Hijau */
         .form-control-new-file { width: 100%; padding: 14px 16px; border: 1px solid #ced4da; border-radius: 10px; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 1rem; }
         .form-control-new-file::file-selector-button { display: none; }
         .form-actions { margin-top: 2.5rem; text-align: right; }
@@ -189,13 +189,54 @@
         .submenu a { font-size: 0.95rem !important; padding: 10px 12px !important; color: #ced4da !important; }
         .submenu a:hover, .submenu a.sub-active { color: #ffffff !important; background-color: transparent !important; }
         
-        /* === 6. CSS WIDGET DASHBOARD === */
+        /* === 6. CSS WIDGET DASHBOARD (LENGKAP) === */
         .widget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .widget-card { padding: 25px; border-radius: 12px; color: #212529; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .widget-card.red { background-color: #f8d7da; border-left: 5px solid #dc3545; }
-        .widget-card.yellow { background-color: #fff3cd; border-left: 5px solid #ffc107; }
-        .widget-card.blue { background-color: #d1ecf1; border-left: 5px solid #17a2b8; }
-        .widget-icon { font-size: 3rem; margin-right: 25px; opacity: 0.7; }
+        .widget-card { 
+            padding: 25px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            border-left: none; 
+        }
+        
+        .widget-card.salmon-red { 
+            background-color: #d06368ff; /* Warna 3 widget pertama */
+            color: white; 
+        }
+        .widget-card.salmon-red .widget-icon { color: white; opacity: 0.8; }
+        
+        .widget-card.blue { 
+            background-color: #88c7d2ff; /* Warna 3 widget kedua */
+            color: #212529; 
+        }
+        .widget-card.blue .widget-icon { color: #212529; opacity: 0.7; }
+
+        .widget-card.purple { 
+            background-color: #88c7d2ff; /* Warna 3 widget kedua */
+            color: #212529;
+        }
+        .widget-card.purple .widget-icon { color: #212529; opacity: 0.7; }
+        
+        .widget-card.green { 
+            background-color: #88c7d2ff; /* Warna 3 widget kedua */
+            color: #212529; 
+        }
+        .widget-card.green .widget-icon { color: #212529; opacity: 0.7; }
+        
+        /* === PERUBAHAN WARNA UNTUK WIDGET TERAKHIR === */
+        .widget-card.mauve { 
+            background-color: #dad664ff; /* Warna baru Anda */
+            color: #212529; /* Teks gelap agar terbaca */
+        }
+        .widget-card.mauve .widget-icon { color: #212529; opacity: 0.7; }
+        /* =================== */
+
+        .widget-icon { 
+            font-size: 3rem; 
+            margin-right: 25px; 
+            opacity: 0.7; 
+        }
         .widget-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; }
         .widget-info p { margin: 0; font-size: 0.95rem; }
         .widget-info .retur-list { font-size: 0.95rem; line-height: 1.6; }
@@ -208,11 +249,9 @@
             <img src="{{ asset('images/logo-pln.png') }}" alt="Logo PLN" class="sidebar-logo">
             <h1>SIMAS-PLN</h1>
         </div>
-        
         <ul class="sidebar-menu">
             <li><a href="#"><i class="fas fa-user-circle"></i> Profil</a></li>
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> Dashboard</a></li>
-            
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
                     <i class="fas fa-box-open"></i>
@@ -224,11 +263,9 @@
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
                 </ul>
             </li>
-            
             <li><a href="#"><i class="fas fa-undo"></i> Material Retur</a></li>
             <li><a href="#"><i class="fas fa-tools"></i> Material Keluar</a></li>
             <li><a href="#"><i class="fas fa-chart-pie"></i> Material Kembali</a></li>
-            
             <li><a href="#"><i class="fas fa-box-archive"></i> Material Siaga Stand By</a></li>
             <li><a href="#"><i class="fas fa-truck"></i> Siaga Keluar</a></li>
             <li><a href="#"><i class="fas fa-sync-alt"></i> Siaga Kembali</a></li>
