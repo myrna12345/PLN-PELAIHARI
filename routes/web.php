@@ -33,6 +33,16 @@ Route::put('/material_keluar/{id}', [MaterialKeluarController::class, 'update'])
 Route::delete('/material_keluar/{id}', [MaterialKeluarController::class, 'destroy'])->name('material_keluar.destroy'); // Hapus data
 Route::post('/material_keluar/download', [MaterialKeluarController::class, 'downloadReport'])
     ->name('material_keluar.download');
+
+// Material Kembali
+Route::get('/material_kembali', [MaterialKembaliController::class, 'index'])->name('material_kembali.index');
+Route::get('/material_kembali/create', [MaterialKembaliController::class, 'create'])->name('material_kembali.create');
+Route::post('/material_kembali/store', [MaterialKembaliController::class, 'store'])->name('material_kembali.store');
+Route::get('/material_kembali/{id}/lihat', [MaterialKembaliController::class, 'lihat'])->name('material_kembali.lihat');
+Route::get('/material_kembali/{id}/edit', [MaterialKembaliController::class, 'edit'])->name('material_kembali.edit');
+Route::put('/material_kembali/{id}', [MaterialKembaliController::class, 'update'])->name('material_kembali.update');
+Route::delete('/material_kembali/{id}', [MaterialKembaliController::class, 'destroy'])->name('material_kembali.destroy');
+Route::post('/material_kembali/download', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
     
 // --- RUTE MATERIAL STAND BY (SUDAH ADA) ---
 Route::get('material-stand-by/download-pdf', [MaterialStandByController::class, 'downloadPDF'])
