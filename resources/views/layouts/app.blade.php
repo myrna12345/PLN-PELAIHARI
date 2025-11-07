@@ -255,6 +255,9 @@
 <body>
 <div class="container-fluid">
     <aside class="sidebar">
+        <!-- ============================================== -->
+        <!-- === HTML SIDEBAR (DENGAN DROPDOWN) === -->
+        <!-- ============================================== -->
         <div class="sidebar-header">
             <img src="{{ asset('images/logo-pln.png') }}" alt="Logo PLN" class="sidebar-logo">
             <h1>SIMAS-PLN</h1>
@@ -276,6 +279,11 @@
                 </ul>
             </li>
             
+            <!-- 
+              ==============================================
+              === PERBAIKAN DROPDOWN UNTUK SEMUA MENU ===
+              ==============================================
+            -->
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-retur.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
                     <i class="fas fa-undo"></i> 
@@ -283,8 +291,8 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#">Laporan Material</a></li>
-                    <li><a href="#">Tambah Material</a></li>
+                    <li><a href="{{ route('material-retur.index') }}" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
+                    <li><a href="{{ route('material-retur.create') }}" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
                 </ul>
             </li>
             
@@ -371,12 +379,21 @@
     </main>
 </div>
 
+<!-- ============================================== -->
+<!-- === HTML BARU UNTUK MODAL FOTO === -->
+<!-- ============================================== -->
 <div id="fotoModal" class="modal-overlay">
     <span class="modal-close" id="modalCloseButton">&times;</span>
     <div class="modal-content">
         <img id="modalImage" class="modal-image" src="" alt="Foto Material">
     </div>
 </div>
+<!-- ============================================== -->
+
+
+<!-- ============================================== -->
+<!-- === JAVASCRIPT (DENGAN KODE MODAL & DROPDOWN) === -->
+<!-- ============================================== -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
