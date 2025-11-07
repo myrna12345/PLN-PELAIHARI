@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class MaterialKeluar extends Model
 {
     use HasFactory;
-    protected $table = 'material_keluar'; // Asumsi nama tabel
-    // Anda bisa tambahkan $fillable nanti
+
+    protected $table = 'material_keluar';
+
+    protected $fillable = [
+        'nama_material',
+        'nama_petugas',
+        'jumlah_material',
+        'tanggal',
+        'foto'
+    ];
 }
