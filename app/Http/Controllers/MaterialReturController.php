@@ -3,30 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Material;
-use App\Models\MaterialStandBy;
+use App\Models\MaterialRetur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\MaterialStandByExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Carbon\Carbon;
+use App\Exports\MaterialReturExport; // <-- 1. Impor class Export
+use Maatwebsite\Excel\Facades\Excel; // <-- 2. Impor class Excel
+use Carbon\Carbon; // <-- 3. Impor Carbon
 
-class MaterialStandByController extends Controller
+class MaterialReturController extends Controller
 {
     /**
      * READ: Menampilkan halaman daftar (laporan) dengan SEARCH.
      */
     public function index(Request $request)
     {
-        // Ambil input dari URL
         $search = $request->query('search');
         $tanggalMulai = $request->query('tanggal_mulai');
         $tanggalAkhir = $request->query('tanggal_akhir');
 
-        // Mulai query
-        $query = MaterialStandBy::with('material');
+        $query = MaterialRetur::with('material');
 
-        // Tambahkan filter NAMA (jika ada)
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', '%' . $search . '%')
@@ -35,22 +32,15 @@ class MaterialStandByController extends Controller
                   });
             });
         }
-
-        // Tambahkan filter TANGGAL MULAI (jika ada)
         if ($tanggalMulai) {
-            $query->whereDate('tanggal', '>=', $tanggalMulai); // whereDate mengabaikan jam
+            $query->whereDate('tanggal', '>=', $tanggalMulai);
         }
-
-        // Tambahkan filter TANGGAL AKHIR (jika ada)
         if ($tanggalAkhir) {
-            $query->whereDate('tanggal', '<=', $tanggalAkhir); // whereDate mengabaikan jam
+            $query->whereDate('tanggal', '<=', $tanggalAkhir);
         }
 
-        // Ambil data, urutkan, dan paginasi
         $items = $query->latest('tanggal')->paginate(10); 
-
-        // Kirim data ke view
-        return view('material_stand_by.index', compact('items'));
+        return view('material_retur.index', compact('items'));
     }
 
     /**
@@ -59,7 +49,7 @@ class MaterialStandByController extends Controller
     public function create()
     {
         $materials = Material::orderBy('nama_material')->get();
-        return view('material_stand_by.create', compact('materials'));
+        return view('material_retur.create', compact('materials'));
     }
 
     /**
@@ -72,35 +62,40 @@ class MaterialStandByController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
             'tanggal' => 'required|date', 
+            'status' => 'required|in:baik,rusak',
+            'keterangan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
+
         $path = null;
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('fotos', 'public');
+            $path = $request->file('foto')->store('fotos_retur', 'public');
         }
-        MaterialStandBy::create($validated + ['foto_path' => $path]);
-        return redirect()->route('material-stand-by.index')
-                         ->with('success', 'Data Material Stand By berhasil ditambahkan.');
+
+        MaterialRetur::create($validated + ['foto_path' => $path]);
+
+        return redirect()->route('material-retur.index')
+                         ->with('success', 'Data Material Retur berhasil ditambahkan.');
     }
 
     /**
      * SHOW: Menampilkan detail data (Read-Only).
      */
-    public function show(MaterialStandBy $materialStandBy)
+    public function show(MaterialRetur $materialRetur)
     {
-        return view('material_stand_by.show', [
-            'item' => $materialStandBy
+        return view('material_retur.show', [
+            'item' => $materialRetur
         ]);
     }
 
     /**
      * UPDATE (Form): Menampilkan form untuk edit data.
      */
-    public function edit(MaterialStandBy $materialStandBy)
+    public function edit(MaterialRetur $materialRetur)
     {
         $materials = Material::orderBy('nama_material')->get();
-        return view('material_stand_by.edit', [
-            'item' => $materialStandBy,
+        return view('material_retur.edit', [
+            'item' => $materialRetur,
             'materials' => $materials
         ]);
     }
@@ -108,53 +103,59 @@ class MaterialStandByController extends Controller
     /**
      * UPDATE (Action): Memperbarui data di database.
      */
-    public function update(Request $request, MaterialStandBy $materialStandBy)
+    public function update(Request $request, MaterialRetur $materialRetur)
     {
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
             'tanggal' => 'required|date',
+            'status' => 'required|in:baik,rusak',
+            'keterangan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
-        $path = $materialStandBy->foto_path;
+        
+        $path = $materialRetur->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
-            $path = $request->file('foto')->store('fotos', 'public');
+            $path = $request->file('foto')->store('fotos_retur', 'public');
         }
-        $materialStandBy->update($validated + ['foto_path' => $path]);
-        return redirect()->route('material-stand-by.index')
-                         ->with('success', 'Data Material Stand By berhasil diperbarui.');
+
+        $materialRetur->update($validated + ['foto_path' => $path]);
+
+        return redirect()->route('material-retur.index')
+                         ->with('success', 'Data Material Retur berhasil diperbarui.');
     }
 
     /**
      * DELETE: Menghapus data dari database.
      */
-    public function destroy(MaterialStandBy $materialStandBy)
+    public function destroy(MaterialRetur $materialRetur)
     {
-        if ($materialStandBy->foto_path) {
-            Storage::disk('public')->delete($materialStandBy->foto_path);
+        if ($materialRetur->foto_path) {
+            Storage::disk('public')->delete($materialRetur->foto_path);
         }
-        $materialStandBy->delete();
-        return redirect()->route('material-stand-by.index')
-                         ->with('success', 'Data Material Stand By berhasil dihapus.');
+        $materialRetur->delete();
+        
+        return redirect()->route('material-retur.index')
+                         ->with('success', 'Data Material Retur berhasil dihapus.');
     }
 
     /**
      * --- FUNGSI UNTUK DOWNLOAD FOTO ---
      */
-    public function downloadFoto(MaterialStandBy $materialStandBy)
+    public function downloadFoto(MaterialRetur $materialRetur)
     {
-        if ($materialStandBy->foto_path && Storage::disk('public')->exists($materialStandBy->foto_path)) {
-            return Storage::disk('public')->download($materialStandBy->foto_path);
+        if ($materialRetur->foto_path && Storage::disk('public')->exists($materialRetur->foto_path)) {
+            return Storage::disk('public')->download($materialRetur->foto_path);
         } else {
-            return redirect()->route('material-stand-by.index')
+            return redirect()->route('material-retur.index')
                              ->with('error', 'File foto tidak ditemukan.');
         }
     }
     
     /**
-     * --- FUNGSI UNTUK DOWNLOAD PDF & EXCEL ---
+     * --- FUNGSI BARU UNTUK DOWNLOAD PDF & EXCEL ---
      */
     public function downloadReport(Request $request)
     {
@@ -163,31 +164,32 @@ class MaterialStandByController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        $tanggalMulai = $request->tanggal_mulai;
-        $tanggalAkhir = $request->tanggal_akhir;
+        $tanggalMulaiString = $request->tanggal_mulai;
+        $tanggalAkhirString = $request->tanggal_akhir;
         
-        // --- Perbaikan Bug Tanggal Selesai ---
-        $tanggalMulaiCarbon = Carbon::parse($tanggalMulai)->startOfDay();
-        $tanggalAkhirCarbon = Carbon::parse($tanggalAkhir)->endOfDay();
+        $tanggalMulai = Carbon::parse($tanggalMulaiString)->startOfDay(); 
+        $tanggalAkhir = Carbon::parse($tanggalAkhirString)->endOfDay();   
         
-        $filename = 'laporan_material_stand_by_' . $tanggalMulai . '_sd_' . $tanggalAkhir;
+        $filename = 'laporan_material_retur_' . $tanggalMulaiString . '_sd_' . $tanggalAkhirString;
 
         if ($request->has('submit_pdf')) {
-            $items = MaterialStandBy::with('material')
-                        ->whereBetween('tanggal', [$tanggalMulaiCarbon, $tanggalAkhirCarbon])
+            
+            $items = MaterialRetur::with('material')
+                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
                         ->orderBy('tanggal', 'asc')
                         ->get();
             $data = [
                 'items' => $items,
-                'tanggal_mulai' => $tanggalMulai,
-                'tanggal_akhir' => $tanggalAkhir,
+                'tanggal_mulai' => $tanggalMulaiString,
+                'tanggal_akhir' => $tanggalAkhirString,
             ];
-            $pdf = PDF::loadView('material_stand_by.laporan_pdf', $data);
+            $pdf = PDF::loadView('material_retur.laporan_pdf', $data); // Arahkan ke view PDF Retur
             return $pdf->download($filename . '.pdf');
+
         } 
         
         if ($request->has('submit_excel')) {
-            return Excel::download(new MaterialStandByExport($tanggalMulaiCarbon->toDateTimeString(), $tanggalAkhirCarbon->toDateTimeString()), $filename . '.xlsx');
+            return Excel::download(new MaterialReturExport($tanggalMulai->toDateTimeString(), $tanggalAkhir->toDateTimeString()), $filename . '.xlsx');
         }
         
         return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');

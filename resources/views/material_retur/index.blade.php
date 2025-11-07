@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Saldo Material Stand By')
+@section('title', 'Laporan Material Retur')
 
 @section('content')
 <div class="card-new">
     
     <div class="index-header">
-        <h2>SALDO MATERIAL STAND BY</h2>
+        <h2>LAPORAN MATERIAL RETUR</h2>
         
-        <form action="{{ route('material-stand-by.index') }}" method="GET" class="search-form">
+        <form action="{{ route('material-retur.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" placeholder="Cari Nama Material/Petugas..." value="{{ request('search') }}">
@@ -20,7 +20,7 @@
                 <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
             </div>
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
-            <a href="{{ route('material-stand-by.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+            <a href="{{ route('material-retur.index') }}" class="btn btn-secondary btn-sm">Reset</a>
         </form>
     </div>
 
@@ -31,7 +31,11 @@
                     <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
-                    <th>Jumlah/Unit</th>
+                    <th>Jumlah Retur</th>
+                    <th>Jumlah Keluar</th>
+                    <th>Jumlah Kembali</th>
+                    <th>Status</th>
+                    <th>Keterangan</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
@@ -44,13 +48,22 @@
                         <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah }}</td>
-                        
+                        <td>{{ $item->material_keluar ?? 0 }}</td>
+                        <td>{{ $item->material_kembali ?? 0 }}</td>
+                        <td>
+                            @if($item->status == 'baik')
+                                <span style="color: #198754; font-weight: 500;">Baik</span>
+                            @else
+                                <span style="color: #d06368ff; font-weight: 500;">Rusak</span>
+                            @endif
+                        </td>
+                        <td>{{ \Illuminate\Support\Str::limit($item->keterangan, 30) ?? '-' }}</td>
                         <td>{{ $item->tanggal->format('d M Y, H:i') }}</td>
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
                                 <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
-                                <a href="{{ route('material-stand-by.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
+                                <a href="{{ route('material-retur.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
                             @else
@@ -59,9 +72,9 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="{{ route('material-stand-by.show', $item->id) }}" class="btn-lihat">Lihat</a>
-                                <a href="{{ route('material-stand-by.edit', $item->id) }}" class="btn btn-edit">Edit</a>
-                                <form action="{{ route('material-stand-by.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                <a href="{{ route('material-retur.show', $item->id) }}" class="btn-lihat">Lihat</a>
+                                <a href="{{ route('material-retur.edit', $item->id) }}" class="btn btn-edit">Edit</a>
+                                <form action="{{ route('material-retur.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-hapus">Hapus</button>
@@ -71,7 +84,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align:center;">Data tidak ditemukan.</td>
+                        <td colspan="11" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -83,7 +96,7 @@
     </div>
 
     <div class="index-footer-form">
-        <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download">
+        <form action="{{ route('material-retur.download-report') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
                 <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
                 <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>

@@ -41,7 +41,7 @@
             </div>
             
             <div class="form-group-new">
-                <label for="jumlah">Jumlah/Unit</label>
+                <label for="jumlah">Jumlah</label>
                 <input type="number" name="jumlah" id="jumlah" class="form-control-new" value="{{ old('jumlah') }}" required>
             </div>
             
