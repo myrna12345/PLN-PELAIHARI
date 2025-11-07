@@ -18,7 +18,7 @@ class MaterialSeeder extends Seeder
             'MCB 1P 35A', 'MCB 1P 50A', 'MCB 3P 16A', 'MCB 3P 20A', 'MCB 3P 25A',
             'MCB 3P 35A', 'MCB 3P 50A', 'MCB 3P 63A', 'KWH METER PASCABAYAR',
             'KWH METER PRABAYAR', 'KABEL SR', 'KABEL TR 4 X 16',
-            'KABEL TR 4 X 35', 'KABEL TR 4X 70'
+            'KABEL TR 4 X 35', 'KABEL TR 4 X 70'
         ];
 
         // Loop dan masukkan setiap material ke database
