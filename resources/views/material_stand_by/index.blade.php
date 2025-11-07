@@ -7,10 +7,21 @@
     
     <div class="index-header">
         <h2>SALDO MATERIAL STAND BY</h2>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search">
-        </div>
+        
+        <form action="{{ route('material-stand-by.index') }}" method="GET" class="search-form">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Cari Nama Material/Petugas..." value="{{ request('search') }}">
+            </div>
+            <div class="form-group-tanggal-filter">
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
+            </div>
+            <div class="form-group-tanggal-filter">
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Cari</button>
+            <a href="{{ route('material-stand-by.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
     </div>
 
     <div class="table-container">
@@ -20,7 +31,7 @@
                     <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
-                    <th>Jumlah</th>
+                    <th>Jumlah/Unit</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
@@ -38,7 +49,7 @@
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Material" class="table-foto">
+                                <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
                                 <a href="{{ route('material-stand-by.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -48,6 +59,7 @@
                         </td>
                         <td>
                             <div class="table-actions">
+                                <a href="{{ route('material-stand-by.show', $item->id) }}" class="btn-lihat">Lihat</a>
                                 <a href="{{ route('material-stand-by.edit', $item->id) }}" class="btn btn-edit">Edit</a>
                                 <form action="{{ route('material-stand-by.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf
@@ -67,25 +79,22 @@
     </div>
     
     <div style="margin-top: 20px;">
-        {{ $items->links() }}
+        {{ $items->appends(request()->query())->links() }}
     </div>
 
     <div class="index-footer-form">
         <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download">
-            
             <div class="form-group-tanggal">
-                <label for="tanggal_mulai">Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control-tanggal" required>
+                <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>
             </div>
             <div class="form-group-tanggal">
-                <label for="tanggal_akhir">Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir" id="tanggal_akhir" class="form-control-tanggal" required>
+                <label for="tanggal_akhir_pdf">Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" id="tanggal_akhir_pdf" class="form-control-tanggal" required>
             </div>
-            
             <button type="submit" name="submit_pdf" value="1" class="btn btn-pdf">
                 <i class="fas fa-file-pdf"></i> Unduh Pdf
             </button>
-            
             <button type="submit" name="submit_excel" value="1" class="btn btn-excel">
                 <i class="fas fa-file-excel"></i> Unduh Excel
             </button>

@@ -97,7 +97,7 @@
         .form-control-new-file { width: 100%; padding: 14px 16px; border: 1px solid #ced4da; border-radius: 10px; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 1rem; }
         .form-control-new-file::file-selector-button { display: none; }
         .form-actions { margin-top: 2.5rem; text-align: right; }
-        .btn-simpan { padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: transform 0.2s; background-color: #198754; color: white; margin-left: 10px; }
+        .btn-simpan { padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: transform 0.2s; background-color: #92C1A9; color: #212529; margin-left: 10px; }
         .btn-simpan:hover { transform: translateY(-2px); }
         .btn-batal { padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: transform 0.2s; background-color: #e9ecef; color: #495057; }
         .btn-batal:hover { transform: translateY(-2px); }
@@ -107,18 +107,22 @@
         .card-new { background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 2.5rem; }
         .index-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
         .index-header h2 { margin: 0; font-size: 1.8rem; color: #333; font-weight: 600; }
+        .search-form { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
         .search-bar { position: relative; }
         .search-bar i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
-        .search-bar input { width: 300px; padding: 12px 15px 12px 40px; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; font-family: 'Poppins', sans-serif; }
+        .search-bar input { width: 250px; padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid #ddd; font-size: 0.9rem; font-family: 'Poppins', sans-serif; }
         .search-bar input:focus { outline: none; border-color: #007bff; }
+        .form-group-tanggal-filter input.form-control-tanggal { padding: 8px 10px; border-radius: 10px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.9rem; height: 20px; }
+        .btn-sm { padding: 9px 15px; font-size: 0.9rem; border-radius: 10px; }
         .table-container { overflow-x: auto; }
         .table { border-top: 1px solid #ddd; width: 100%; border-collapse: collapse; }
         .table th, .table td { padding: 12px; border: 1px solid #ddd; text-align: left; vertical-align: middle; }
         .table thead { background-color: #f4f6f9; }
         .table th { font-weight: 600; }
-        .table-foto { width: 100px; height: auto; border-radius: 5px; object-fit: cover; display: block; margin: 0 auto; }
+        .table-foto { width: 100px; height: auto; border-radius: 5px; object-fit: cover; display: block; margin: 0 auto; cursor: pointer; transition: transform 0.2s; }
+        .table-foto:hover { transform: scale(1.05); }
         .table-actions { display: flex; flex-wrap: wrap; gap: 5px; }
-        .btn-edit, .btn-hapus { 
+        .btn-lihat, .btn-edit, .btn-hapus { 
             padding: 5px 15px;
             border: none;
             border-radius: 5px;
@@ -126,15 +130,12 @@
             cursor: pointer;
             font-size: 0.9rem;
             font-weight: 500;
-            color: white;
             display: inline-block;
             font-family: 'Poppins', sans-serif; 
         }
-        .btn-edit { background-color: #198754; } 
-        
-        /* === PERUBAHAN WARNA DI SINI === */
-        .btn-hapus { background-color: #d06368ff; } 
-        
+        .btn-lihat { background-color: #6c757d; color: white; }
+        .btn-edit { background-color: #92C1A9; color: #212529; } 
+        .btn-hapus { background-color: #d06368ff; color: white; }
         .btn-foto-download {
             display: inline-flex; 
             align-items: center;
@@ -142,24 +143,19 @@
             margin-top: 8px; 
             padding: 4px 8px; 
             border-radius: 5px;
-            background-color: #0d6efd; 
-            color: white; 
+            background-color: #88c7d2ff; 
+            color: #212529;
             font-size: 0.8rem; 
             font-weight: 500;
             text-decoration: none;
             transition: background-color 0.2s;
         }
-        .btn-foto-download:hover { background-color: #0b5ed7; }
-        .btn-foto-download i { font-size: 0.8rem; }
+        .btn-foto-download:hover { background-color: #7ab8c2; }
+        .btn-foto-download i { font-size: 0.8rem; color: #212529; }
         .index-footer-form {
             margin-top: 2rem;
             border-top: 1px solid #eee;
             padding-top: 1.5rem;
-            display: flex;
-            justify-content: space-between; 
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 1rem;
         }
         .form-download {
             display: flex;
@@ -179,7 +175,7 @@
             border: 1px solid #ddd;
             font-family: 'Poppins', sans-serif;
         }
-        .btn-pdf, .btn-excel { padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .btn-pdf, .btn-excel { padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; font-family: 'Poppins', sans-serif; }
         .btn-pdf { background-color: #fce8e6; color: #dc3545; border: 1px solid #f5c6cb; }
         .btn-excel { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
@@ -192,51 +188,69 @@
         .submenu a { font-size: 0.95rem !important; padding: 10px 12px !important; color: #ced4da !important; }
         .submenu a:hover, .submenu a.sub-active { color: #ffffff !important; background-color: transparent !important; }
         
-        /* === 6. CSS WIDGET DASHBOARD (LENGKAP) === */
+        /* === 6. CSS WIDGET DASHBOARD === */
         .widget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .widget-card { 
-            padding: 25px; 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
-            border-left: none; 
-        }
-        .widget-card.salmon-red { 
-            background-color: #d06368ff; 
-            color: white; 
-        }
+        .widget-card { padding: 25px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: none; }
+        .widget-card.salmon-red { background-color: #d06368ff; color: white; }
         .widget-card.salmon-red .widget-icon { color: white; opacity: 0.8; }
-        .widget-card.blue { 
-            background-color: #88c7d2ff; 
-            color: #212529; 
-        }
+        .widget-card.blue { background-color: #88c7d2ff; color: #212529; }
         .widget-card.blue .widget-icon { color: #212529; opacity: 0.7; }
-        .widget-card.purple { 
-            background-color: #88c7d2ff; 
-            color: #212529;
-        }
+        .widget-card.purple { background-color: #88c7d2ff; color: #212529; }
         .widget-card.purple .widget-icon { color: #212529; opacity: 0.7; }
-        .widget-card.green { 
-            background-color: #88c7d2ff; 
-            color: #212529; 
-        }
+        .widget-card.green { background-color: #88c7d2ff; color: #212529; }
         .widget-card.green .widget-icon { color: #212529; opacity: 0.7; }
-        .widget-card.mauve { 
-            background-color: #dad664ff; 
-            color: #212529; 
-        }
+        .widget-card.mauve { background-color: #dad664ff; color: #212529; }
         .widget-card.mauve .widget-icon { color: #212529; opacity: 0.7; }
-        .widget-icon { 
-            font-size: 3rem; 
-            margin-right: 25px; 
-            opacity: 0.7; 
-        }
+        .widget-icon { font-size: 3rem; margin-right: 25px; opacity: 0.7; }
         .widget-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; }
         .widget-info p { margin: 0; font-size: 0.95rem; }
         .widget-info .retur-list { font-size: 0.95rem; line-height: 1.6; }
+        
+        
+        /* === 7. CSS MODAL FOTO === */
+        .modal-overlay {
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8); 
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 0;
+            max-width: 80%;
+            max-height: 80%;
+        }
+        .modal-image {
+            width: 100%;
+            height: auto;
+            max-width: 80vw;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+        .modal-close {
+            position: absolute;
+            top: -15px;
+            right: 0px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+        }
     </style>
-    @stack('styles') {{-- Tambahkan stack styles di head --}}
 </head>
 <body>
 <div class="container-fluid">
@@ -249,6 +263,7 @@
         <ul class="sidebar-menu">
             <li><a href="#"><i class="fas fa-user-circle"></i> Profil</a></li>
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> Dashboard</a></li>
+            
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
                     <i class="fas fa-box-open"></i>
@@ -256,83 +271,82 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}">Lihat Material</a></li>
+                    <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
                 </ul>
             </li>
             
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-retur.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
-                    <i class="fas fa-undo"></i>
+                    <i class="fas fa-undo"></i> 
                     <span>Material Retur</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}">Lihat Material Retur</a></li>
-                    <li><a href="#" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}">Tambah Material Retur</a></li>
+                    <li><a href="#">Laporan Material</a></li>
+                    <li><a href="#">Tambah Material</a></li>
                 </ul>
             </li>
-
+            
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-keluar.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
-                    <i class="fas fa-tools"></i>
+                    <i class="fas fa-tools"></i> 
                     <span>Material Keluar</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="{{ request()->routeIs('material-keluar.index') ? 'sub-active' : '' }}">Lihat Material Keluar</a></li>
-                    <li><a href="#" class="{{ request()->routeIs('material-keluar.create') ? 'sub-active' : '' }}">Tambah Material Keluar</a></li>
+                    <li><a href="#">Laporan Material</a></li>
+                    <li><a href="#">Tambah Material</a></li>
                 </ul>
             </li>
-
+    
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-kembali.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
-                    <i class="fas fa-chart-pie"></i>
+                    <i class="fas fa-chart-pie"></i> 
                     <span>Material Kembali</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="{{ request()->routeIs('material-kembali.index') ? 'sub-active' : '' }}">Lihat Material Kembali</a></li>
-                    <li><a href="#" class="{{ request()->routeIs('material-kembali.create') ? 'sub-active' : '' }}">Tambah Material Kembali</a></li>
+                    <li><a href="#">Laporan Material</a></li>
+                    <li><a href="#">Tambah Material</a></li>
                 </ul>
             </li>
-
+    
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
-                    <i class="fas fa-box-archive"></i>
-                    <span>Siaga Stand By</span>
+                    <i class="fas fa-box-archive"></i> 
+                    <span>Material Siaga Stand By</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}">Lihat Material Siaga</a></li>
-                    <li><a href="#" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}">Tambah Material Siaga</a></li>
+                    <li><a href="#">Laporan Material</a></li>
+                    <li><a href="#">Tambah Material</a></li>
                 </ul>
             </li>
-
+    
             <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-keluar.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
-                    <i class="fas fa-truck"></i>
+                    <i class="fas fa-truck"></i> 
                     <span>Siaga Keluar</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}">Lihat Siaga Keluar</a></li>
-                    <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">Tambah Siaga Keluar</a></li>
+                    <li><a href="#">Laporan Siaga</a></li>
+                    <li><a href="#">Tambah Siaga</a></li>
                 </ul>
             </li>
-
+    
             <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-kembali.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle">
-                    <i class="fas fa-sync-alt"></i>
+                    <i class="fas fa-sync-alt"></i> 
                     <span>Siaga Kembali</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}">Lihat Siaga Kembali</a></li>
-                    <li><a href="#" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}">Tambah Siaga Kembali</a></li>
+                    <li><a href="#">Laporan Siaga</a></li>
+                    <li><a href="#">Tambah Siaga</a></li>
                 </ul>
             </li>
-            
         </ul>
     </aside>
 
@@ -357,6 +371,12 @@
     </main>
 </div>
 
+<div id="fotoModal" class="modal-overlay">
+    <span class="modal-close" id="modalCloseButton">&times;</span>
+    <div class="modal-content">
+        <img id="modalImage" class="modal-image" src="" alt="Foto Material">
+    </div>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -367,68 +387,64 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault(); 
             var parentLi = this.parentElement;
             
-            // Logika untuk menutup dropdown lain (opsional, tapi bagus)
-            document.querySelectorAll('.sidebar-menu .menu-item-has-dropdown.open').forEach(function(openItem) {
-                if (openItem !== parentLi) {
-                    openItem.classList.remove('open');
+            // Tutup dropdown lain yang mungkin terbuka
+            document.querySelectorAll('.sidebar-menu .menu-item-has-dropdown.open').forEach(function(openDropdown) {
+                if (openDropdown !== parentLi) {
+                    openDropdown.classList.remove('open');
                 }
             });
 
-            // Buka/tutup item yang diklik
+            // Buka/tutup dropdown yang diklik
             parentLi.classList.toggle('open');
         });
     });
 
     // --- 2. Skrip untuk Halaman TAMBAH (create.blade.php) ---
-    const tanggalLocalInput = document.getElementById('tanggal_local_input');
-    const tanggalUtcInput = document.getElementById('tanggal_utc_output');
-
-    if (tanggalLocalInput && tanggalUtcInput) { 
-        function updateUtcValue() {
-            if (tanggalLocalInput.value) {
-                const localDate = new Date(tanggalLocalInput.value);
-                const utcDateTimeString = localDate.toISOString();
-                tanggalUtcInput.value = utcDateTimeString;
-            }
-        }
-        if (!tanggalLocalInput.value) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const day = now.getDate().toString().padStart(2, '0');
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const localDateTimeDefault = `${year}-${month}-${day}T${hours}:${minutes}`;
-            tanggalLocalInput.value = localDateTimeDefault;
-        }
-        updateUtcValue();
-        tanggalLocalInput.addEventListener('change', updateUtcValue);
-        tanggalLocalInput.addEventListener('input', updateUtcValue);
-    }
+    // (JavaScript untuk jam lokal di Halaman Tambah sudah dihapus)
+    // Kita biarkan input `datetime-local` mengambil nilai dari server (PHP `now()`)
 
     // --- 3. Skrip untuk Halaman LIHAT (index.blade.php) ---
-    document.querySelectorAll('.local-datetime').forEach(function(cell) {
-        try {
-            const serverTimestamp = cell.dataset.timestamp; 
-            const localDate = new Date(serverTimestamp); 
-            const options = {
-                day: 'numeric', 
-                month: 'short', 
-                year: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: false
-            };
-            cell.textContent = new Intl.DateTimeFormat('id-ID', options).format(localDate);
-        } catch (e) {
-            console.error('Gagal memformat tanggal:', e);
-            cell.textContent = 'Invalid Date'; 
-        }
+    // (JavaScript untuk konversi jam lokal di Halaman Lihat juga sudah dihapus)
+    // Kita biarkan tabel menampilkan jam dari server (PHP `format()`)
+
+    
+    // ==============================================
+    // === 4. SCRIPT MODAL FOTO (TETAP ADA) ===
+    // ==============================================
+    const modal = document.getElementById('fotoModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeBtn = document.getElementById('modalCloseButton');
+
+    // 1. Cari semua gambar di tabel yang bisa diklik
+    document.querySelectorAll('.table-foto').forEach(function(img) {
+        img.addEventListener('click', function() {
+            modal.style.display = "flex"; // Tampilkan modal
+            modalImg.src = this.src;      // Set gambar di modal
+        });
     });
 
+    // 2. Fungsi untuk menutup modal
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    // 3. Klik tombol 'x' untuk menutup
+    if(closeBtn) {
+        closeBtn.onclick = closeModal;
+    }
+
+    // 4. Klik di luar gambar (di background) untuk menutup
+    if(modal) {
+        modal.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    }
+    // ==============================================
+    
 });
 </script>
-
 
 </body>
 </html>

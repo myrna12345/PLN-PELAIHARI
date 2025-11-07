@@ -6,23 +6,26 @@ use App\Models\MaterialStandBy;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize; // Untuk membuat kolom otomatis lebar
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Carbon\Carbon;
 
 class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 {
     protected $tanggalMulai;
     protected $tanggalAkhir;
+    private $rowNumber = 0;
 
-    // 1. Menerima tanggal dari controller
+    // 1. Menerima tanggal dari controller (sekarang dalam format datetime)
     public function __construct(string $tanggalMulai, string $tanggalAkhir)
     {
-        $this->tanggalMulai = $tanggalMulai;
-        $this->tanggalAkhir = $tanggalAkhir;
+        $this->tanggalMulai = $tanggalMulai; // cth: '2025-11-06 00:00:00'
+        $this->tanggalAkhir = $tanggalAkhir; // cth: '2025-11-15 23:59:59'
     }
 
     // 2. Mengambil data dari database
     public function query()
     {
+        // Query ini sekarang sudah benar
         return MaterialStandBy::with('material')
             ->whereBetween('tanggal', [$this->tanggalMulai, $this->tanggalAkhir])
             ->orderBy('tanggal', 'asc');
@@ -36,18 +39,20 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
             'Nama Material',
             'Nama Petugas',
             'Jumlah',
-            'Tanggal (WITA)', // Samakan dengan PDF
+            'Tanggal (WITA)',
         ];
     }
 
     // 4. Memetakan data per baris
     public function map($item): array
     {
+        $this->rowNumber++;
+
         // Konversi jam UTC ke WITA (Asia/Makassar)
         $tanggalWita = $item->tanggal->setTimezone('Asia/Makassar')->format('d M Y, H:i');
 
         return [
-            $item->id, // Ganti ini dengan $loop->index jika Anda mau
+            $this->rowNumber, // Nomor urut yang benar
             $item->material->nama_material ?? 'N/A',
             $item->nama_petugas,
             $item->jumlah,
