@@ -31,6 +31,7 @@ Route::get('/material-keluar/{id}/lihat', [MaterialKeluarController::class, 'lih
 Route::get('/material_keluar/{id}/edit', [MaterialKeluarController::class, 'edit'])->name('material_keluar.edit');  // Form edit
 Route::put('/material_keluar/{id}', [MaterialKeluarController::class, 'update'])->name('material_keluar.update');   // Update data
 Route::delete('/material_keluar/{id}', [MaterialKeluarController::class, 'destroy'])->name('material_keluar.destroy'); // Hapus data
+
 // --- RUTE MATERIAL STAND BY (SUDAH ADA) ---
 Route::get('material-stand-by/download-pdf', [MaterialStandByController::class, 'downloadPDF'])
      ->name('material-stand-by.download-pdf');
@@ -46,6 +47,10 @@ Route::resource('material-stand-by', MaterialStandByController::class);
 // --- TAMBAHKAN RUTE RESOURCE BARU UNTUK SETIAP MODUL ---
 
 // Rute untuk Material Retur
+Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])
+     ->name('material-retur.download-report'); // <-- TAMBAHKAN INI
+Route::get('material-retur/{materialRetur}/download-foto', [MaterialReturController::class, 'downloadFoto'])
+     ->name('material-retur.download-foto'); // <-- TAMBAHKAN INI
 Route::resource('material-retur', MaterialReturController::class);
 
 // Rute untuk Material Keluar
