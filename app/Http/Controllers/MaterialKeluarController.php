@@ -3,80 +3,89 @@
 namespace App\Http\Controllers;
 
 use App\Models\MaterialKeluar;
-use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class MaterialKeluarController extends Controller
 {
-    // 🧭 Tampilkan semua data material keluar
-    public function index()
+    // 🔍 INDEX: Tampilkan data + fitur pencarian
+    public function index(Request $request)
     {
-        $materialKeluar = MaterialKeluar::all();
+        $search = $request->query('search');
+        $tanggalMulai = $request->query('tanggal_mulai');
+        $tanggalAkhir = $request->query('tanggal_akhir');
+
+        $query = MaterialKeluar::query();
+
+        // Filter pencarian nama material / petugas
+        if ($search) {
+            $query->where('nama_material', 'like', "%{$search}%")
+                  ->orWhere('nama_petugas', 'like', "%{$search}%");
+        }
+
+
+        // Urutkan dari terbaru dan paginate
+        $materialKeluar = $query->orderByDesc('tanggal')->paginate(10);
+
         return view('material_keluar.index', compact('materialKeluar'));
     }
 
-    // 🧱 Form tambah data material keluar
+    // ➕ CREATE
     public function create()
     {
-        $materialList = Material::all(); // untuk dropdown nama material
-        return view('material_keluar.create', compact('materialList'));
+        return view('material_keluar.create');
     }
 
-    // 💾 Simpan data baru ke database
+    // 💾 STORE
     public function store(Request $request)
     {
-        date_default_timezone_set('Asia/Makassar'); // atau 'Asia/Jakarta' tergantung lokasi
-
-        $validated['tanggal'] = now(); // otomatis waktu saat ini
-
-        // Validasi input
         $validated = $request->validate([
-            'nama_material' => 'required',
-            'nama_petugas' => 'required',
-            'jumlah_material' => 'required|numeric',
-            'tanggal' => 'required|date',
+            'nama_material' => 'required|string|max:255',
+            'nama_petugas' => 'required|string|max:255',
+            'jumlah_material' => 'required|numeric|min:1',
+            'tanggal' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-        // Format tanggal dari HTML ke format database
-            $validated['tanggal'] = date('Y-m-d H:i:s', strtotime($request->tanggal));
-            
-        // Simpan foto jika ada
+
+        // Tambahkan waktu saat ini otomatis
+        $validated['tanggal'] = now('Asia/Makassar');
+
         if ($request->hasFile('foto')) {
-        $fotoPath = $request->file('foto')->store('material_keluar', 'public');
-        $validated['foto'] = $fotoPath;
-    }
+            $validated['foto'] = $request->file('foto')->store('material_keluar', 'public');
+        }
 
-
-        // Simpan ke database
         MaterialKeluar::create($validated);
 
-        // Tambahkan pesan sukses
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil disimpan!');
     }
+     //  lihat show  
+    public function lihat($id)
+        {
+            $item = MaterialKeluar::findOrFail($id);
+            return view('material_keluar.lihat', compact('item'));
+        }
 
-    // ✏️ Tampilkan form edit data
+    // ✏️ EDIT
     public function edit($id)
     {
         $data = MaterialKeluar::findOrFail($id);
-        $materialList = Material::all();
-        return view('material_keluar.edit', compact('data', 'materialList'));
+        return view('material_keluar.edit', compact('data'));
     }
 
-    // 🔄 Update data
+    // 🔁 UPDATE
     public function update(Request $request, $id)
     {
         $data = MaterialKeluar::findOrFail($id);
 
         $validated = $request->validate([
-            'nama_material' => 'required',
-            'nama_petugas' => 'required',
-            'jumlah_material' => 'required|numeric',
-            'tanggal' => 'required',
+            'nama_material' => 'required|string|max:255',
+            'nama_petugas' => 'required|string|max:255',
+            'jumlah_material' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Ganti foto lama jika ada foto baru
         if ($request->hasFile('foto')) {
             if ($data->foto) {
                 Storage::disk('public')->delete($data->foto);
@@ -89,16 +98,13 @@ class MaterialKeluarController extends Controller
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil diperbarui!');
     }
 
-    // 🗑️ Hapus data
+    // 🗑 DELETE
     public function destroy($id)
     {
         $data = MaterialKeluar::findOrFail($id);
-
-        // Hapus foto dari storage jika ada
         if ($data->foto) {
             Storage::disk('public')->delete($data->foto);
         }
-
         $data->delete();
 
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil dihapus!');
