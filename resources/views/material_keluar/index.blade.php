@@ -34,7 +34,7 @@
                     <th>Jumlah/Unit</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
-                    <th style="width: 200px;">Aksi</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,16 +51,14 @@
                             @if($item->foto)
                                 <img src="{{ asset('storage/' . $item->foto) }}" 
                                      alt="Foto Material" 
-                                     class="table-foto" 
-                                     style="width:70px; height:70px; object-fit:cover; border-radius:6px; display:block; margin:0 auto 8px; cursor:pointer;" 
+                                     class="table-foto"
                                      title="Klik untuk memperbesar">
 
                                 <a href="{{ asset('storage/' . $item->foto) }}" 
                                    download 
                                    class="btn-foto-download" 
-                                   title="Download Foto"
-                                   style="display:inline-flex; align-items:center; gap:5px; padding:5px 8px; background:#3498db; color:#fff; border-radius:5px; font-size:0.85rem; text-decoration:none;">
-                                    <i class="fas fa-download"></i> Download
+                                   title="Download Foto">
+                                    <i class="fas fa-download"></i> Download Foto
                                 </a>
                             @else
                                 <span>-</span>
@@ -68,32 +66,14 @@
                         </td>
 
                         <!-- AKSI -->
-                        <td style="text-align:center;">
-                            <div class="table-actions" style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-                                <!-- Tombol Lihat -->
-                                <a href="{{ route('material_keluar.lihat', $item->id) }}" 
-                                   class="btn-lihat" 
-                                   style="background:#17a2b8; color:#fff; padding:6px 12px; border-radius:6px; font-size:0.9rem; text-decoration:none;">
-                                   👁 Lihat
-                                </a>
-                                
-                                <a href="{{ route('material_keluar.edit', $item->id) }}" 
-                                   class="btn-edit" 
-                                   style="background:#ffc107; color:#000; padding:6px 12px; border-radius:6px; font-size:0.9rem; text-decoration:none;">
-                                   ✏ Edit
-                                </a>
-
-                                <form action="{{ route('material_keluar.destroy', $item->id) }}" 
-                                      method="POST" 
-                                      onsubmit="return confirm('Yakin ingin menghapus data ini?')" 
-                                      style="display:inline;">
-                                    @csrf 
+                        <td>
+                            <div class="table-actions">
+                                <a href="{{ route('material_keluar.lihat', $item->id) }}" class="btn-lihat">Lihat</a>
+                                <a href="{{ route('material_keluar.edit', $item->id) }}" class="btn btn-edit">Edit</a>
+                                <form action="{{ route('material_keluar.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                    @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
-                                            class="btn-hapus" 
-                                            style="background:#e74c3c; color:#fff; padding:6px 12px; border:none; border-radius:6px; font-size:0.9rem; cursor:pointer;">
-                                            🗑 Hapus
-                                    </button>
+                                    <button type="submit" class="btn btn-hapus">Hapus</button>
                                 </form>
                             </div>
                         </td>
@@ -112,10 +92,26 @@
         {{ $materialKeluar->appends(request()->query())->links() }}
     </div>
 
-    <!-- FOOTER BUTTON -->
-    <div class="index-footer-form" style="text-align: right;">
-        <button class="btn-pdf">📄 Unduh PDF</button>
-        <button class="btn-excel">📊 Unduh Excel</button>
+    <!-- 📥 FOOTER: UNDUH PDF / EXCEL -->
+    <div class="index-footer-form">
+        <form action="{{ route('material_keluar.download') }}" method="POST" class="form-download">
+            @csrf
+            <div class="form-group-tanggal">
+                <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>
+            </div>
+            <div class="form-group-tanggal">
+                <label for="tanggal_akhir_pdf">Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" id="tanggal_akhir_pdf" class="form-control-tanggal" required>
+            </div>
+            <button type="submit" name="submit_pdf" value="1" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Unduh PDF
+            </button>
+            <button type="submit" name="submit_excel" value="1" class="btn btn-excel">
+                <i class="fas fa-file-excel"></i> Unduh Excel
+            </button>
+        </form>
     </div>
+
 </div>
 @endsection

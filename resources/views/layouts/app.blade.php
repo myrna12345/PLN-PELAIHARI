@@ -295,8 +295,8 @@
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#">Laporan Material</a></li>
-                    <li><a href="#">Tambah Material</a></li>
+                    <li><a href="{{ route('material_keluar.index') }}" class="{{ request()->routeIs('material_keluar.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
+                    <li><a href="{{ route('material_keluar.create') }}" class="{{ request()->routeIs('material_keluar.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
                 </ul>
             </li>
     
