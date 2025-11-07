@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Material;
 use App\Models\MaterialKeluar;
+use App\Exports\MaterialKeluarExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -31,11 +34,13 @@ class MaterialKeluarController extends Controller
         return view('material_keluar.index', compact('materialKeluar'));
     }
 
-    // ➕ CREATE
+    // CREATE
     public function create()
     {
-        return view('material_keluar.create');
+        $materialList = Material::all(); // mengambil daftar material untuk dropdown
+        return view('material_keluar.create', compact('materialList'));
     }
+
 
     // 💾 STORE
     public function store(Request $request)
@@ -67,10 +72,12 @@ class MaterialKeluarController extends Controller
         }
 
     // ✏️ EDIT
-    public function edit($id)
+        public function edit($id)
     {
         $data = MaterialKeluar::findOrFail($id);
-        return view('material_keluar.edit', compact('data'));
+        $materialList = Material::all(); // Ambil semua data material
+
+        return view('material_keluar.edit', compact('data', 'materialList'));
     }
 
     // 🔁 UPDATE
@@ -109,4 +116,35 @@ class MaterialKeluarController extends Controller
 
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil dihapus!');
     }
+    public function downloadReport(Request $request)
+{
+    $request->validate([
+        'tanggal_mulai' => 'required|date',
+        'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+    ]);
+
+    $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+    $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+    $filename = 'laporan_material_keluar_' . $tanggalMulai->format('Ymd') . '_sd_' . $tanggalAkhir->format('Ymd');
+
+    $items = MaterialKeluar::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                ->orderBy('tanggal', 'asc')
+                ->get();
+
+    if ($request->has('submit_pdf')) {
+        $data = [
+            'items' => $items,
+            'tanggal_mulai' => $tanggalMulai,
+            'tanggal_akhir' => $tanggalAkhir,
+        ];
+        $pdf = Pdf::loadView('material_keluar.laporan_pdf', $data);
+        return $pdf->download($filename . '.pdf');
+    }
+
+    if ($request->has('submit_excel')) {
+        return Excel::download(new MaterialKeluarExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
+    }
+
+    return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
+}
 }

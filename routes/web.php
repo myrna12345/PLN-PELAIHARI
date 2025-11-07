@@ -32,6 +32,9 @@ Route::get('/material_keluar/{id}/edit', [MaterialKeluarController::class, 'edit
 Route::put('/material_keluar/{id}', [MaterialKeluarController::class, 'update'])->name('material_keluar.update');   // Update data
 Route::delete('/material_keluar/{id}', [MaterialKeluarController::class, 'destroy'])->name('material_keluar.destroy'); // Hapus data
 
+Route::post('/material_keluar/download', [MaterialKeluarController::class, 'downloadReport'])
+    ->name('material_keluar.download');
+    
 // --- RUTE MATERIAL STAND BY (SUDAH ADA) ---
 Route::get('material-stand-by/download-pdf', [MaterialStandByController::class, 'downloadPDF'])
      ->name('material-stand-by.download-pdf');
