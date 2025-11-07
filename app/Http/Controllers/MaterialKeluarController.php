@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Material;
 use App\Models\MaterialKeluar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,11 +31,13 @@ class MaterialKeluarController extends Controller
         return view('material_keluar.index', compact('materialKeluar'));
     }
 
-    // ➕ CREATE
+    // CREATE
     public function create()
     {
-        return view('material_keluar.create');
+        $materialList = Material::all(); // mengambil daftar material untuk dropdown
+        return view('material_keluar.create', compact('materialList'));
     }
+
 
     // 💾 STORE
     public function store(Request $request)
@@ -67,10 +69,12 @@ class MaterialKeluarController extends Controller
         }
 
     // ✏️ EDIT
-    public function edit($id)
+        public function edit($id)
     {
         $data = MaterialKeluar::findOrFail($id);
-        return view('material_keluar.edit', compact('data'));
+        $materialList = Material::all(); // Ambil semua data material
+
+        return view('material_keluar.edit', compact('data', 'materialList'));
     }
 
     // 🔁 UPDATE
