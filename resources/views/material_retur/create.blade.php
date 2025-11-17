@@ -41,7 +41,7 @@
             </div>
             
             <div class="form-group-new">
-                <label for="jumlah">Jumlah/Unit</label>
+                <label for="jumlah">Jumlah Retur</label>
                 <input type="number" name="jumlah" id="jumlah" class="form-control-new" value="{{ old('jumlah') }}" required>
             </div>
             
@@ -54,14 +54,17 @@
                 </select>
             </div>
 
+            <!-- Input Tanggal READONLY (Otomatis Waktu Sekarang) -->
             <div class="form-group-new">
-                <label for="tanggal">Tanggal dan Jam</label>
-                <input type="datetime-local" 
-                       name="tanggal" 
-                       id="tanggal" 
+                <label>Tanggal dan Jam</label>
+                <input type="text" 
                        class="form-control-new" 
-                       value="{{ old('tanggal', now()->format('Y-m-d\TH:i')) }}"
-                       required>
+                       style="background-color: #e9ecef; cursor: not-allowed;"
+                       value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}"
+                       readonly>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Waktu akan otomatis terisi saat data disimpan.
+                </small>
             </div>
 
             <div class="form-group-new">

@@ -45,11 +45,11 @@
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah }}</td>
                         
-                        <td>{{ $item->tanggal->format('d M Y, H:i') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
+                                <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
                                 <a href="{{ route('material-stand-by.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -59,7 +59,6 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="{{ route('material-stand-by.show', $item->id) }}" class="btn-lihat">Lihat</a>
                                 <a href="{{ route('material-stand-by.edit', $item->id) }}" class="btn btn-edit">Edit</a>
                                 <form action="{{ route('material-stand-by.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf
@@ -83,7 +82,8 @@
     </div>
 
     <div class="index-footer-form">
-        <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download">
+        <!-- TAMBAHAN: target="_blank" agar download lebih stabil di HP -->
+        <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download" target="_blank">
             <div class="form-group-tanggal">
                 <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
                 <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>

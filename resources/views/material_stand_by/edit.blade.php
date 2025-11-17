@@ -22,14 +22,13 @@
         
         <form action="{{ route('material-stand-by.update', $item->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @method('PUT') {{-- PENTING: Beri tahu Laravel ini adalah update --}}
+            @method('PUT')
             
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="" disabled>Pilih material...</option>
                     @foreach($materials as $material)
-                        {{-- Cek mana material yang sedang dipilih --}}
                         <option value="{{ $material->id }}" {{ old('material_id', $item->material_id) == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
@@ -47,26 +46,25 @@
                 <input type="number" name="jumlah" id="jumlah" class="form-control-new" value="{{ old('jumlah', $item->jumlah) }}" required>
             </div>
             
+            <!-- Input Tanggal READONLY (Hanya Tampilan) -->
             <div class="form-group-new">
-                <label for="tanggal">Tanggal dan Jam</label>
-                {{-- 
-                  Input datetime-local butuh format 'Y-m-d\TH:i'.
-                  Model $casts (datetime) akan otomatis memformat $item->tanggal.
-                --}}
-                <input type="datetime-local" 
-                       name="tanggal" 
-                       id="tanggal" 
+                <label for="tanggal_display">Tanggal dan Jam</label>
+                <input type="text" 
+                       id="tanggal_display" 
                        class="form-control-new" 
-                       value="{{ old('tanggal', $item->tanggal->format('Y-m-d\TH:i')) }}"
-                       required>
+                       style="background-color: #e9ecef; cursor: not-allowed;"
+                       value="{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}"
+                       readonly>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Tanggal pembuatan data tidak dapat diubah.
+                </small>
             </div>
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto (Opsional: Ganti foto)</label>
                 
-                {{-- Tampilkan foto yang ada saat ini --}}
                 @if($item->foto_path)
-                    <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Lama" width="150" style="margin-bottom:10px; display:block; border-radius: 5px;">
+                    <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Lama" width="150" style="margin-bottom:10px; display:block; border-radius: 5px;">
                 @endif
 
                 <input type="file" name="foto" id="foto" class="form-control-new-file">

@@ -7,31 +7,30 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Carbon\Carbon;
 
-class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
+class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
     protected $tanggalMulai;
     protected $tanggalAkhir;
     private $rowNumber = 0;
 
-    // 1. Menerima tanggal dari controller (sekarang dalam format datetime)
-    public function __construct(string $tanggalMulai, string $tanggalAkhir)
+    // Menerima objek Carbon dari controller
+    public function __construct($tanggalMulai, $tanggalAkhir)
     {
-        $this->tanggalMulai = $tanggalMulai; // cth: '2025-11-06 00:00:00'
-        $this->tanggalAkhir = $tanggalAkhir; // cth: '2025-11-15 23:59:59'
+        $this->tanggalMulai = $tanggalMulai;
+        $this->tanggalAkhir = $tanggalAkhir;
     }
 
-    // 2. Mengambil data dari database
     public function query()
     {
-        // Query ini sekarang sudah benar
         return MaterialStandBy::with('material')
             ->whereBetween('tanggal', [$this->tanggalMulai, $this->tanggalAkhir])
             ->orderBy('tanggal', 'asc');
     }
 
-    // 3. Menulis judul kolom (header)
     public function headings(): array
     {
         return [
@@ -43,20 +42,24 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
         ];
     }
 
-    // 4. Memetakan data per baris
     public function map($item): array
     {
         $this->rowNumber++;
 
-        // Konversi jam UTC ke WITA (Asia/Makassar)
-        $tanggalWita = $item->tanggal->setTimezone('Asia/Makassar')->format('d M Y, H:i');
-
+        // Format tanggal disesuaikan dengan zona waktu WITA (Asia/Makassar)
         return [
-            $this->rowNumber, // Nomor urut yang benar
+            $this->rowNumber,
             $item->material->nama_material ?? 'N/A',
             $item->nama_petugas,
             $item->jumlah,
-            $tanggalWita,
+            Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i'),
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            1 => ['font' => ['bold' => true]],
         ];
     }
 }

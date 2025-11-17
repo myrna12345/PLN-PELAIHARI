@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Laporan Material Retur'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -32,8 +30,6 @@
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Jumlah Retur</th>
-                    <th>Jumlah Keluar</th>
-                    <th>Jumlah Kembali</th>
                     <th>Status</th>
                     <th>Keterangan</th>
                     <th>Tanggal (WITA)</th>
@@ -48,8 +44,6 @@
                         <td><?php echo e($item->material->nama_material ?? 'N/A'); ?></td>
                         <td><?php echo e($item->nama_petugas); ?></td>
                         <td><?php echo e($item->jumlah); ?></td>
-                        <td><?php echo e($item->material_keluar ?? 0); ?></td>
-                        <td><?php echo e($item->material_kembali ?? 0); ?></td>
                         <td>
                             <?php if($item->status == 'baik'): ?>
                                 <span style="color: #198754; font-weight: 500;">Baik</span>
@@ -58,11 +52,14 @@
                             <?php endif; ?>
                         </td>
                         <td><?php echo e(\Illuminate\Support\Str::limit($item->keterangan, 30) ?? '-'); ?></td>
-                        <td><?php echo e($item->tanggal->format('d M Y, H:i')); ?></td>
+                        
+                        <!-- Format tanggal WITA -->
+                        <td><?php echo e(\Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i')); ?></td>
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             <?php if($item->foto_path): ?>
-                                <img src="<?php echo e(asset('storage/' . $item->foto_path)); ?>" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
+                                <!-- Gunakan ltrim agar path aman -->
+                                <img src="<?php echo e(asset('storage/' . ltrim($item->foto_path, '/'))); ?>" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
                                 <a href="<?php echo e(route('material-retur.download-foto', $item->id)); ?>" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -72,7 +69,7 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="<?php echo e(route('material-retur.show', $item->id)); ?>" class="btn-lihat">Lihat</a>
+                                <!-- Tombol Lihat SUDAH DIHAPUS -->
                                 <a href="<?php echo e(route('material-retur.edit', $item->id)); ?>" class="btn btn-edit">Edit</a>
                                 <form action="<?php echo e(route('material-retur.destroy', $item->id)); ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     <?php echo csrf_field(); ?>
@@ -84,7 +81,7 @@
                     </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="11" style="text-align:center;">Data tidak ditemukan.</td>
+                        <td colspan="9" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Tambah Material Stand By'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -46,14 +44,18 @@
                 <input type="number" name="jumlah" id="jumlah" class="form-control-new" value="<?php echo e(old('jumlah')); ?>" required>
             </div>
             
+            <!-- Input Tanggal READONLY (Hanya Tampilan) -->
             <div class="form-group-new">
-                <label for="tanggal">Tanggal dan Jam</label>
-                <input type="datetime-local" 
-                       name="tanggal" 
-                       id="tanggal" 
+                <label for="tanggal_display">Tanggal dan Jam</label>
+                <input type="text" 
+                       id="tanggal_display" 
                        class="form-control-new" 
-                       value="<?php echo e(old('tanggal', now()->format('Y-m-d\TH:i'))); ?>"
-                       required>
+                       style="background-color: #e9ecef; cursor: not-allowed;"
+                       value="<?php echo e(\Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i')); ?>"
+                       readonly>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Waktu akan otomatis terisi saat data disimpan.
+                </small>
             </div>
 
             <div class="form-group-new">

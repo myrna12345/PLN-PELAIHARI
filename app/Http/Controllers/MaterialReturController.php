@@ -7,15 +7,12 @@ use App\Models\MaterialRetur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\MaterialReturExport; // <-- 1. Impor class Export
-use Maatwebsite\Excel\Facades\Excel; // <-- 2. Impor class Excel
-use Carbon\Carbon; // <-- 3. Impor Carbon
+use App\Exports\MaterialReturExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class MaterialReturController extends Controller
 {
-    /**
-     * READ: Menampilkan halaman daftar (laporan) dengan SEARCH.
-     */
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -43,25 +40,20 @@ class MaterialReturController extends Controller
         return view('material_retur.index', compact('items'));
     }
 
-    /**
-     * CREATE (Form): Menampilkan form tambah data.
-     */
     public function create()
     {
         $materials = Material::orderBy('nama_material')->get();
         return view('material_retur.create', compact('materials'));
     }
 
-    /**
-     * CREATE (Action): Menyimpan data baru ke database.
-     */
     public function store(Request $request)
     {
+        // Validasi TANPA tanggal, karena tanggal diisi otomatis
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'tanggal' => 'required|date', 
+            // 'tanggal' => 'required|date',  <-- DIHAPUS
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
@@ -72,25 +64,18 @@ class MaterialReturController extends Controller
             $path = $request->file('foto')->store('fotos_retur', 'public');
         }
 
-        MaterialRetur::create($validated + ['foto_path' => $path]);
+        // Isi tanggal otomatis dengan waktu sekarang (WITA)
+        $dataToSave = array_merge($validated, [
+            'foto_path' => $path,
+            'tanggal' => Carbon::now('Asia/Makassar')
+        ]);
+
+        MaterialRetur::create($dataToSave);
 
         return redirect()->route('material-retur.index')
                          ->with('success', 'Data Material Retur berhasil ditambahkan.');
     }
 
-    /**
-     * SHOW: Menampilkan detail data (Read-Only).
-     */
-    public function show(MaterialRetur $materialRetur)
-    {
-        return view('material_retur.show', [
-            'item' => $materialRetur
-        ]);
-    }
-
-    /**
-     * UPDATE (Form): Menampilkan form untuk edit data.
-     */
     public function edit(MaterialRetur $materialRetur)
     {
         $materials = Material::orderBy('nama_material')->get();
@@ -100,16 +85,14 @@ class MaterialReturController extends Controller
         ]);
     }
 
-    /**
-     * UPDATE (Action): Memperbarui data di database.
-     */
     public function update(Request $request, MaterialRetur $materialRetur)
     {
+        // Validasi TANPA tanggal, agar user tidak bisa mengubah tanggal lama
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'tanggal' => 'required|date',
+            // 'tanggal' => 'required|date', <-- DIHAPUS
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
@@ -121,15 +104,13 @@ class MaterialReturController extends Controller
             $path = $request->file('foto')->store('fotos_retur', 'public');
         }
 
-        $materialRetur->update($validated + ['foto_path' => $path]);
+        // Update data TANPA mengubah kolom 'tanggal'
+        $materialRetur->update(array_merge($validated, ['foto_path' => $path]));
 
         return redirect()->route('material-retur.index')
                          ->with('success', 'Data Material Retur berhasil diperbarui.');
     }
 
-    /**
-     * DELETE: Menghapus data dari database.
-     */
     public function destroy(MaterialRetur $materialRetur)
     {
         if ($materialRetur->foto_path) {
@@ -141,9 +122,6 @@ class MaterialReturController extends Controller
                          ->with('success', 'Data Material Retur berhasil dihapus.');
     }
 
-    /**
-     * --- FUNGSI UNTUK DOWNLOAD FOTO ---
-     */
     public function downloadFoto(MaterialRetur $materialRetur)
     {
         if ($materialRetur->foto_path && Storage::disk('public')->exists($materialRetur->foto_path)) {
@@ -154,9 +132,6 @@ class MaterialReturController extends Controller
         }
     }
     
-    /**
-     * --- FUNGSI BARU UNTUK DOWNLOAD PDF & EXCEL ---
-     */
     public function downloadReport(Request $request)
     {
         $request->validate([
@@ -164,34 +139,33 @@ class MaterialReturController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        $tanggalMulaiString = $request->tanggal_mulai;
-        $tanggalAkhirString = $request->tanggal_akhir;
+        // Gunakan Carbon untuk rentang waktu yang akurat (00:00:00 s/d 23:59:59)
+        $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+        $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         
-        $tanggalMulai = Carbon::parse($tanggalMulaiString)->startOfDay(); 
-        $tanggalAkhir = Carbon::parse($tanggalAkhirString)->endOfDay();   
-        
-        $filename = 'laporan_material_retur_' . $tanggalMulaiString . '_sd_' . $tanggalAkhirString;
+        $filename = 'laporan_material_retur_' . $tanggalMulai->format('Y-m-d') . '_sd_' . $tanggalAkhir->format('Y-m-d');
 
         if ($request->has('submit_pdf')) {
-            
             $items = MaterialRetur::with('material')
                         ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
                         ->orderBy('tanggal', 'asc')
                         ->get();
+
             $data = [
                 'items' => $items,
-                'tanggal_mulai' => $tanggalMulaiString,
-                'tanggal_akhir' => $tanggalAkhirString,
+                'tanggal_mulai' => $tanggalMulai->format('d M Y'),
+                'tanggal_akhir' => $tanggalAkhir->format('d M Y'),
             ];
-            $pdf = PDF::loadView('material_retur.laporan_pdf', $data); // Arahkan ke view PDF Retur
+            
+            $pdf = PDF::loadView('material_retur.laporan_pdf', $data);
             return $pdf->download($filename . '.pdf');
-
         } 
         
         if ($request->has('submit_excel')) {
-            return Excel::download(new MaterialReturExport($tanggalMulai->toDateTimeString(), $tanggalAkhir->toDateTimeString()), $filename . '.xlsx');
+            // Kirim objek Carbon ke Export class
+            return Excel::download(new MaterialReturExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
         }
         
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
+        return redirect()->back()->with('error', 'Pilih jenis laporan yang ingin diunduh.');
     }
 }

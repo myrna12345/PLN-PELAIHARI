@@ -32,8 +32,6 @@
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Jumlah Retur</th>
-                    <th>Jumlah Keluar</th>
-                    <th>Jumlah Kembali</th>
                     <th>Status</th>
                     <th>Keterangan</th>
                     <th>Tanggal (WITA)</th>
@@ -48,8 +46,6 @@
                         <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah }}</td>
-                        <td>{{ $item->material_keluar ?? 0 }}</td>
-                        <td>{{ $item->material_kembali ?? 0 }}</td>
                         <td>
                             @if($item->status == 'baik')
                                 <span style="color: #198754; font-weight: 500;">Baik</span>
@@ -58,11 +54,14 @@
                             @endif
                         </td>
                         <td>{{ \Illuminate\Support\Str::limit($item->keterangan, 30) ?? '-' }}</td>
-                        <td>{{ $item->tanggal->format('d M Y, H:i') }}</td>
+                        
+                        <!-- Format tanggal WITA -->
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <img src="{{ asset('storage/' . $item->foto_path) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
+                                <!-- Gunakan ltrim agar path aman -->
+                                <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
                                 <a href="{{ route('material-retur.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -72,7 +71,7 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <a href="{{ route('material-retur.show', $item->id) }}" class="btn-lihat">Lihat</a>
+                                <!-- Tombol Lihat SUDAH DIHAPUS -->
                                 <a href="{{ route('material-retur.edit', $item->id) }}" class="btn btn-edit">Edit</a>
                                 <form action="{{ route('material-retur.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf
@@ -84,7 +83,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="11" style="text-align:center;">Data tidak ditemukan.</td>
+                        <td colspan="9" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -19,9 +19,11 @@ class MaterialKembaliController extends Controller
         $query = MaterialKembali::query();
 
         if ($search) {
-            $query->where('nama_material', 'like', "%{$search}%")
-                  ->orWhere('nama_petugas', 'like', "%{$search}%");
-        }
+            $query->where(function ($q) use ($search) {
+            $q->where('nama_material', 'like', "%{$search}%")
+              ->orWhere('nama_petugas', 'like', "%{$search}%");
+        });
+    }
 
         $materialKembali = $query->orderByDesc('tanggal')->paginate(10);
 
@@ -117,23 +119,31 @@ class MaterialKembaliController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        $mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
-        $akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
-        $filename = 'laporan_material_kembali_'.$mulai->format('Ymd').'_sd_'.$akhir->format('Ymd');
+        $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+        $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+        $filename = 'laporan_material_kembali_' . $tanggalMulai->format('Ymd') . '_sd_' . $tanggalAkhir->format('Ymd');
 
-        $items = MaterialKembali::whereBetween('tanggal', [$mulai, $akhir])
-                ->orderBy('tanggal', 'asc')
-                ->get();
+        $items = MaterialKembali::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                    ->orderBy('tanggal', 'asc')
+                    ->get();
 
+        // ✅ PDF
         if ($request->has('submit_pdf')) {
-            $pdf = Pdf::loadView('material_kembali.laporan_pdf', compact('items','mulai','akhir'));
+            $data = [
+                'items' => $items,
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_akhir' => $tanggalAkhir,
+            ];
+
+            $pdf = Pdf::loadView('material_kembali.laporan_pdf', $data);
             return $pdf->download($filename . '.pdf');
         }
 
+        // ✅ Excel
         if ($request->has('submit_excel')) {
-            return Excel::download(new MaterialKembaliExport($mulai, $akhir), $filename . '.xlsx');
+            return Excel::download(new MaterialKembaliExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
         }
 
-        return back()->with('error', 'Gagal unduh laporan.');
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
     }
-}
+    }
