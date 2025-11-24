@@ -68,7 +68,6 @@
                         <!-- AKSI -->
                         <td>
                             <div class="table-actions">
-                                <a href="{{ route('material_keluar.lihat', $item->id) }}" class="btn-lihat">Lihat</a>
                                 <a href="{{ route('material_keluar.edit', $item->id) }}" class="btn btn-edit">Edit</a>
                                 <form action="{{ route('material_keluar.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf
