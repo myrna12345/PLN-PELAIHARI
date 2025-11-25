@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Material Keluar - SIMAS-PLN'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -68,7 +66,6 @@
                         <!-- AKSI -->
                         <td>
                             <div class="table-actions">
-                                <a href="<?php echo e(route('material_keluar.lihat', $item->id)); ?>" class="btn-lihat">Lihat</a>
                                 <a href="<?php echo e(route('material_keluar.edit', $item->id)); ?>" class="btn btn-edit">Edit</a>
                                 <form action="<?php echo e(route('material_keluar.destroy', $item->id)); ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     <?php echo csrf_field(); ?>
