@@ -49,12 +49,12 @@ Route::resource('material_kembali', MaterialKembaliController::class);
 // --- RUTE MATERIAL RETUR ---
 Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])
      ->name('material-retur.download-report');
-Route::get('material-retur/{materialRetur}/download-foto', [MaterialReturController::class, 'downloadFoto'])
+Route::get('material-retur/{materialRetur}/download-foto', [Materia  lReturController::class, 'downloadFoto'])
      ->name('material-retur.download-foto');
 Route::resource('material-retur', MaterialReturController::class);
 
 
-// --- RUTE LAINNYA ---
+// --- RUTE SIAGA KELUAR DAN SIAGA KEMBALI ---
 Route::resource('material-siaga-stand-by', MaterialSiagaStandByController::class);
 Route::resource('siaga-keluar', SiagaKeluarController::class);
 Route::resource('siaga-kembali', SiagaKembaliController::class);
