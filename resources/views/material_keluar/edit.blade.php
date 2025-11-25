@@ -61,21 +61,26 @@
                 @enderror
             </div>
 
-            <!-- Foto -->
+            <!-- Foto Lama & Baru -->
             <div class="form-group-new">
-                <label for="foto">Ubah Foto (opsional)</label>
-                <input type="file" name="foto" id="foto" accept="image/*" class="form-control-new-file">
-                @error('foto') 
-                    <small style="color:red;">{{ $message }}</small> 
-                @enderror
+                <label for="foto">Foto</label>
 
                 @if($data->foto)
-                    <div class="mt-3 d-flex align-items-center gap-3">
-                        <span>Foto Saat Ini:</span>
-                        <img src="{{ asset('storage/' . $data->foto) }}" alt="Foto Material" width="100" height="100" style="border-radius:8px;object-fit:cover;">
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ asset('storage/' . $data->foto) }}" 
+                            alt="Foto Material" 
+                            class="table-foto">
                     </div>
                 @endif
+
+                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
+                <small style="color: #777;">*Upload jika ingin mengganti foto</small>
+
+                @error('foto')
+                    <small style="color:red;">{{ $message }}</small>
+                @enderror
             </div>
+
 
             <!-- Tombol Aksi -->
             <div class="form-actions">

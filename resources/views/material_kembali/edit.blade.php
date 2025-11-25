@@ -78,7 +78,7 @@
             {{-- Tombol --}}
             <div class="form-actions">
                 <a href="{{ route('material_kembali.index') }}" class="btn-batal">Batal</a>
-                <button type="submit" class="btn-simpan">Perbarui</button>
+                <button type="submit" class="btn-simpan">Simpan</button>
             </div>
 
         </form>
