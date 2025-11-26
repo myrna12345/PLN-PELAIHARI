@@ -333,8 +333,8 @@
              <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    <li><a href="#">Laporan Material</a></li>
-                    <li><a href="#">Tambah Material</a></li>
+                    <li><a href="{{ route('material-siaga.index') }}">Laporan Material</a></li>
+                    <li><a href="{{ route('material-siaga.create') }}">Tambah Material</a></li>
                 </ul>
             </li>
              <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-keluar.*') ? 'active open' : '' }}">
