@@ -45,7 +45,7 @@ Route::get('/material_kembali/{id}/lihat', [MaterialKembaliController::class, 'l
 Route::post('/material_kembali/download', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
 Route::resource('material_kembali', MaterialKembaliController::class);
 
-
+  
 // --- RUTE MATERIAL RETUR ---
 Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])
      ->name('material-retur.download-report');
@@ -54,7 +54,8 @@ Route::get('material-retur/{materialRetur}/download-foto', [MaterialReturControl
 Route::resource('material-retur', MaterialReturController::class);
 
 
-// --- RUTE SIAGA KELUAR DAN SIAGA KEMBALI ---
+// --- RUTE SIAGA KELUAR  ---
 Route::resource('material-siaga-stand-by', MaterialSiagaStandByController::class);
 Route::resource('siaga-keluar', SiagaKeluarController::class);
+//RUTE SIAGA KEMBALI
 Route::resource('siaga-kembali', SiagaKembaliController::class);
