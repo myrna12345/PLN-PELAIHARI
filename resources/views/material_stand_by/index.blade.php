@@ -6,7 +6,7 @@
 <div class="card-new">
     
     <div class="index-header">
-        <h2>SALDO MATERIAL STAND BY</h2>
+        <h2>LAPORAN MATERIAL STAND BY</h2>
         
         <form action="{{ route('material-stand-by.index') }}" method="GET" class="search-form">
             <div class="search-bar">
