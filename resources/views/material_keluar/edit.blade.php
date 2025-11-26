@@ -50,16 +50,21 @@
                 @enderror
             </div>
 
-            <!-- Tanggal dan Waktu -->
+           <!-- Tanggal dan Waktu (Hanya tampil, user tidak bisa ubah) -->
             <div class="form-group-new">
-                <label for="tanggal">Tanggal dan Waktu</label>
-                <input type="datetime-local" name="tanggal" id="tanggal"
-                       class="form-control-new"
-                       value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d\TH:i') }}" required>
-                @error('tanggal') 
-                    <small style="color:red;">{{ $message }}</small> 
-                @enderror
+                <label for="tanggal_display">Tanggal dan Waktu</label>
+
+                <!-- Tampilan tanggal (disabled) -->
+                <input type="datetime-local" id="tanggal_display"
+                    class="form-control-new"
+                    value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d\TH:i') }}"
+                    disabled>
             </div>
+
+            <!-- Hidden input agar tanggal tetap terkirim ke server -->
+            <input type="hidden" name="tanggal"
+                value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d H:i:s') }}">
+
 
             <!-- Foto Lama & Baru -->
             <div class="form-group-new">

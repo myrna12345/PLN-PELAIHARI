@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class MaterialKeluarController extends Controller
 {
-    // 🔍 INDEX: Tampilkan data + fitur pencarian
+    // INDEX: Tampilkan data + fitur pencarian
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -49,7 +49,6 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -89,7 +88,6 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
