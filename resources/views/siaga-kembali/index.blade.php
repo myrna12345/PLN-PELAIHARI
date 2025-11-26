@@ -33,7 +33,6 @@
                     <th>Nama Petugas</th>
                     <th>Stand Meter</th>
                     
-                    <!-- KOLOM BARU OTOMATIS (RELASI) -->
                     <th>Jumlah Siaga Keluar</th>
                     
                     <th>Jumlah Siaga Kembali</th>
@@ -51,8 +50,7 @@
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->stand_meter ?? '-' }}</td>
                         
-                        <!-- DATA OTOMATIS DARI SIAGA KELUAR -->
-                        <!-- Menggunakan Accessor getJumlahSiagaKeluarAttribute -->
+                        
                         <td style="font-weight: bold; color: #007bff;">
                             {{ $item->jumlah_siaga_keluar }}
                         </td>
@@ -60,12 +58,22 @@
                         <td>{{ $item->jumlah_siaga_kembali }}</td>
                         <td>{{ $item->status ?? 'Kembali' }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
-                        <td style="text-align: center;"> 
+                        
+                        <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto" class="table-foto" style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;">
-                                <br>
-                                <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download Foto</a>
-                            @else - @endif
+                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto ke Controller --}}
+                                <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
+                                     alt="Foto Siaga Kembali" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                     title="Klik untuk memperbesar">
+
+                                <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
+                                    <i class="fas fa-download"></i> Download Foto
+                                </a>
+                            @else
+                                <span>-</span>
+                            @endif
                         </td>
                         <td>
                             <div class="table-actions">

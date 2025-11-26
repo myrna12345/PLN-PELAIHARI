@@ -60,8 +60,13 @@
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <!-- Gunakan ltrim agar path aman -->
-                                <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
+                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto yang mengambil file langsung dari Storage --}}
+                                <img src="{{ route('material-retur.show-foto', $item->id) }}" 
+                                     alt="Foto Material" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                     title="Klik untuk memperbesar">
+                                
                                 <a href="{{ route('material-retur.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -71,7 +76,6 @@
                         </td>
                         <td>
                             <div class="table-actions">
-                                <!-- Tombol Lihat SUDAH DIHAPUS -->
                                 <a href="{{ route('material-retur.edit', $item->id) }}" class="btn btn-edit">Edit</a>
                                 <form action="{{ route('material-retur.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf

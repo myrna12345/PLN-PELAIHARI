@@ -24,9 +24,9 @@ class MaterialReturController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', '%' . $search . '%')
-                  ->orWhereHas('material', function($subQ) use ($search) {
-                      $subQ->where('nama_material', 'like', '%' . $search . '%');
-                  });
+                    ->orWhereHas('material', function($subQ) use ($search) {
+                        $subQ->where('nama_material', 'like', '%' . $search . '%');
+                    });
             });
         }
         if ($tanggalMulai) {
@@ -60,12 +60,14 @@ class MaterialReturController extends Controller
             'jumlah' => 'required|integer|min:1',
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('fotos_retur', 'public');
+            // Menggunakan folder yang spesifik (fotos_material_standby)
+            $path = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
         // Isi tanggal otomatis dengan waktu sekarang (WITA)
@@ -103,13 +105,16 @@ class MaterialReturController extends Controller
             'jumlah' => 'required|integer|min:1',
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
         
+        // PERBAIKAN: Menggunakan variabel yang benar ($materialRetur)
         $path = $materialRetur->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
-            $path = $request->file('foto')->store('fotos_retur', 'public');
+            // Menggunakan folder yang spesifik (fotos_material_standby)
+            $path = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
         // Update data TANPA mengubah kolom 'tanggal'
@@ -128,6 +133,21 @@ class MaterialReturController extends Controller
         
         return redirect()->route('material-retur.index')
                          ->with('success', 'Data Material Retur berhasil dihapus.');
+    }
+
+    /**
+     * FUNGSI PERMANEN: Melayani file foto secara langsung melalui Controller.
+     * Menggunakan Storage::response() adalah solusi terbaik untuk masalah Symlink.
+     */
+    public function showFoto(MaterialRetur $materialRetur)
+    {
+        if (!$materialRetur->foto_path || !Storage::disk('public')->exists($materialRetur->foto_path)) {
+            // Jika path kosong atau file tidak ditemukan
+            return redirect()->back()->with('error', 'File foto tidak ditemukan untuk ditampilkan.');
+        }
+
+        // PERBAIKAN UTAMA: Menggunakan Storage::response()
+        return Storage::disk('public')->response($materialRetur->foto_path);
     }
 
     public function downloadFoto(MaterialRetur $materialRetur)
@@ -153,9 +173,9 @@ class MaterialReturController extends Controller
 
         if ($request->has('submit_pdf')) {
             $items = MaterialRetur::with('material')
-                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                        ->orderBy('tanggal', 'asc')
-                        ->get();
+                                 ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                 ->orderBy('tanggal', 'asc')
+                                 ->get();
 
             $data = [
                 'items' => $items,

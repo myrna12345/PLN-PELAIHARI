@@ -49,7 +49,13 @@
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
+                                {{-- KODE PERBAIKAN UTAMA: Menggunakan Route ke Controller showFoto --}}
+                                <img src="{{ route('material-stand-by.show-foto', $item->id) }}" 
+                                     alt="Foto Material" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                     title="Klik untuk memperbesar">
+                                
                                 <a href="{{ route('material-stand-by.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -82,7 +88,6 @@
     </div>
 
     <div class="index-footer-form">
-        <!-- TAMBAHAN: target="_blank" agar download lebih stabil di HP -->
         <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download" target="_blank">
             <div class="form-group-tanggal">
                 <label for="tanggal_mulai_pdf">Dari Tanggal:</label>

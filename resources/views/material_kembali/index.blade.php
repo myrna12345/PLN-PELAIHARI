@@ -41,7 +41,8 @@
                 @forelse($materialKembali as $item)
                     <tr>
                         <td>{{ $materialKembali->firstItem() + $loop->index }}</td>
-                        <td>{{ $item->nama_material }}</td>
+                        {{-- Asumsi: $item->nama_material berasal dari relasi atau accessor --}}
+                        <td>{{ $item->material->nama_material ?? $item->nama_material }}</td>
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah_material }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
@@ -49,15 +50,21 @@
                         <!-- FOTO + DOWNLOAD -->
                         <td style="text-align: center; vertical-align: top;">
                             @if($item->foto)
-                                <img src="{{ asset('storage/' . $item->foto) }}" 
-                                     alt="Foto Material" 
-                                     class="table-foto"
-                                     title="Klik untuk memperbesar">
+                                {{-- SOLUSI FOTO PERMANEN --}}
+                                @php
+                                    $fotoUrl = '/storage/' . ltrim($item->foto, '/');
+                                @endphp
+                                
+                                <img src="{{ $fotoUrl }}" 
+                                    alt="Foto Material" 
+                                    class="table-foto"
+                                    style="cursor: pointer;"
+                                    title="Klik untuk memperbesar">
 
-                                <a href="{{ asset('storage/' . $item->foto) }}" 
-                                   download 
-                                   class="btn-foto-download" 
-                                   title="Download Foto">
+                                <a href="{{ $fotoUrl }}" 
+                                    download 
+                                    class="btn-foto-download" 
+                                    title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
                             @else

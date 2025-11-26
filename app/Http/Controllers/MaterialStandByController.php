@@ -24,9 +24,9 @@ class MaterialStandByController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', '%' . $search . '%')
-                  ->orWhereHas('material', function($subQ) use ($search) {
-                      $subQ->where('nama_material', 'like', '%' . $search . '%');
-                  });
+                    ->orWhereHas('material', function($subQ) use ($search) {
+                        $subQ->where('nama_material', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -62,12 +62,14 @@ class MaterialStandByController extends Controller
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' 
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('fotos', 'public');
+            // Menggunakan folder yang spesifik (fotos_material_standby)
+            $path = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
         // Gabungkan data validasi dengan tanggal otomatis
@@ -103,13 +105,15 @@ class MaterialStandByController extends Controller
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' 
         ]);
 
         $path = $materialStandBy->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
-            $path = $request->file('foto')->store('fotos', 'public');
+            // Menggunakan folder yang spesifik (fotos_material_standby)
+            $path = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
         // Update data tanpa mengubah tanggal lama
@@ -127,6 +131,22 @@ class MaterialStandByController extends Controller
         $materialStandBy->delete();
         return redirect()->route('material-stand-by.index')
                          ->with('success', 'Data Material Stand By berhasil dihapus.');
+    }
+
+    /**
+     * FUNGSI BARU: Melayani file foto secara langsung melalui Controller (SOLUSI ANTI-SYMLINK).
+     * Dipanggil oleh route('material-stand-by.show-foto', $item->id)
+     */
+    public function showFoto(MaterialStandBy $materialStandBy)
+    {
+        if (!$materialStandBy->foto_path || !Storage::disk('public')->exists($materialStandBy->foto_path)) {
+            // Jika path kosong atau file tidak ditemukan
+            return redirect()->back()->with('error', 'File foto tidak ditemukan untuk ditampilkan.');
+        }
+
+        // Menggunakan Storage::response() untuk memaksa Laravel melayani file.
+        // Ini adalah cara yang paling solid, mengabaikan masalah symlink yang sering terjadi di Windows/Copy-Paste.
+        return Storage::disk('public')->response($materialStandBy->foto_path);
     }
 
     public function downloadFoto(MaterialStandBy $materialStandBy)
@@ -152,9 +172,9 @@ class MaterialStandByController extends Controller
 
         if ($request->has('submit_pdf')) {
             $items = MaterialStandBy::with('material')
-                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                        ->orderBy('tanggal', 'asc')
-                        ->get();
+                                 ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                 ->orderBy('tanggal', 'asc')
+                                 ->get();
 
             $data = [
                 'items' => $items,
@@ -162,7 +182,7 @@ class MaterialStandByController extends Controller
                 'tanggal_akhir' => $tanggalAkhir->format('d M Y'),
             ];
             
-            $pdf = PDF::loadView('material_stand_by.laporan_pdf', $data);
+            $pdf = Pdf::loadView('material_stand_by.laporan_pdf', $data);
             return $pdf->download($filename . '.pdf');
         } 
         

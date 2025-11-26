@@ -27,6 +27,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 Route::get('material-stand-by/download-report', [MaterialStandByController::class, 'downloadReport'])
      ->name('material-stand-by.download-report');
 
+// RUTE BARU UNTUK MENAMPILKAN FOTO SECARA LANGSUNG (SOLUSI ANTI-SYMLINK)
+Route::get('material-stand-by/foto/{materialStandBy}', [MaterialStandByController::class, 'showFoto'])
+     ->name('material-stand-by.show-foto');
+
 Route::get('material-stand-by/{materialStandBy}/download-foto', [MaterialStandByController::class, 'downloadFoto'])
      ->name('material-stand-by.download-foto');
 
@@ -51,6 +55,11 @@ Route::get('material-retur/download-report', [MaterialReturController::class, 'd
      ->name('material-retur.download-report');
 Route::get('material-retur/{materialRetur}/download-foto', [MaterialReturController::class, 'downloadFoto'])
      ->name('material-retur.download-foto');
+
+// RUTE BARU UNTUK MENAMPILKAN FOTO SECARA LANGSUNG (SOLUSI SYMLINK PUTUS)
+Route::get('material-retur/foto/{materialRetur}', [MaterialReturController::class, 'showFoto'])
+     ->name('material-retur.show-foto');
+
 Route::resource('material-retur', MaterialReturController::class);
 
 
@@ -61,6 +70,10 @@ Route::resource('material-siaga-stand-by', MaterialSiagaStandByController::class
 // --- RUTE SIAGA KELUAR ---
 // Tambahkan rute download report dan foto SEBELUM resource
 Route::get('siaga-keluar/download-report', [SiagaKeluarController::class, 'downloadReport'])->name('siaga-keluar.download-report');
+
+// RUTE BARU UNTUK MENAMPILKAN FOTO SECARA LANGSUNG (SOLUSI ANTI-SYMLINK)
+Route::get('siaga-keluar/foto/{siagaKeluar}', [SiagaKeluarController::class, 'showFoto'])->name('siaga-keluar.show-foto');
+
 Route::get('siaga-keluar/{siagaKeluar}/download-foto', [SiagaKeluarController::class, 'downloadFoto'])->name('siaga-keluar.download-foto');
 Route::resource('siaga-keluar', SiagaKeluarController::class);
 
@@ -68,5 +81,12 @@ Route::resource('siaga-keluar', SiagaKeluarController::class);
 // --- RUTE SIAGA KEMBALI ---
 // Tambahkan rute download report dan foto SEBELUM resource
 Route::get('siaga-kembali/download-report', [SiagaKembaliController::class, 'downloadReport'])->name('siaga-kembali.download-report');
-Route::get('siaga-kembali/{id}/download-foto', [SiagaKembaliController::class, 'downloadFoto'])->name('siaga-kembali.download-foto');
+
+// ***** PERBAIKAN: MENAMBAHKAN RUTE SHOW FOTO UNTUK SIAGA KEMBALI *****
+Route::get('siaga-kembali/foto/{siagaKembali}', [SiagaKembaliController::class, 'showFoto'])->name('siaga-kembali.show-foto');
+
+Route::get('siaga-kembali/{siagaKembali}/download-foto', [SiagaKembaliController::class, 'downloadFoto'])
+     // Mengganti {id} dengan {siagaKembali} agar Route Model Binding bekerja
+     ->name('siaga-kembali.download-foto'); 
+
 Route::resource('siaga-kembali', SiagaKembaliController::class);

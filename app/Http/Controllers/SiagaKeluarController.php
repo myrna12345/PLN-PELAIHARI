@@ -29,11 +29,11 @@ class SiagaKeluarController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', "%$search%")
-                  ->orWhere('stand_meter', 'like', "%$search%")
-                  ->orWhere('status', 'like', "%$search%")
-                  ->orWhereHas('material', function($subQ) use ($search) {
-                      $subQ->where('nama_material', 'like', "%$search%");
-                  });
+                    ->orWhere('stand_meter', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhereHas('material', function($subQ) use ($search) {
+                        $subQ->where('nama_material', 'like', "%$search%");
+                    });
             });
         }
 
@@ -46,9 +46,9 @@ class SiagaKeluarController extends Controller
         }
 
         // Mengambil data terbaru dan melakukan pagination
-        $dataSiagaKeluar = $query->latest('tanggal')->paginate(10); // Variabel disesuaikan
+        $dataSiagaKeluar = $query->latest('tanggal')->paginate(10); 
 
-        return view('siaga-keluar.index', compact('dataSiagaKeluar')); // Variabel disesuaikan
+        return view('siaga-keluar.index', compact('dataSiagaKeluar')); 
     }
 
     /**
@@ -58,8 +58,8 @@ class SiagaKeluarController extends Controller
     {
         // KHUSUS SIAGA: Ambil material yang kategorinya 'siaga'
         $materials = Material::where('kategori', 'siaga')
-                        ->get()
-                        ->sortBy('nama_material', SORT_NATURAL);
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
 
         return view('siaga-keluar.create', compact('materials'));
     }
@@ -77,11 +77,13 @@ class SiagaKeluarController extends Controller
             // TAMBAHAN: Validasi untuk jumlah siaga masuk
             'jumlah_siaga_masuk' => 'nullable|integer|min:0',
             'status' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
+            // PERBAIKAN: Menggunakan folder yang spesifik 'fotos_siaga_keluar'
             $path = $request->file('foto')->store('fotos_siaga_keluar', 'public');
         }
 
@@ -111,8 +113,8 @@ class SiagaKeluarController extends Controller
         
         // KHUSUS SIAGA: Filter material siaga
         $materials = Material::where('kategori', 'siaga')
-                        ->get()
-                        ->sortBy('nama_material', SORT_NATURAL);
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
 
         return view('siaga-keluar.edit', compact('item', 'materials'));
     }
@@ -133,12 +135,14 @@ class SiagaKeluarController extends Controller
             'jumlah_siaga_masuk' => 'nullable|integer|min:0',
             // PERBAIKAN: Status menjadi nullable
             'status' => 'nullable|string', 
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
         $path = $siagaKeluar->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
+            // PERBAIKAN: Menggunakan folder yang spesifik 'fotos_siaga_keluar'
             $path = $request->file('foto')->store('fotos_siaga_keluar', 'public');
         }
 
@@ -173,6 +177,22 @@ class SiagaKeluarController extends Controller
                          ->with('success', 'Data Siaga Keluar berhasil dihapus.');
     }
     
+    /**
+     * FUNGSI PERMANEN: Melayani file foto secara langsung melalui Controller (Solusi Anti-Symlink).
+     */
+    public function showFoto($id)
+    {
+        $siagaKeluar = SiagaKeluar::findOrFail($id);
+        
+        if (!$siagaKeluar->foto_path || !Storage::disk('public')->exists($siagaKeluar->foto_path)) {
+            return redirect()->back()->with('error', 'File foto tidak ditemukan untuk ditampilkan.');
+        }
+
+        // PERBAIKAN UTAMA: Menggunakan Storage::response()
+        return Storage::disk('public')->response($siagaKeluar->foto_path);
+    }
+
+
     // --- FUNGSI DOWNLOAD FOTO ---
     public function downloadFoto($id)
     {
@@ -186,7 +206,7 @@ class SiagaKeluarController extends Controller
     // --- FUNGSI DOWNLOAD REPORT (PDF & EXCEL) ---
     public function downloadReport(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
@@ -199,9 +219,9 @@ class SiagaKeluarController extends Controller
         // === LOGIKA DOWNLOAD PDF ===
         if ($request->has('submit_pdf')) {
             $dataSiagaKeluar = SiagaKeluar::with('material')
-                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                        ->orderBy('tanggal', 'asc')
-                        ->get();
+                                 ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                 ->orderBy('tanggal', 'asc')
+                                 ->get();
 
             $data = [
                 'dataSiagaKeluar' => $dataSiagaKeluar,

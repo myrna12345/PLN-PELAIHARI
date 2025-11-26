@@ -33,7 +33,6 @@
                     <th>Nama Petugas</th>
                     <th>Stand Meter</th>
                     <th>Jumlah Siaga Keluar</th>
-                    <!-- Kolom Jumlah Siaga Masuk DIKEMBALIKAN -->
                     <th>Jumlah Siaga Masuk</th>
                     <th>Status</th>
                     <th>Tanggal (WITA)</th>
@@ -42,7 +41,6 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- PERBAIKAN: Menggunakan variabel $dataSiagaKeluar sesuai dengan Controller --}}
                 @forelse ($dataSiagaKeluar as $item)
                     <tr>
                         <td>{{ $dataSiagaKeluar->firstItem() + $loop->index }}</td>
@@ -53,7 +51,6 @@
                         
                         <td>{{ $item->jumlah_siaga_keluar }}</td>
                         
-                        <!-- Data Jumlah Siaga Masuk -->
                         <td>{{ $item->jumlah_siaga_masuk ?? 0 }}</td>
 
                         <td>{{ $item->status }}</td>
@@ -62,7 +59,13 @@
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Material" class="table-foto" style="cursor: pointer;" title="Klik untuk memperbesar">
+                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto ke Controller --}}
+                                <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" 
+                                     alt="Foto Siaga Keluar" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                     title="Klik untuk memperbesar">
+                                
                                 <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
@@ -83,7 +86,6 @@
                     </tr>
                 @empty
                     <tr>
-                        <!-- Colspan disesuaikan menjadi 10 -->
                         <td colspan="10" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
@@ -92,7 +94,6 @@
     </div>
     
     <div style="margin-top: 20px;">
-        {{-- PERBAIKAN: Menggunakan variabel $dataSiagaKeluar untuk pagination --}}
         {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>
 

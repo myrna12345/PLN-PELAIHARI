@@ -63,7 +63,6 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>
-                <a href="{{ route('siaga-kembali.index') }}" class="btn-batal">Batal</a>
             </div>
         </form>
     </div>
