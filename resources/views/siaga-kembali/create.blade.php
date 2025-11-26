@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Siaga Keluar')
+@section('title', 'Tambah Siaga Kembali')
 
 @section('content')
 <div class="card-form-container">
     <div class="card-form-header">
-        <h2>Tambah Material Siaga Keluar</h2>
+        <h2>Tambah Material Siaga Kembali</h2>
     </div>
 
+    <!-- Menampilkan Error Validasi -->
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul style="margin: 0; padding-left: 20px;">
@@ -19,12 +20,9 @@
     @endif
 
     <div class="card-form-body">
-        
-        <form action="{{ route('siaga-keluar.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('siaga-kembali.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
-            <!-- BAGIAN INI YANG DIPERBAIKI -->
-            <!-- Menggunakan $materials dari database, bukan $oneP manual -->
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new" required>
@@ -36,38 +34,26 @@
                     @endforeach
                 </select>
             </div>
-            
+
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
                 <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas') }}" required>
             </div>
-            
+
             <div class="form-group-new">
                 <label for="stand_meter">Stand Meter</label>
                 <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter') }}" required>
             </div>
-            
-            <div class="form-group-new">
-                <label for="jumlah_siaga_keluar">Jumlah</label>
-                <input type="number" name="jumlah_siaga_keluar" id="jumlah_siaga_keluar" class="form-control-new" value="{{ old('jumlah_siaga_keluar') }}" required min="1">
-            </div>
 
             <div class="form-group-new">
-                <label for="status">Status</label>
-                <input type="text" name="status" id="status" class="form-control-new" value="{{ old('status', 'Keluar') }}" required>
+                <label for="jumlah_siaga_kembali">Jumlah Siaga Kembali</label>
+                <input type="number" name="jumlah_siaga_kembali" id="jumlah_siaga_kembali" class="form-control-new" value="{{ old('jumlah_siaga_kembali') }}" min="1" required>
             </div>
-            
-            <!-- Input Tanggal READONLY (Otomatis Waktu Sekarang) -->
+
+            <!-- PERUBAHAN: Mengganti Keterangan menjadi Status (Readonly) -->
             <div class="form-group-new">
-                <label>Tanggal dan Jam</label>
-                <input type="text" 
-                       class="form-control-new" 
-                       style="background-color: #e9ecef; cursor: not-allowed;"
-                       value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}"
-                       readonly>
-                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    Waktu akan otomatis terisi saat data disimpan.
-                </small>
+                <label for="status">Status</label>
+                <input type="text" name="status" id="status" class="form-control-new" value="Kembali" readonly style="background-color: #e9ecef; cursor: not-allowed;">
             </div>
 
             <div class="form-group-new">
@@ -77,6 +63,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>
+                <a href="{{ route('siaga-kembali.index') }}" class="btn-batal">Batal</a>
             </div>
         </form>
     </div>

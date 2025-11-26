@@ -49,12 +49,25 @@ Route::resource('material_kembali', MaterialKembaliController::class);
 // --- RUTE MATERIAL RETUR ---
 Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])
      ->name('material-retur.download-report');
-Route::get('material-retur/{materialRetur}/download-foto', [Materia  lReturController::class, 'downloadFoto'])
+     
+Route::get('material-retur/{materialRetur}/download-foto', [MaterialReturController::class, 'downloadFoto'])
      ->name('material-retur.download-foto');
 Route::resource('material-retur', MaterialReturController::class);
 
 
-// --- RUTE SIAGA KELUAR DAN SIAGA KEMBALI ---
+// --- RUTE MATERIAL SIAGA STAND BY ---
 Route::resource('material-siaga-stand-by', MaterialSiagaStandByController::class);
+
+
+// --- RUTE SIAGA KELUAR ---
+// Tambahkan rute download report dan foto SEBELUM resource
+Route::get('siaga-keluar/download-report', [SiagaKeluarController::class, 'downloadReport'])->name('siaga-keluar.download-report');
+Route::get('siaga-keluar/{siagaKeluar}/download-foto', [SiagaKeluarController::class, 'downloadFoto'])->name('siaga-keluar.download-foto');
 Route::resource('siaga-keluar', SiagaKeluarController::class);
+
+
+// --- RUTE SIAGA KEMBALI ---
+// Tambahkan rute download report dan foto SEBELUM resource
+Route::get('siaga-kembali/download-report', [SiagaKembaliController::class, 'downloadReport'])->name('siaga-kembali.download-report');
+Route::get('siaga-kembali/{id}/download-foto', [SiagaKembaliController::class, 'downloadFoto'])->name('siaga-kembali.download-foto');
 Route::resource('siaga-kembali', SiagaKembaliController::class);

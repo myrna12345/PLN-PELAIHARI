@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+// Panggil kedua class seeder
+use Database\Seeders\MaterialSeeder;
+use Database\Seeders\MaterialSiagaSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,10 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Panggil MaterialSeeder yang baru kita buat
-        $this->call([
-            MaterialSeeder::class,
-            // Anda bisa tambahkan seeder lain di sini nanti
-        ]);
+        // 1. Jalankan MaterialSeeder (Ini akan menghapus data lama & isi material umum)
+        $this->call(MaterialSeeder::class);
+        
+        // 2. Jalankan MaterialSiagaSeeder (Ini akan menambahkan material 1P & 3P)
+        $this->call(MaterialSiagaSeeder::class);
     }
 }

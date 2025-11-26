@@ -16,6 +16,12 @@ return new class extends Migration
             $table->string('nama_material');
             $table->string('kode_material')->unique()->nullable();
             $table->string('satuan')->nullable();
+            
+            // Saya tambahkan kembali kolom 'kategori' karena kode Anda sebelumnya
+            // (SiagaKembaliController, MaterialSeeder, dll) SANGAT BERGANTUNG padanya.
+            // Jika dihapus, filter "hanya tampil di halaman Siaga" TIDAK AKAN JALAN dan akan ERROR lagi.
+            $table->string('kategori')->default('umum'); 
+            
             $table->timestamps();
         });
     }
