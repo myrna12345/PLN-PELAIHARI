@@ -42,7 +42,6 @@ class MaterialKembaliController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -83,7 +82,6 @@ class MaterialKembaliController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
