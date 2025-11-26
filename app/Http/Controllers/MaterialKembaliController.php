@@ -20,10 +20,10 @@ class MaterialKembaliController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-            $q->where('nama_material', 'like', "%{$search}%")
-              ->orWhere('nama_petugas', 'like', "%{$search}%");
-        });
-    }
+                $q->where('nama_material', 'like', "%{$search}%")
+                  ->orWhere('nama_petugas', 'like', "%{$search}%");
+            });
+        }
 
         $materialKembali = $query->orderByDesc('tanggal')->paginate(10);
 
@@ -32,7 +32,12 @@ class MaterialKembaliController extends Controller
 
     public function create()
     {
-        $materialList = Material::all();
+        // PERBAIKAN: Filter agar hanya mengambil material yang BUKAN 'siaga'
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->orderBy('nama_material')
+                                ->get();
+                                
         return view('material_kembali.create', compact('materialList'));
     }
 
@@ -42,7 +47,6 @@ class MaterialKembaliController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -57,8 +61,6 @@ class MaterialKembaliController extends Controller
         return redirect()->route('material_kembali.index')->with('success', 'Data berhasil disimpan!');
     }
 
-
-
     public function lihat($id)
     {
         $item = MaterialKembali::findOrFail($id);
@@ -68,12 +70,15 @@ class MaterialKembaliController extends Controller
     public function edit($id)
     {
         $materialKembali = MaterialKembali::findOrFail($id);
-        $materialList = Material::all(); 
+        
+        // PERBAIKAN: Filter agar hanya mengambil material yang BUKAN 'siaga'
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->orderBy('nama_material')
+                                ->get(); 
 
         return view('material_kembali.edit', compact('materialKembali', 'materialList'));
     }
-
-
 
     public function update(Request $request, $id)
     {
@@ -83,7 +88,6 @@ class MaterialKembaliController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -146,4 +150,4 @@ class MaterialKembaliController extends Controller
 
         return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
     }
-    }
+}

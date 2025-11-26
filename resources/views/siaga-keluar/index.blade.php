@@ -1,98 +1,121 @@
 @extends('layouts.app')
 
-{{-- Set Judul Halaman --}}
-@section('title', 'Lihat Siaga Keluar - SIMAS-PLN')
+@section('title', 'Laporan Siaga Keluar')
 
-{{-- Set Konten Halaman --}}
 @section('content')
 <div class="card-new">
+    
     <div class="index-header">
-        <h2>Lihat Siaga Keluar</h2>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            {{-- Form untuk pencarian --}}
-            <form action="{{ route('siaga-keluar.index') }}" method="GET">
-                <input type="text" name="search" placeholder="Cari..." value="{{ request('search') }}">
-            </form>
-        </div>
+        <h2>LAPORAN MATERIAL SIAGA KELUAR</h2>
+        
+        <form action="{{ route('siaga-keluar.index') }}" method="GET" class="search-form">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Cari Nama Material/Petugas..." value="{{ request('search') }}">
+            </div>
+            <div class="form-group-tanggal-filter">
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
+            </div>
+            <div class="form-group-tanggal-filter">
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Cari</button>
+            <a href="{{ route('siaga-keluar.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
     </div>
 
     <div class="table-container">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Id</th>
+                    <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Stand Meter</th>
-                    <th>Siaga Keluar</th>
-                    <th>Siaga Kembali</th>
-                    <th>Tanggal</th>
-                    <th>Foto</th>
+                    <th>Jumlah Siaga Keluar</th>
+                    <th>Jumlah Siaga Masuk</th>
                     <th>Status</th>
+                    <th>Tanggal (WITA)</th>
+                    <th>Foto & Download</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                {{-- Loop data siaga keluar --}}
-                @forelse ($dataSiagaKeluar as $data)
+                @forelse ($dataSiagaKeluar as $item)
                     <tr>
-                        <td>{{ $data->id }}</td>
-                        {{-- Ambil nama material dari relasi --}}
-                        <td>{{ $data->materialStandBy->nama_material ?? 'N/A' }}</td>
-                        <td>{{ $data->nama_petugas }}</td>
-                        <td>{{ $data->stand_meter }}</td>
-                        <td>{{ $data->jumlah_siaga_keluar }}</td>
-                        <td>{{ $data->jumlah_siaga_kembali }}</td>
-                        {{-- Format tanggal --}}
-                        <td class="local-datetime" data-timestamp="{{ $data->tanggal }}">
-                            {{ $data->tanggal }}
-                        </td>
-                        <td>
-                            @if ($data->foto)
-                                <img src="{{ asset('storage/' . $data->foto) }}" alt="Foto" class="table-foto">
-                                {{-- TODO: Tambahkan link download foto jika perlu --}}
+                        <td>{{ $dataSiagaKeluar->firstItem() + $loop->index }}</td>
+                        
+                        <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
+                        <td>{{ $item->nama_petugas }}</td>
+                        <td>{{ $item->stand_meter ?? '-' }}</td>
+                        
+                        <td>{{ $item->jumlah_siaga_keluar }}</td>
+                        
+                        <td>{{ $item->jumlah_siaga_masuk ?? 0 }}</td>
+
+                        <td>{{ $item->status }}</td>
+                        
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
+                        
+                        <td style="text-align: center; vertical-align: top;"> 
+                            @if($item->foto_path)
+                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto ke Controller --}}
+                                <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" 
+                                     alt="Foto Siaga Keluar" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                     title="Klik untuk memperbesar">
+                                
+                                <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
+                                    <i class="fas fa-download"></i> Download Foto
+                                </a>
                             @else
-                                -
+                                <span>-</span>
                             @endif
                         </td>
                         <td>
-                            {{-- TODO: Buat ini menjadi dropdown jika status bisa diubah --}}
-                            {{ $data->status }}
-                        </td>
-                        <td class="table-actions">
-                            {{-- Tombol Edit --}}
-                            <a href="{{ route('siaga-keluar.edit', $data->id) }}" class="btn-edit">Edit</a>
-                            
-                            {{-- Form Hapus --}}
-                            <form action="{{ route('siaga-keluar.destroy', $data->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-hapus">Hapus</button>
-                            </form>
+                            <div class="table-actions">
+                                <a href="{{ route('siaga-keluar.edit', $item->id) }}" class="btn btn-edit">Edit</a>
+                                <form action="{{ route('siaga-keluar.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-hapus">Hapus</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty
-                    {{-- Jika data kosong --}}
                     <tr>
-                        <td colspan="10" style="text-align: center;">Tidak ada data siaga keluar.</td>
+                        <td colspan="10" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-
-    {{-- Footer/Form Download --}}
-    <div class="index-footer-form">
-        {{-- Form Download PDF & Excel --}}
-        <div class="form-download">
-            <form action="#" method="GET" style="display:inline;"> {{-- TODO: Ganti '#' dengan route download PDF --}}
-                <button type="submit" class="btn-pdf"><i class="fas fa-file-pdf"></i> Unduh PDF</button>
-            </form>
-            <form action="#" method="GET" style="display:inline;"> {{-- TODO: Ganti '#' dengan route download Excel --}}
-                <button type="submit" class="btn-excel"><i class="fas fa-file-excel"></i> Unduh Excel</button>
-            </form>
-        </div>
+    
+    <div style="margin-top: 20px;">
+        {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>
+
+    <div class="index-footer-form">
+        <form action="{{ route('siaga-keluar.download-report') }}" method="GET" class="form-download" target="_blank">
+            <div class="form-group-tanggal">
+                <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>
+            </div>
+            <div class="form-group-tanggal">
+                <label for="tanggal_akhir_pdf">Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" id="tanggal_akhir_pdf" class="form-control-tanggal" required>
+            </div>
+            
+            <button type="submit" name="submit_pdf" value="1" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Unduh Pdf
+            </button>
+            <button type="submit" name="submit_excel" value="1" class="btn btn-excel">
+                <i class="fas fa-file-excel"></i> Unduh Excel
+            </button>
+        </form>
+    </div>
+
 </div>
 @endsection

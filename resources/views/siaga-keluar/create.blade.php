@@ -1,106 +1,84 @@
 @extends('layouts.app')
 
-{{-- Set Judul Halaman --}}
-@section('title', 'Tambah Siaga Keluar - SIMAS-PLN')
+@section('title', 'Tambah Siaga Keluar')
 
-{{-- Set Konten Halaman --}}
 @section('content')
 <div class="card-form-container">
     <div class="card-form-header">
-        <h2>Tambah Siaga Keluar</h2>
+        <h2>Tambah Material Siaga Keluar</h2>
     </div>
 
-    {{-- Formulir Tambah Data --}}
-    {{-- Arahkan action ke route 'siaga-keluar.store' dengan method POST --}}
-    <div class="card-form-body">
-        <form action="{{ route('siaga-keluar.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf {{-- Token CSRF untuk keamanan --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul style="margin: 0; padding-left: 20px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-            {{-- 1. Input Nama Material (Dropdown) --}}
+    <div class="card-form-body">
+        
+        <form action="{{ route('siaga-keluar.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            
+            <!-- BAGIAN INI YANG DIPERBAIKI -->
+            <!-- Menggunakan $materials dari database, bukan $oneP manual -->
             <div class="form-group-new">
-                <label for="nama_material">Nama Material</label>
-                <select id="nama_material" name="nama_material" class="form-control-new @error('nama_material') is-invalid @enderror">
-                    <option value="" disabled selected>Pilih Material</option>
-                    {{-- Loop data material untuk dropdown --}}
-                    @foreach ($materials as $material)
-                        <option value="{{ $material->id }}" {{ old('nama_material') == $material->id ? 'selected' : '' }}>
-                            {{ $material->nama_material }} (Stok: {{ $material->jumlah_stok }})
+                <label for="material_id">Nama Material</label>
+                <select name="material_id" id="material_id" class="form-control-new" required>
+                    <option value="" disabled selected>Pilih material...</option>
+                    @foreach($materials as $material)
+                        <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
+                            {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                @error('nama_material')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
             </div>
-
-            {{-- 2. Input Nama Petugas --}}
+            
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
-                <input type="text" id="nama_petugas" name="nama_petugas" class="form-control-new @error('nama_petugas') is-invalid @enderror" placeholder="Masukkan nama petugas" value="{{ old('nama_petugas') }}">
-                @error('nama_petugas')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas') }}" required>
             </div>
-
-            {{-- 3. Input Stand Meter --}}
+            
             <div class="form-group-new">
                 <label for="stand_meter">Stand Meter</label>
-                <input type="text" id="stand_meter" name="stand_meter" class="form-control-new @error('stand_meter') is-invalid @enderror" placeholder="Masukkan stand meter" value="{{ old('stand_meter') }}">
-                @error('stand_meter')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter') }}" required>
             </div>
-
-            {{-- 4. Input Jumlah Siaga Keluar --}}
+            
             <div class="form-group-new">
-                <label for="jumlah_siaga_keluar">Jumlah Siaga Keluar</label>
-                <input type="number" id="jumlah_siaga_keluar" name="jumlah_siaga_keluar" class="form-control-new @error('jumlah_siaga_keluar') is-invalid @enderror" placeholder="Masukkan jumlah" value="{{ old('jumlah_siaga_keluar') }}">
-                @error('jumlah_siaga_keluar')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <label for="jumlah_siaga_keluar">Jumlah</label>
+                <input type="number" name="jumlah_siaga_keluar" id="jumlah_siaga_keluar" class="form-control-new" value="{{ old('jumlah_siaga_keluar') }}" required min="1">
             </div>
 
-            {{-- 5. Input Tanggal --}}
             <div class="form-group-new">
-                <label for="tanggal_local_input">Tanggal</label>
-                {{-- Input ini yang dilihat pengguna --}}
-                <input type="datetime-local" id="tanggal_local_input" class="form-control-new @error('tanggal') is-invalid @enderror" value="{{ old('tanggal') }}">
-                {{-- Input ini yang dikirim ke server (tersembunyi) --}}
-                <input type="hidden" id="tanggal_utc_output" name="tanggal">
-                @error('tanggal')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <label for="status">Status</label>
+                <input type="text" name="status" id="status" class="form-control-new" value="{{ old('status', 'Keluar') }}" required>
             </div>
-
-            {{-- 6. Input Unggah Foto --}}
+            
+            <!-- Input Tanggal READONLY (Otomatis Waktu Sekarang) -->
             <div class="form-group-new">
-                <label for="foto">Unggah Foto</label>
-                <input type="file" id="foto" name="foto" class="form-control-new-file @error('foto') is-invalid @enderror">
-                @error('foto')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <label>Tanggal dan Jam</label>
+                <input type="text" 
+                       class="form-control-new" 
+                       style="background-color: #e9ecef; cursor: not-allowed;"
+                       value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}"
+                       readonly>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Waktu akan otomatis terisi saat data disimpan.
+                </small>
             </div>
 
-            {{-- Tombol Aksi --}}
+            <div class="form-group-new">
+                <label for="foto">Unggah Foto (Opsional)</label>
+                <input type="file" name="foto" id="foto" class="form-control-new-file">
+            </div>
+
             <div class="form-actions">
-                <a href="{{ route('siaga-keluar.index') }}" class="btn-batal">Batal</a>
                 <button type="submit" class="btn-simpan">Simpan</button>
             </div>
         </form>
     </div>
 </div>
-
-{{-- CSS Tambahan untuk pesan error validasi (jika belum ada di app.blade.php) --}}
-@push('styles')
-<style>
-    .is-invalid {
-        border-color: #dc3545;
-    }
-    .invalid-feedback {
-        color: #dc3545;
-        font-size: 0.875em;
-        margin-top: 0.25rem;
-    }
-</style>
-@endpush
 @endsection

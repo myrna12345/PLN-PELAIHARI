@@ -50,32 +50,42 @@
                 @enderror
             </div>
 
-            <!-- Tanggal dan Waktu -->
+           <!-- Tanggal dan Waktu (Hanya tampil, user tidak bisa ubah) -->
             <div class="form-group-new">
-                <label for="tanggal">Tanggal dan Waktu</label>
-                <input type="datetime-local" name="tanggal" id="tanggal"
-                       class="form-control-new"
-                       value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d\TH:i') }}" required>
-                @error('tanggal') 
-                    <small style="color:red;">{{ $message }}</small> 
-                @enderror
+                <label for="tanggal_display">Tanggal dan Waktu</label>
+
+                <!-- Tampilan tanggal (disabled) -->
+                <input type="datetime-local" id="tanggal_display"
+                    class="form-control-new"
+                    value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d\TH:i') }}"
+                    disabled>
             </div>
 
-            <!-- Foto -->
+            <!-- Hidden input agar tanggal tetap terkirim ke server -->
+            <input type="hidden" name="tanggal"
+                value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d H:i:s') }}">
+
+
+            <!-- Foto Lama & Baru -->
             <div class="form-group-new">
-                <label for="foto">Ubah Foto (opsional)</label>
-                <input type="file" name="foto" id="foto" accept="image/*" class="form-control-new-file">
-                @error('foto') 
-                    <small style="color:red;">{{ $message }}</small> 
-                @enderror
+                <label for="foto">Foto</label>
 
                 @if($data->foto)
-                    <div class="mt-3 d-flex align-items-center gap-3">
-                        <span>Foto Saat Ini:</span>
-                        <img src="{{ asset('storage/' . $data->foto) }}" alt="Foto Material" width="100" height="100" style="border-radius:8px;object-fit:cover;">
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ asset('storage/' . $data->foto) }}" 
+                            alt="Foto Material" 
+                            class="table-foto">
                     </div>
                 @endif
+
+                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
+                <small style="color: #777;">*Upload jika ingin mengganti foto</small>
+
+                @error('foto')
+                    <small style="color:red;">{{ $message }}</small>
+                @enderror
             </div>
+
 
             <!-- Tombol Aksi -->
             <div class="form-actions">

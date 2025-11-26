@@ -13,7 +13,14 @@ class MaterialKembaliExport implements FromCollection, WithHeadings, ShouldAutoS
     protected $akhir;
 
     public function __construct($mulai, $akhir)
-    {
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Menampilkan data material kembali beserta pencarian nama material atau nama petugas
+ *
+ * @param \Illuminate\Http\Request $request
+ * @return \Illuminate\Http\Response
+ */
+/*******  93afff6d-2a9d-495a-9c32-95c784bb4c20  *******/    {
         $this->mulai = $mulai;
         $this->akhir = $akhir;
     }

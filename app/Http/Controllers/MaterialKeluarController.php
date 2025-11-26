@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class MaterialKeluarController extends Controller
 {
-    // 🔍 INDEX: Tampilkan data + fitur pencarian
+    // INDEX: Tampilkan data + fitur pencarian
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -37,7 +37,12 @@ class MaterialKeluarController extends Controller
     // CREATE
     public function create()
     {
-        $materialList = Material::all(); // mengambil daftar material untuk dropdown
+        // PERBAIKAN: Jangan ambil Material::all(). 
+        // Ambil material yang kategorinya BUKAN 'siaga' (bisa 'teknik' atau null)
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->get();
+                                
         return view('material_keluar.create', compact('materialList'));
     }
 
@@ -49,7 +54,6 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -75,7 +79,11 @@ class MaterialKeluarController extends Controller
         public function edit($id)
     {
         $data = MaterialKeluar::findOrFail($id);
-        $materialList = Material::all(); // Ambil semua data material
+        
+        // PERBAIKAN: Sama seperti create, filter agar material siaga tidak muncul
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->get();
 
         return view('material_keluar.edit', compact('data', 'materialList'));
     }
@@ -89,7 +97,6 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 

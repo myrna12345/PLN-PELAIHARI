@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Material; // <-- PENTING: Impor model Material Anda
+use App\Models\Material;
 
 class MaterialSeeder extends Seeder
 {
@@ -12,7 +12,7 @@ class MaterialSeeder extends Seeder
      */
     public function run(): void
     {
-        // Daftar material yang Anda berikan
+        // Daftar material umum/teknik (BUKAN Siaga)
         $materials = [
             'MCB 1P 2A', 'MCB 1P 4A', 'MCB 1P 6A', 'MCB 1P 10A', 'MCB 1P 16A',
             'MCB 1P 35A', 'MCB 1P 50A', 'MCB 3P 16A', 'MCB 3P 20A', 'MCB 3P 25A',
@@ -21,13 +21,15 @@ class MaterialSeeder extends Seeder
             'KABEL TR 4 X 35', 'KABEL TR 4 X 70'
         ];
 
-        // Loop dan masukkan setiap material ke database
         foreach ($materials as $materialName) {
-            // Menggunakan firstOrCreate agar data tidak duplikat jika seeder dijalankan lagi
-            Material::firstOrCreate(['nama_material' => $materialName]);
+            // PERBAIKAN: Tambahkan ['kategori' => 'teknik'] sebagai nilai default
+            // agar material ini memiliki kategori berbeda dengan material siaga
+            Material::firstOrCreate(
+                ['nama_material' => $materialName], 
+                ['kategori' => 'teknik'] 
+            );
         }
         
-        // Pesan sukses di terminal
-        $this->command->info('Tabel materials berhasil diisi (seeded).');
+        $this->command->info('Tabel materials berhasil diisi dengan kategori teknik.');
     }
 }

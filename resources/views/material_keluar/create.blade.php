@@ -44,11 +44,23 @@
                 @enderror
             </div>
 
-            {{-- Tanggal dan Waktu --}}
+            {{-- Tanggal dan Waktu (hanya tampil, tidak bisa diubah) --}}
             <div class="form-group-new">
-                <label for="tanggal">Tanggal dan Waktu</label>
-                <input type="datetime-local" id="tanggal" name="tanggal" class="form-control-new" required>
+                <label for="tanggal_display">Tanggal dan Waktu</label>
+
+                {{-- Menampilkan tanggal, tetapi disabled --}}
+                <input type="datetime-local" 
+                    id="tanggal_display" 
+                    class="form-control-new"
+                    value="{{ now('Asia/Makassar')->format('Y-m-d\TH:i') }}"
+                    disabled>
             </div>
+
+            {{-- Mengirim nilai ke server via input hidden --}}
+            <input type="hidden" 
+                name="tanggal" 
+                value="{{ now('Asia/Makassar')->format('Y-m-d H:i:s') }}">
+
 
             {{-- Upload Foto --}}
             <div class="form-group-new">

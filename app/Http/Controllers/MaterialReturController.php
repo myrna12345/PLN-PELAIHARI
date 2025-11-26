@@ -24,9 +24,9 @@ class MaterialReturController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', '%' . $search . '%')
-                  ->orWhereHas('material', function($subQ) use ($search) {
-                      $subQ->where('nama_material', 'like', '%' . $search . '%');
-                  });
+                    ->orWhereHas('material', function($subQ) use ($search) {
+                        $subQ->where('nama_material', 'like', '%' . $search . '%');
+                    });
             });
         }
         if ($tanggalMulai) {
@@ -42,7 +42,12 @@ class MaterialReturController extends Controller
 
     public function create()
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // PERBAIKAN: Menggunakan SORT_NATURAL agar urutan angka benar (1P 1, 1P 2, ... 1P 10)
+        $materials = Material::where('kategori', '!=', 'siaga')
+                             ->orWhereNull('kategori')
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
+
         return view('material_retur.create', compact('materials'));
     }
 
@@ -53,15 +58,16 @@ class MaterialReturController extends Controller
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            // 'tanggal' => 'required|date',  <-- DIHAPUS
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('fotos_retur', 'public');
+            // Menggunakan folder yang spesifik (fotos_material_standby)
+            $path = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
         // Isi tanggal otomatis dengan waktu sekarang (WITA)
@@ -78,7 +84,12 @@ class MaterialReturController extends Controller
 
     public function edit(MaterialRetur $materialRetur)
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // PERBAIKAN: Terapkan juga SORT_NATURAL di halaman edit
+        $materials = Material::where('kategori', '!=', 'siaga')
+                             ->orWhereNull('kategori')
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
+
         return view('material_retur.edit', [
             'item' => $materialRetur,
             'materials' => $materials
@@ -92,16 +103,18 @@ class MaterialReturController extends Controller
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            // 'tanggal' => 'required|date', <-- DIHAPUS
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
         
+        // PERBAIKAN: Menggunakan variabel yang benar ($materialRetur)
         $path = $materialRetur->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
-            $path = $request->file('foto')->store('fotos_retur', 'public');
+            // Menggunakan folder yang spesifik (fotos_material_standby)
+            $path = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
         // Update data TANPA mengubah kolom 'tanggal'
@@ -122,13 +135,27 @@ class MaterialReturController extends Controller
                          ->with('success', 'Data Material Retur berhasil dihapus.');
     }
 
+    /**
+     * FUNGSI PERMANEN: Melayani file foto secara langsung melalui Controller.
+     * Menggunakan Storage::response() adalah solusi terbaik untuk masalah Symlink.
+     */
+    public function showFoto(MaterialRetur $materialRetur)
+    {
+        if (!$materialRetur->foto_path || !Storage::disk('public')->exists($materialRetur->foto_path)) {
+            // Jika path kosong atau file tidak ditemukan
+            return redirect()->back()->with('error', 'File foto tidak ditemukan untuk ditampilkan.');
+        }
+
+        // PERBAIKAN UTAMA: Menggunakan Storage::response()
+        return Storage::disk('public')->response($materialRetur->foto_path);
+    }
+
     public function downloadFoto(MaterialRetur $materialRetur)
     {
         if ($materialRetur->foto_path && Storage::disk('public')->exists($materialRetur->foto_path)) {
             return Storage::disk('public')->download($materialRetur->foto_path);
         } else {
-            return redirect()->route('material-retur.index')
-                             ->with('error', 'File foto tidak ditemukan.');
+            return redirect()->back()->with('error', 'File foto tidak ditemukan.');
         }
     }
     
@@ -139,7 +166,6 @@ class MaterialReturController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        // Gunakan Carbon untuk rentang waktu yang akurat (00:00:00 s/d 23:59:59)
         $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         
@@ -147,9 +173,9 @@ class MaterialReturController extends Controller
 
         if ($request->has('submit_pdf')) {
             $items = MaterialRetur::with('material')
-                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                        ->orderBy('tanggal', 'asc')
-                        ->get();
+                                 ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                 ->orderBy('tanggal', 'asc')
+                                 ->get();
 
             $data = [
                 'items' => $items,
@@ -157,12 +183,11 @@ class MaterialReturController extends Controller
                 'tanggal_akhir' => $tanggalAkhir->format('d M Y'),
             ];
             
-            $pdf = PDF::loadView('material_retur.laporan_pdf', $data);
+            $pdf = Pdf::loadView('material_retur.laporan_pdf', $data);
             return $pdf->download($filename . '.pdf');
         } 
         
         if ($request->has('submit_excel')) {
-            // Kirim objek Carbon ke Export class
             return Excel::download(new MaterialReturExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
         }
         
