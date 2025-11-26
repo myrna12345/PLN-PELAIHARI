@@ -45,7 +45,13 @@ class MaterialStandByController extends Controller
 
     public function create()
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // PERBAIKAN: Menggunakan SORT_NATURAL agar urutan angka benar (1P 1, 1P 2, ... 1P 10)
+        // Kita ambil dulu semua data ->get(), baru diurutkan ->sortBy()
+        $materials = Material::where('kategori', '!=', 'siaga')
+                             ->orWhereNull('kategori')
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
+                             
         return view('material_stand_by.create', compact('materials'));
     }
 
@@ -78,7 +84,12 @@ class MaterialStandByController extends Controller
 
     public function edit(MaterialStandBy $materialStandBy)
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // PERBAIKAN: Terapkan juga SORT_NATURAL di halaman edit
+        $materials = Material::where('kategori', '!=', 'siaga')
+                             ->orWhereNull('kategori')
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
+
         return view('material_stand_by.edit', [
             'item' => $materialStandBy,
             'materials' => $materials

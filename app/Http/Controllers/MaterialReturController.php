@@ -42,7 +42,12 @@ class MaterialReturController extends Controller
 
     public function create()
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // PERBAIKAN: Menggunakan SORT_NATURAL agar urutan angka benar (1P 1, 1P 2, ... 1P 10)
+        $materials = Material::where('kategori', '!=', 'siaga')
+                             ->orWhereNull('kategori')
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
+
         return view('material_retur.create', compact('materials'));
     }
 
@@ -53,7 +58,6 @@ class MaterialReturController extends Controller
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            // 'tanggal' => 'required|date',  <-- DIHAPUS
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
@@ -78,7 +82,12 @@ class MaterialReturController extends Controller
 
     public function edit(MaterialRetur $materialRetur)
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // PERBAIKAN: Terapkan juga SORT_NATURAL di halaman edit
+        $materials = Material::where('kategori', '!=', 'siaga')
+                             ->orWhereNull('kategori')
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
+
         return view('material_retur.edit', [
             'item' => $materialRetur,
             'materials' => $materials
@@ -92,7 +101,6 @@ class MaterialReturController extends Controller
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            // 'tanggal' => 'required|date', <-- DIHAPUS
             'status' => 'required|in:baik,rusak',
             'keterangan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
@@ -127,8 +135,7 @@ class MaterialReturController extends Controller
         if ($materialRetur->foto_path && Storage::disk('public')->exists($materialRetur->foto_path)) {
             return Storage::disk('public')->download($materialRetur->foto_path);
         } else {
-            return redirect()->route('material-retur.index')
-                             ->with('error', 'File foto tidak ditemukan.');
+            return redirect()->back()->with('error', 'File foto tidak ditemukan.');
         }
     }
     
@@ -139,7 +146,6 @@ class MaterialReturController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        // Gunakan Carbon untuk rentang waktu yang akurat (00:00:00 s/d 23:59:59)
         $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         
@@ -157,12 +163,11 @@ class MaterialReturController extends Controller
                 'tanggal_akhir' => $tanggalAkhir->format('d M Y'),
             ];
             
-            $pdf = PDF::loadView('material_retur.laporan_pdf', $data);
+            $pdf = Pdf::loadView('material_retur.laporan_pdf', $data);
             return $pdf->download($filename . '.pdf');
         } 
         
         if ($request->has('submit_excel')) {
-            // Kirim objek Carbon ke Export class
             return Excel::download(new MaterialReturExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
         }
         
