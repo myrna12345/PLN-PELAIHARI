@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\SiagaKeluarExport;
+use App\Exports\SiagaKeluarExport; 
 
 class SiagaKeluarController extends Controller
 {
@@ -46,9 +46,9 @@ class SiagaKeluarController extends Controller
         }
 
         // Mengambil data terbaru dan melakukan pagination
-        $dataSiagaKeluar = $query->latest('tanggal')->paginate(10);
+        $dataSiagaKeluar = $query->latest('tanggal')->paginate(10); // Variabel disesuaikan
 
-        return view('siaga-keluar.index', compact('dataSiagaKeluar'));
+        return view('siaga-keluar.index', compact('dataSiagaKeluar')); // Variabel disesuaikan
     }
 
     /**
@@ -106,13 +106,15 @@ class SiagaKeluarController extends Controller
      */
     public function edit($id)
     {
-        $siagaKeluar = SiagaKeluar::findOrFail($id);
+        // Variabel disesuaikan menjadi $item agar cocok dengan View
+        $item = SiagaKeluar::findOrFail($id);
+        
         // KHUSUS SIAGA: Filter material siaga
         $materials = Material::where('kategori', 'siaga')
                         ->get()
                         ->sortBy('nama_material', SORT_NATURAL);
 
-        return view('siaga-keluar.edit', compact('siagaKeluar', 'materials'));
+        return view('siaga-keluar.edit', compact('item', 'materials'));
     }
 
     /**
@@ -129,7 +131,8 @@ class SiagaKeluarController extends Controller
             'jumlah_siaga_keluar' => 'required|integer|min:1',
             // TAMBAHAN: Validasi untuk update jumlah siaga masuk
             'jumlah_siaga_masuk' => 'nullable|integer|min:0',
-            'status' => 'required|string',
+            // PERBAIKAN: Status menjadi nullable
+            'status' => 'nullable|string', 
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -141,7 +144,9 @@ class SiagaKeluarController extends Controller
 
         $dataToUpdate = array_merge($validated, [
             'foto_path' => $path,
-            'jumlah_siaga_masuk' => $request->jumlah_siaga_masuk ?? 0
+            'jumlah_siaga_masuk' => $request->jumlah_siaga_masuk ?? 0,
+            // Jika status tidak ada di request (karena readonly), gunakan status lama dari model
+            'status' => $siagaKeluar->status 
         ]);
         unset($dataToUpdate['foto']);
 
@@ -204,7 +209,7 @@ class SiagaKeluarController extends Controller
                 'tanggal_akhir' => $tanggalAkhir->format('d M Y'),
             ];
             
-            $pdf = PDF::loadView('siaga-keluar.laporan_pdf', $data);
+            $pdf = Pdf::loadView('siaga-keluar.laporan_pdf', $data);
             return $pdf->download($filename . '.pdf');
         } 
         

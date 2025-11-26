@@ -42,6 +42,7 @@
                 </tr>
             </thead>
             <tbody>
+                {{-- PERBAIKAN: Menggunakan variabel $dataSiagaKeluar sesuai dengan Controller --}}
                 @forelse ($dataSiagaKeluar as $item)
                     <tr>
                         <td>{{ $dataSiagaKeluar->firstItem() + $loop->index }}</td>
@@ -52,7 +53,7 @@
                         
                         <td>{{ $item->jumlah_siaga_keluar }}</td>
                         
-                        <!-- Data Jumlah Siaga Masuk DIKEMBALIKAN -->
+                        <!-- Data Jumlah Siaga Masuk -->
                         <td>{{ $item->jumlah_siaga_masuk ?? 0 }}</td>
 
                         <td>{{ $item->status }}</td>
@@ -82,7 +83,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <!-- Colspan disesuaikan kembali menjadi 10 -->
+                        <!-- Colspan disesuaikan menjadi 10 -->
                         <td colspan="10" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
@@ -91,6 +92,7 @@
     </div>
     
     <div style="margin-top: 20px;">
+        {{-- PERBAIKAN: Menggunakan variabel $dataSiagaKeluar untuk pagination --}}
         {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>
 
