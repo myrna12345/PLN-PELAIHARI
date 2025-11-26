@@ -49,7 +49,10 @@ Route::resource('material_kembali', MaterialKembaliController::class);
 // --- RUTE MATERIAL RETUR ---
 Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])
      ->name('material-retur.download-report');
+<<<<<<< HEAD
      
+=======
+>>>>>>> 2821cda232332cdce78875bd6a25efc3c19f47a1
 Route::get('material-retur/{materialRetur}/download-foto', [MaterialReturController::class, 'downloadFoto'])
      ->name('material-retur.download-foto');
 Route::resource('material-retur', MaterialReturController::class);
