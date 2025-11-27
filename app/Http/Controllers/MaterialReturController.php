@@ -67,7 +67,7 @@ class MaterialReturController extends Controller
         $path = null;
         if ($request->hasFile('foto')) {
             // Menggunakan folder yang spesifik (fotos_material_standby)
-            $path = $request->file('foto')->store('fotos_material_standby', 'public');
+            $path = $request->file('foto')->store('fotos_material_retur', 'public');
         }
 
         // Isi tanggal otomatis dengan waktu sekarang (WITA)

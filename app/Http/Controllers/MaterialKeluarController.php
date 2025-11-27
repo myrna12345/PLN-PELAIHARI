@@ -23,6 +23,7 @@ class MaterialKeluarController extends Controller
 
         // Filter pencarian nama material / petugas
         if ($search) {
+            // PERBAIKAN: Eager load material (asumsi relasi sudah ada)
             $query->where('nama_material', 'like', "%{$search}%")
                   ->orWhere('nama_petugas', 'like', "%{$search}%");
         }
@@ -37,12 +38,11 @@ class MaterialKeluarController extends Controller
     // CREATE
     public function create()
     {
-        // PERBAIKAN: Jangan ambil Material::all(). 
         // Ambil material yang kategorinya BUKAN 'siaga' (bisa 'teknik' atau null)
         $materialList = Material::where('kategori', '!=', 'siaga')
-                                ->orWhereNull('kategori')
-                                ->get();
-                                
+                                 ->orWhereNull('kategori')
+                                 ->get();
+                                 
         return view('material_keluar.create', compact('materialList'));
     }
 
@@ -54,7 +54,8 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
 
         // Tambahkan waktu saat ini otomatis
@@ -68,22 +69,23 @@ class MaterialKeluarController extends Controller
 
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil disimpan!');
     }
-     //  lihat show  
+    
+    // lihat show
     public function lihat($id)
-        {
-            $item = MaterialKeluar::findOrFail($id);
-            return view('material_keluar.lihat', compact('item'));
-        }
+    {
+        $item = MaterialKeluar::findOrFail($id);
+        return view('material_keluar.lihat', compact('item'));
+    }
 
     // ✏️ EDIT
-        public function edit($id)
+    public function edit($id)
     {
         $data = MaterialKeluar::findOrFail($id);
         
-        // PERBAIKAN: Sama seperti create, filter agar material siaga tidak muncul
+        // Sama seperti create, filter agar material siaga tidak muncul
         $materialList = Material::where('kategori', '!=', 'siaga')
-                                ->orWhereNull('kategori')
-                                ->get();
+                                 ->orWhereNull('kategori')
+                                 ->get();
 
         return view('material_keluar.edit', compact('data', 'materialList'));
     }
@@ -97,7 +99,8 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
 
         if ($request->hasFile('foto')) {
@@ -123,35 +126,51 @@ class MaterialKeluarController extends Controller
 
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil dihapus!');
     }
+    
+    /**
+     * FUNGSI PERMANEN: Melayani file foto secara langsung melalui Controller (Solusi Anti-Symlink).
+     */
+    public function showFoto($id)
+    {
+        $item = MaterialKeluar::findOrFail($id);
+        
+        if (!$item->foto || !Storage::disk('public')->exists($item->foto)) {
+            return abort(404, 'File foto tidak ditemukan untuk ditampilkan.');
+        }
+
+        // PERBAIKAN UTAMA: Menggunakan Storage::response()
+        return Storage::disk('public')->response($item->foto);
+    }
+    
     public function downloadReport(Request $request)
-{
-    $request->validate([
-        'tanggal_mulai' => 'required|date',
-        'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
-    ]);
+    {
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
 
-    $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
-    $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
-    $filename = 'laporan_material_keluar_' . $tanggalMulai->format('Ymd') . '_sd_' . $tanggalAkhir->format('Ymd');
+        $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+        $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+        $filename = 'laporan_material_keluar_' . $tanggalMulai->format('Ymd') . '_sd_' . $tanggalAkhir->format('Ymd');
 
-    $items = MaterialKeluar::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                ->orderBy('tanggal', 'asc')
-                ->get();
+        $items = MaterialKeluar::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                               ->orderBy('tanggal', 'asc')
+                               ->get();
 
-    if ($request->has('submit_pdf')) {
-        $data = [
-            'items' => $items,
-            'tanggal_mulai' => $tanggalMulai,
-            'tanggal_akhir' => $tanggalAkhir,
-        ];
-        $pdf = Pdf::loadView('material_keluar.laporan_pdf', $data);
-        return $pdf->download($filename . '.pdf');
+        if ($request->has('submit_pdf')) {
+            $data = [
+                'items' => $items,
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_akhir' => $tanggalAkhir,
+            ];
+            $pdf = Pdf::loadView('material_keluar.laporan_pdf', $data);
+            return $pdf->download($filename . '.pdf');
+        }
+
+        if ($request->has('submit_excel')) {
+            return Excel::download(new MaterialKeluarExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
+        }
+
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
     }
-
-    if ($request->has('submit_excel')) {
-        return Excel::download(new MaterialKeluarExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
-    }
-
-    return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
-}
 }

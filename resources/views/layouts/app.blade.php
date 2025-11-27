@@ -333,14 +333,9 @@
              <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-<<<<<<< HEAD
-                    <li><a href="{{ route('material-siaga.index') }}">Laporan Material</a></li>
-                    <li><a href="{{ route('material-siaga.create') }}">Tambah Material</a></li>
-=======
                     <!-- INI YANG DIPERBAIKI (href="#") -->
                     <li><a href="{{ route('material-siaga-stand-by.index') }}" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
->>>>>>> f62d50ac3e2f3ff52ca7d3e4ef9ac52831175ff7
                 </ul>
             </li>
              <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-keluar.*') ? 'active open' : '' }}">

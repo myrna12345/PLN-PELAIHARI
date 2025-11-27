@@ -26,7 +26,7 @@
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new" required>
-                    <option value="" disabled selected>Pilih material...</option>
+                    <option value="" disabled selected>Pilih material</option>
                     @foreach($materials as $material)
                         <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
@@ -48,7 +48,7 @@
             <div class="form-group-new">
                 <label for="status">Status Material</label>
                 <select name="status" id="status" class="form-control-new" required>
-                    <option value="" disabled selected>Pilih status...</option>
+                    <option value="" disabled selected>Pilih status</option>
                     <option value="baik" {{ old('status') == 'baik' ? 'selected' : '' }}>Andal Bagus</option>
                     <option value="rusak" {{ old('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                 </select>

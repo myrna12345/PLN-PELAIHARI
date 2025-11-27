@@ -6,7 +6,7 @@
 <div class="card-new">
     
     <div class="index-header">
-        <h2>MATERIAL KELUAR</h2>
+        <h2>LAPORAN MATERIAL KELUAR</h2>
 
         <!-- 🔍 FORM SEARCH -->
         <form action="{{ route('material_keluar.index') }}" method="GET" class="search-form">
@@ -41,28 +41,24 @@
                 @forelse($materialKeluar as $item)
                     <tr>
                         <td>{{ $materialKeluar->firstItem() + $loop->index }}</td>
-                        {{-- Asumsi: $item->nama_material berasal dari relasi atau accessor --}}
+                        {{-- Asumsi: $item->material->nama_material ada, jika tidak, gunakan kolom lama --}}
                         <td>{{ $item->material->nama_material ?? $item->nama_material }}</td> 
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah_material }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
 
-                        <!-- FOTO + DOWNLOAD -->
+                        <!-- FOTO + DOWNLOAD (PERBAIKAN ANTI-SYMLINK) -->
                         <td style="text-align: center; vertical-align: top;">
                             @if($item->foto)
-                                {{-- SOLUSI FOTO PERMANEN --}}
-                                @php
-                                    $fotoUrl = '/storage/' . ltrim($item->foto, '/');
-                                @endphp
-
-                                <img src="{{ $fotoUrl }}" 
+                                {{-- PERBAIKAN: Menggunakan route showFoto baru --}}
+                                <img src="{{ route('material_keluar.show-foto', $item->id) }}" 
                                     alt="Foto Material" 
-                                    class="table-foto"
-                                    style="cursor: pointer;"
+                                    class="table-foto zoomable"
+                                    style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;"
                                     title="Klik untuk memperbesar">
 
-                                <a href="{{ $fotoUrl }}" 
-                                    download 
+                                {{-- PERBAIKAN: Menggunakan route downloadFoto baru --}}
+                                <a href="{{ route('material_keluar.download-foto', $item->id) }}" 
                                     class="btn-foto-download" 
                                     title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto

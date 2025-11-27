@@ -16,7 +16,7 @@
             <div class="form-group-new">
                 <label for="nama_material">Nama Material</label>
                 <select name="nama_material" id="nama_material" class="form-control-new" required>
-                    <option value="">-- Pilih Material --</option>
+                    <option value="">Pilih Material</option>
                     @foreach($materialList as $material)
                         <option value="{{ $material->nama_material }}">{{ $material->nama_material }}</option>
                     @endforeach
