@@ -10,32 +10,29 @@ class MaterialSiagaSeeder extends Seeder
 {
     public function run(): void
     {
-        // KITA TIDAK PAKAI TRUNCATE DI SINI
-        // Agar data dari MaterialSeeder (umum) tidak terhapus.
-
-        $materials = [];
-
-        // Opsi 1P -> 1 sampai 50
-        for ($i = 1; $i <= 50; $i++) {
-            $materials[] = [
-                'nama_material' => "1P $i",
+        $materials = [
+            [
+                'nama_material' => "KWH Siaga 1P",
                 'kategori' => 'siaga', // Tanda KHUSUS
                 'created_at' => now(),
                 'updated_at' => now(),
-            ];
-        }
-
-        // Opsi 3P -> 1 sampai 10
-        for ($i = 1; $i <= 10; $i++) {
-            $materials[] = [
-                'nama_material' => "3P $i",
+            ],
+            [
+                'nama_material' => "KWH Siaga 3P",
                 'kategori' => 'siaga', // Tanda KHUSUS
                 'created_at' => now(),
                 'updated_at' => now(),
-            ];
-        }
+            ],
+        ];
 
-        // Masukkan data siaga
-        Material::insert($materials);
+        // Masukkan atau update data siaga
+        foreach ($materials as $material) {
+            // Gunakan updateOrCreate untuk menghindari duplikasi jika dijalankan berulang kali
+            // dan untuk mengganti item 1P 1, 1P 2, dst. sebelumnya.
+            Material::updateOrCreate(
+                ['nama_material' => $material['nama_material'], 'kategori' => 'siaga'],
+                $material
+            );
+        }
     }
 }

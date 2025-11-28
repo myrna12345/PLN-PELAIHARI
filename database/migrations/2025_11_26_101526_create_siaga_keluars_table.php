@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Gunakan Schema::create, BUKAN Schema::table
         Schema::create('siaga_keluars', function (Blueprint $table) {
             $table->id();
             $table->foreignId('material_id')->constrained('materials')->onDelete('cascade');
+            
+            // START: KOLOM BARU UNTUK NOMOR UNIT DAN NAMA LENGKAP
+            $table->integer('nomor_unit')->nullable(); // Menyimpan nomor 1 s/d 50
+            $table->string('nama_material_lengkap')->nullable(); // Menyimpan hasil gabungan nama material + nomor unit
+            // END: KOLOM BARU
+            
             $table->string('nama_petugas');
             $table->string('stand_meter')->nullable();
             
             $table->integer('jumlah_siaga_keluar')->default(0);
-            // Kolom baru langsung kita definisikan di sini saat pembuatan tabel
             $table->integer('jumlah_siaga_masuk')->default(0); 
             
             $table->string('status')->default('Keluar');

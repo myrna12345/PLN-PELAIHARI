@@ -8,7 +8,6 @@
         <h2>Edit Data Siaga Keluar</h2>
     </div>
 
-    <!-- Menampilkan Error Validasi -->
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul style="margin: 0; padding-left: 20px;">
@@ -37,6 +36,27 @@
                 </select>
             </div>
 
+            {{-- 🟢 KODE BARU: Form Group Nomor Unit 🟢 --}}
+            <div class="form-group-new">
+                <label for="nomor_unit">Nomor Unit</label>
+                <select name="nomor_unit" id="nomor_unit" class="form-control-new" required>
+                    <option value="" disabled selected>Pilih Nomor</option>
+                    @for ($i = 1; $i <= 50; $i++)
+                        @php
+                            $selected_unit = (old('nomor_unit') == $i) || ($item->nomor_unit == $i);
+                        @endphp
+                        <option value="{{ $i }}" {{ $selected_unit ? 'selected' : '' }}>{{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+            {{-- ⬆️ END KODE BARU --}}
+            
+            {{-- Sama seperti di create, Anda mungkin perlu menyertakan field tersembunyi untuk validasi nama_material_lengkap --}}
+            <div class="form-group-new" style="display: none;"> 
+                <label for="nama_material_lengkap">Nama Material Lengkap</label>
+                <input type="hidden" name="nama_material_lengkap" id="nama_material_lengkap" class="form-control-new" value="{{ old('nama_material_lengkap', $item->nama_material_lengkap ?? 'siaga-keluar-dummy') }}" required>
+            </div>
+
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
                 <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas', $item->nama_petugas) }}" required>
@@ -52,35 +72,41 @@
                 <input type="number" name="jumlah_siaga_keluar" id="jumlah_siaga_keluar" class="form-control-new" value="{{ old('jumlah_siaga_keluar', $item->jumlah_siaga_keluar) }}" min="1" required>
             </div>
             
-            <!-- PERBAIKAN: Menambahkan input Status (ReadOnly) -->
             <div class="form-group-new">
                 <label for="status">Status</label>
                 <input type="text" 
-                       name="status" 
-                       id="status" 
-                       class="form-control-new" 
-                       value="{{ $item->status ?? 'Keluar' }}" 
-                       readonly 
-                       style="background-color: #e9ecef; cursor: not-allowed;">
+                        name="status" 
+                        id="status" 
+                        class="form-control-new" 
+                        value="{{ $item->status ?? 'Keluar' }}" 
+                        readonly 
+                        style="background-color: #e9ecef; cursor: not-allowed;">
             </div>
             
             <div class="form-group-new">
                 <label>Tanggal dan Jam</label>
                 <input type="text" 
-                       class="form-control-new" 
-                       style="background-color: #e9ecef; cursor: not-allowed;"
-                       value="{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}"
-                       readonly>
+                        class="form-control-new" 
+                        style="background-color: #e9ecef; cursor: not-allowed;"
+                        value="{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}"
+                        readonly>
                 <small class="text-muted" style="display: block; margin-top: 5px;">
                     Tanggal pembuatan data tidak dapat diubah.
                 </small>
             </div>
 
             <div class="form-group-new">
-                <label for="foto">Unggah Foto (Opsional: Ganti foto)</label>
+                <label for="foto">Foto</label>
+                {{-- 🖼️ Pratinjau Foto --}}
                 @if($item->foto_path)
-                    <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Lama" width="150" style="margin-bottom:10px; display:block; border-radius: 5px;">
+                    <div style="margin-bottom: 10px;">
+                        {{-- Menggunakan route show-foto dari Controller --}}
+                        <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" 
+                            alt="Foto Lama" 
+                            style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
+                    </div>
                 @endif
+                <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Baru (Opsional)</label>
                 <input type="file" name="foto" id="foto" class="form-control-new-file">
             </div>
 

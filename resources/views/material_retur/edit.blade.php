@@ -54,14 +54,13 @@
                 </select>
             </div>
             
-            <!-- Input Tanggal READONLY (Menampilkan Tanggal Pembuatan Asli) -->
             <div class="form-group-new">
                 <label>Tanggal dan Jam</label>
                 <input type="text" 
-                       class="form-control-new" 
-                       style="background-color: #e9ecef; cursor: not-allowed;"
-                       value="{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}"
-                       readonly>
+                        class="form-control-new" 
+                        style="background-color: #e9ecef; cursor: not-allowed;"
+                        value="{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}"
+                        readonly>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
                     Tanggal pembuatan data tidak dapat diubah.
                 </small>
@@ -72,13 +71,21 @@
                 <textarea name="keterangan" id="keterangan" class="form-control-new" rows="3">{{ old('keterangan', $item->keterangan) }}</textarea>
             </div>
 
+            {{-- 🖼️ KODE PERBAIKAN: Form Group Foto dengan Pratinjau 🖼️ --}}
             <div class="form-group-new">
-                <label for="foto">Unggah Foto (Opsional: Ganti foto)</label>
-                @if($item->foto_path)
-                    <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Lama" width="150" style="margin-bottom:10px; display:block; border-radius: 5px;">
+                <label for="foto">Foto</label>
+                @if ($item->foto_path)
+                    <div style="margin-bottom: 10px;">
+                        {{-- Menggunakan route show-foto yang baru dari Controller --}}
+                        <img src="{{ route('material-retur.show-foto', $item->id) }}" 
+                             alt="Foto Saat Ini" 
+                             style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
+                    </div>
                 @endif
+                <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Baru (Opsional)</label>
                 <input type="file" name="foto" id="foto" class="form-control-new-file">
             </div>
+            {{-- ⬆️ END KODE PERBAIKAN --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>

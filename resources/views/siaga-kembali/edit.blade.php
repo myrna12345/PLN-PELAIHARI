@@ -5,10 +5,9 @@
 @section('content')
 <div class="card-form-container">
     <div class="card-form-header">
-        <h2>Edit Data Siaga Kembali</h2>
+        <h2>Edit Material Siaga Kembali (ID: {{ $item->id }})</h2>
     </div>
 
-    <!-- Menampilkan Error Validasi -->
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul style="margin: 0; padding-left: 20px;">
@@ -24,63 +23,84 @@
             @csrf
             @method('PUT')
             
+            {{-- Form Nama Material (Dropdown) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new" required>
-                    <option value="" disabled>Pilih material...</option>
+                    <option value="" disabled>Pilih material</option>
                     @foreach($materials as $material)
-                        <option value="{{ $material->id }}" {{ old('material_id', $item->material_id) == $material->id ? 'selected' : '' }}>
+                        @php
+                            $selected = (old('material_id') == $material->id) || ($item->material_id == $material->id);
+                        @endphp
+                        <option value="{{ $material->id }}" {{ $selected ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
             </div>
 
+            {{-- Form Group Nomor Unit --}}
+            <div class="form-group-new">
+                <label for="nomor_unit">Nomor Unit</label>
+                <select name="nomor_unit" id="nomor_unit" class="form-control-new" required>
+                    <option value="" disabled selected>Pilih Nomor</option>
+                    @for ($i = 1; $i <= 50; $i++)
+                        @php
+                            $selected_unit = (old('nomor_unit') == $i) || ($item->nomor_unit == $i);
+                        @endphp
+                        <option value="{{ $i }}" {{ $selected_unit ? 'selected' : '' }}>{{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+
+            {{-- Form Nama Petugas --}}
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
-                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas', $item->nama_petugas) }}" required>
+                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" 
+                       value="{{ old('nama_petugas', $item->nama_petugas) }}" required>
             </div>
 
+            {{-- Form Stand Meter --}}
             <div class="form-group-new">
                 <label for="stand_meter">Stand Meter</label>
-                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter', $item->stand_meter) }}" required>
+                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" 
+                       value="{{ old('stand_meter', $item->stand_meter) }}" required>
             </div>
 
-            <!-- PERUBAHAN: Input untuk Jumlah Siaga Kembali -->
+            {{-- Form Jumlah Siaga Kembali --}}
             <div class="form-group-new">
                 <label for="jumlah_siaga_kembali">Jumlah Siaga Kembali</label>
-                <input type="number" name="jumlah_siaga_kembali" id="jumlah_siaga_kembali" class="form-control-new" value="{{ old('jumlah_siaga_kembali', $item->jumlah_siaga_kembali) }}" min="1" required>
+                <input type="number" name="jumlah_siaga_kembali" id="jumlah_siaga_kembali" class="form-control-new" 
+                       value="{{ old('jumlah_siaga_kembali', $item->jumlah_siaga_kembali) }}" min="1" required>
             </div>
 
+            {{-- Status (Readonly) --}}
             <div class="form-group-new">
-                <label for="keterangan">Keterangan (Opsional)</label>
-                <textarea name="keterangan" id="keterangan" class="form-control-new" rows="3">{{ old('keterangan', $item->keterangan) }}</textarea>
-            </div>
-            
-            <!-- Input Tanggal READONLY -->
-            <div class="form-group-new">
-                <label>Tanggal dan Jam</label>
-                <input type="text" 
-                       class="form-control-new" 
-                       style="background-color: #e9ecef; cursor: not-allowed;"
-                       value="{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}"
-                       readonly>
-                <small class="text-muted" style="display: block; margin-top: 5px;">
-                    Tanggal pembuatan data tidak dapat diubah.
-                </small>
+                <label for="status">Status</label>
+                <input type="text" name="status" id="status" class="form-control-new" 
+                       value="{{ old('status', $item->status ?? 'Kembali') }}" 
+                       readonly style="background-color: #e9ecef; cursor: not-allowed;">
             </div>
 
+            {{-- 🖼️ Form Group Foto dengan Pratinjau (Tanpa Tombol Unduh) 🖼️ --}}
             <div class="form-group-new">
-                <label for="foto">Unggah Foto (Opsional: Ganti foto)</label>
-                @if($item->foto_path)
-                    <img src="{{ asset('storage/' . ltrim($item->foto_path, '/')) }}" alt="Foto Lama" width="150" style="margin-bottom:10px; display:block; border-radius: 5px;">
+                <label for="foto">Foto</label>
+                @if ($item->foto_path)
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
+                             alt="Foto Saat Ini" 
+                             style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
+                        
+                        {{-- ❌ BARIS TOMBOL UNDUH DIHAPUS ❌ --}}
+                    </div>
                 @endif
+                <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Baru (Opsional)</label>
                 <input type="file" name="foto" id="foto" class="form-control-new-file">
             </div>
+            {{-- ⬆️ END KODE MODIFIKASI --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>
-                <a href="{{ route('siaga-kembali.index') }}" class="btn-batal">Batal</a>
             </div>
         </form>
     </div>

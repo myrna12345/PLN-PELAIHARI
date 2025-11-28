@@ -4,8 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-// Tambahkan Import Model SiagaKeluar
-use App\Models\SiagaKeluar;
+use App\Models\SiagaKeluar; // Pastikan ini diimpor
 
 class SiagaKembali extends Model
 {
@@ -15,11 +14,14 @@ class SiagaKembali extends Model
 
     protected $fillable = [
         'material_id',
+        // START: PENAMBAHAN KOLOM BARU
+        'nomor_unit',
+        'nama_material_lengkap',
+        // END: PENAMBAHAN KOLOM BARU
         'nama_petugas',
         'stand_meter',
         'jumlah_siaga_kembali', 
-        'keterangan',
-        'status',
+        'status', 
         'tanggal',
         'foto_path',
     ];
@@ -31,18 +33,17 @@ class SiagaKembali extends Model
 
     /**
      * Accessor untuk mengambil data 'jumlah_siaga_keluar' secara otomatis
-     * Berdasarkan kecocokan Nama Petugas dan Material ID.
-     * Mengambil data transaksi TERBARU.
+     * Berdasarkan kecocokan Material ID dan Nomor Unit TERBARU.
      */
     public function getJumlahSiagaKeluarAttribute()
     {
-        // Cari data di tabel Siaga Keluar
-        $dataKeluar = SiagaKeluar::where('nama_petugas', $this->nama_petugas)
-                        ->where('material_id', $this->material_id)
-                        ->latest('tanggal') // Ambil yang paling baru
-                        ->first();
+        // 🟢 PERBAIKAN: Cari data di tabel Siaga Keluar berdasarkan material_id DAN nomor_unit
+        $dataKeluar = SiagaKeluar::where('material_id', $this->material_id)
+                                 ->where('nomor_unit', $this->nomor_unit) // ⬅️ Kunci perbaikan utama
+                                 ->latest('tanggal')
+                                 ->first();
 
-        // Jika ketemu, kembalikan jumlahnya. Jika tidak, kembalikan 0.
+        // Jika ketemu, kembalikan jumlah keluar. Jika tidak, kembalikan 0.
         return $dataKeluar ? $dataKeluar->jumlah_siaga_keluar : 0;
     }
 }

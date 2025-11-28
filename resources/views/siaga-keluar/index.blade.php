@@ -29,11 +29,12 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Nama Material</th>
+                    <th>Nama Material & Unit</th> {{-- ⬅️ Kolom Nama Material diganti namanya --}}
+                    {{-- ❌ KOLOM NOMOR UNIT DIHAPUS DARI HEADER ❌ --}}
                     <th>Nama Petugas</th>
                     <th>Stand Meter</th>
                     <th>Jumlah Siaga Keluar</th>
-                    <th>Jumlah Siaga Masuk</th>
+                    <th>Jumlah Siaga Kembali</th>
                     <th>Status</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
@@ -45,7 +46,15 @@
                     <tr>
                         <td>{{ $dataSiagaKeluar->firstItem() + $loop->index }}</td>
                         
-                        <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
+                        {{-- 🟢 PERBAIKAN: Menggabungkan Nama Material dan Nomor Unit 🟢 --}}
+                        <td>
+                            {{ $item->material->nama_material ?? 'N/A' }} 
+                            @if ($item->nomor_unit)
+                                - {{ $item->nomor_unit }}
+                            @endif
+                        </td>
+                        {{-- ❌ CELL NOMOR UNIT DIHAPUS DARI BODY ❌ --}}
+                        
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->stand_meter ?? '-' }}</td>
                         
@@ -59,12 +68,11 @@
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto ke Controller --}}
                                 <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" 
-                                     alt="Foto Siaga Keluar" 
-                                     class="table-foto" 
-                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
-                                     title="Klik untuk memperbesar">
+                                        alt="Foto Siaga Keluar" 
+                                        class="table-foto" 
+                                        style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                        title="Klik untuk memperbesar">
                                 
                                 <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
@@ -85,6 +93,7 @@
                         </td>
                     </tr>
                 @empty
+                    {{-- ⚠️ PERBAIKAN: Colspan dihitung ulang. (10 Kolom tersisa) ⚠️ --}}
                     <tr>
                         <td colspan="10" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>

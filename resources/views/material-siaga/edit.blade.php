@@ -124,12 +124,16 @@ body { background: #E7E8EA !important; }
         <div class="field">
             <label class="form-label">Foto Saat Ini</label>
             @if($data->foto)
-                <img src="{{ asset('storage/' . $data->foto) }}" width="160" style="border-radius:10px;border:1.6px solid #222;margin-bottom:14px;">
+                {{-- 🟢 KODE PERBAIKAN: Menggunakan route showFoto 🟢 --}}
+                <img src="{{ route('material-siaga-stand-by.show-foto', $data->id) }}" 
+                     width="160" 
+                     style="border-radius:10px;border:1.6px solid #222;margin-bottom:14px;">
+                {{-- Tambahkan link download jika perlu (saat ini dihilangkan mengikuti format Siaga Kembali Edit) --}}
             @endif
 
             <label class="form-label">Unggah Foto Baru</label>
             <div class="input-file">
-                <input type="file" name="foto" accept="image/*">
+                <input type="file" name="unggah_foto" accept="image/*">
             </div>
         </div>
 
@@ -166,6 +170,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     u1.addEventListener("change", update);
     u3.addEventListener("change", update);
+    
+    // Initial update on load to ensure current value is correctly formatted if needed
+    update();
 });
 </script>
 

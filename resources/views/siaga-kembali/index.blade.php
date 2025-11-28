@@ -11,7 +11,7 @@
         <form action="{{ route('siaga-kembali.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Cari Nama Material/Petugas..." value="{{ request('search') }}">
+                <input type="text" name="search" placeholder="Cari Material/Petugas/Nomor Unit..." value="{{ request('search') }}">
             </div>
             <div class="form-group-tanggal-filter">
                 <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
@@ -29,13 +29,11 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Nama Material</th>
+                    <th>Nama Material & Unit</th>
                     <th>Nama Petugas</th>
                     <th>Stand Meter</th>
-                    
-                    <th>Jumlah Siaga Keluar</th>
-                    
-                    <th>Jumlah Siaga Kembali</th>
+                    <th>Jumlah Siaga Keluar</th> {{-- ⬅️ Kolom ini harus menampilkan Accessor --}}
+                    <th>Jumlah Siaga Kembali</th> {{-- ⬅️ Kolom ini harus menampilkan field mentah --}}
                     <th>Status</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
@@ -46,33 +44,44 @@
                 @forelse ($items as $item)
                     <tr>
                         <td>{{ $items->firstItem() + $loop->index }}</td>
-                        <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
+                        
+                        <td>
+                            {{ $item->material->nama_material ?? 'N/A' }} 
+                            @if ($item->nomor_unit)
+                                - {{ $item->nomor_unit }}
+                            @endif
+                        </td>
+                        
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->stand_meter ?? '-' }}</td>
                         
-                        
-                        <td style="font-weight: bold; color: #007bff;">
-                            {{ $item->jumlah_siaga_keluar }}
+                        <td>
+                            {{-- ✅ PERBAIKAN: Menghapus style color: #007bff; dari tag td di baris ini --}}
+                            {{ $item->jumlah_siaga_keluar }} 
                         </td>
                         
-                        <td>{{ $item->jumlah_siaga_kembali }}</td>
+                        <td>
+                            {{-- 🟢 PERBAIKAN: Menampilkan nilai mentah dari database (bukan Accessor) 🟢 --}}
+                            {{ $item->jumlah_siaga_kembali }}
+                        </td>
+                        
                         <td>{{ $item->status ?? 'Kembali' }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto ke Controller --}}
                                 <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
-                                     alt="Foto Siaga Kembali" 
-                                     class="table-foto" 
-                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
-                                     title="Klik untuk memperbesar">
+                                        alt="Foto Siaga Kembali" 
+                                        class="table-foto" 
+                                        style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                        title="Klik untuk memperbesar">
 
                                 <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto
                                 </a>
                             @else
                                 <span>-</span>
+                            </button>
                             @endif
                         </td>
                         <td>

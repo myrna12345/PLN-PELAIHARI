@@ -23,8 +23,6 @@
         <form action="{{ route('siaga-keluar.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
-            <!-- BAGIAN INI YANG DIPERBAIKI -->
-            <!-- Menggunakan $materials dari database, bukan $oneP manual -->
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new" required>
@@ -37,6 +35,25 @@
                 </select>
             </div>
             
+            {{-- 🟢 KODE PERBAIKAN: Mengubah Placeholder dan Small Text 🟢 --}}
+            <div class="form-group-new">
+                <label for="nomor_unit">Nomor Unit</label>
+                <input type="text" name="nomor_unit" id="nomor_unit" class="form-control-new" 
+                       value="{{ old('nomor_unit') }}" 
+                       placeholder="Masukkan Nomor Unit" {{-- ✅ Diubah menjadi ini --}}
+                       required>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Masukkan nomor unit.
+                </small>
+            </div>
+            {{-- ⬆️ END KODE PERBAIKAN --}}
+
+            {{-- Field tersembunyi untuk validasi 'nama_material_lengkap' --}}
+            <div class="form-group-new" style="display: none;"> 
+                <label for="nama_material_lengkap">Nama Material Lengkap</label>
+                <input type="hidden" name="nama_material_lengkap" id="nama_material_lengkap" class="form-control-new" value="siaga-keluar-dummy" required>
+            </div>
+
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
                 <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas') }}" required>
@@ -57,14 +74,14 @@
                 <input type="text" name="status" id="status" class="form-control-new" value="{{ old('status', 'Keluar') }}" required>
             </div>
             
-            <!-- Input Tanggal READONLY (Otomatis Waktu Sekarang) -->
+            <!-- Input Tanggal READONLY -->
             <div class="form-group-new">
                 <label>Tanggal dan Jam</label>
                 <input type="text" 
-                       class="form-control-new" 
-                       style="background-color: #e9ecef; cursor: not-allowed;"
-                       value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}"
-                       readonly>
+                        class="form-control-new" 
+                        style="background-color: #e9ecef; cursor: not-allowed;"
+                        value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}"
+                        readonly>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
                     Waktu akan otomatis terisi saat data disimpan.
                 </small>

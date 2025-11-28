@@ -8,7 +8,6 @@
         <h2>Tambah Material Siaga Kembali</h2>
     </div>
 
-    <!-- Menampilkan Error Validasi -->
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul style="margin: 0; padding-left: 20px;">
@@ -35,6 +34,26 @@
                 </select>
             </div>
 
+            {{-- 🟢 KODE BARU: Form Input Text untuk Nomor Unit 🟢 --}}
+            <div class="form-group-new">
+                <label for="nomor_unit">Nomor Unit</label>
+                {{-- Dibuat type="text" agar user bisa mengetik bebas --}}
+                <input type="text" name="nomor_unit" id="nomor_unit" class="form-control-new" 
+                       value="{{ old('nomor_unit') }}" 
+                       placeholder="Masukkan Nomor Unit" 
+                       required>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Pastikan nomor unit yang dimasukkan sesuai dengan data.
+                </small>
+            </div>
+            {{-- ⬆️ END KODE BARU --}}
+            
+            {{-- Field tersembunyi untuk validasi 'nama_material_lengkap' --}}
+            <div class="form-group-new" style="display: none;">
+                <label for="nama_material_lengkap">Nama Material Lengkap</label>
+                <input type="hidden" name="nama_material_lengkap" id="nama_material_lengkap" class="form-control-new" value="siaga-kembali-dummy" required>
+            </div>
+
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
                 <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas') }}" required>
@@ -50,7 +69,6 @@
                 <input type="number" name="jumlah_siaga_kembali" id="jumlah_siaga_kembali" class="form-control-new" value="{{ old('jumlah_siaga_kembali') }}" min="1" required>
             </div>
 
-            <!-- PERUBAHAN: Mengganti Keterangan menjadi Status (Readonly) -->
             <div class="form-group-new">
                 <label for="status">Status</label>
                 <input type="text" name="status" id="status" class="form-control-new" value="Kembali" readonly style="background-color: #e9ecef; cursor: not-allowed;">

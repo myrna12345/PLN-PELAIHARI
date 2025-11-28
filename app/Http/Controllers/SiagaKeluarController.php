@@ -31,6 +31,8 @@ class SiagaKeluarController extends Controller
                 $q->where('nama_petugas', 'like', "%$search%")
                     ->orWhere('stand_meter', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%")
+                    // PERBAIKAN: Tambahkan pencarian berdasarkan Nomor Unit
+                    ->orWhere('nomor_unit', 'like', "%$search%")
                     ->orWhereHas('material', function($subQ) use ($search) {
                         $subQ->where('nama_material', 'like', "%$search%");
                     });
@@ -56,8 +58,8 @@ class SiagaKeluarController extends Controller
      */
     public function create()
     {
-        // KHUSUS SIAGA: Ambil material yang kategorinya 'siaga'
-        $materials = Material::where('kategori', 'siaga')
+        // PERBAIKAN UTAMA: Filter hanya untuk Kwh Siaga 1P dan Kwh Siaga 3P
+        $materials = Material::whereIn('nama_material', ['Kwh Siaga 1P', 'Kwh Siaga 3P'])
                              ->get()
                              ->sortBy('nama_material', SORT_NATURAL);
 
@@ -71,6 +73,10 @@ class SiagaKeluarController extends Controller
     {
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
+            // START: PERBAIKAN UTAMA UNTUK NOMOR UNIT DAN NAMA LENGKAP
+            'nomor_unit' => 'required|integer|min:1|max:50', // Tambahkan Nomor Unit
+            'nama_material_lengkap' => 'required|string|max:255', // Tambahkan Nama Material Lengkap
+            // END: PERBAIKAN UTAMA
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
             'jumlah_siaga_keluar' => 'required|integer|min:1',
@@ -111,8 +117,8 @@ class SiagaKeluarController extends Controller
         // Variabel disesuaikan menjadi $item agar cocok dengan View
         $item = SiagaKeluar::findOrFail($id);
         
-        // KHUSUS SIAGA: Filter material siaga
-        $materials = Material::where('kategori', 'siaga')
+        // PERBAIKAN UTAMA: Filter hanya untuk Kwh Siaga 1P dan Kwh Siaga 3P
+        $materials = Material::whereIn('nama_material', ['Kwh Siaga 1P', 'Kwh Siaga 3P'])
                              ->get()
                              ->sortBy('nama_material', SORT_NATURAL);
 
@@ -128,6 +134,10 @@ class SiagaKeluarController extends Controller
 
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
+            // START: PERBAIKAN UTAMA UNTUK NOMOR UNIT DAN NAMA LENGKAP
+            'nomor_unit' => 'required|integer|min:1|max:50', // Tambahkan Nomor Unit
+            'nama_material_lengkap' => 'required|string|max:255', // Tambahkan Nama Material Lengkap
+            // END: PERBAIKAN UTAMA
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
             'jumlah_siaga_keluar' => 'required|integer|min:1',
@@ -171,7 +181,7 @@ class SiagaKeluarController extends Controller
             Storage::disk('public')->delete($siagaKeluar->foto_path);
         }
 
-        $siagaKeluar->delete();
+        SiagaKeluar::destroy($id);
 
         return redirect()->route('siaga-keluar.index')
                          ->with('success', 'Data Siaga Keluar berhasil dihapus.');
@@ -219,9 +229,9 @@ class SiagaKeluarController extends Controller
         // === LOGIKA DOWNLOAD PDF ===
         if ($request->has('submit_pdf')) {
             $dataSiagaKeluar = SiagaKeluar::with('material')
-                                 ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                                 ->orderBy('tanggal', 'asc')
-                                 ->get();
+                                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                        ->orderBy('tanggal', 'asc')
+                                        ->get();
 
             $data = [
                 'dataSiagaKeluar' => $dataSiagaKeluar,
