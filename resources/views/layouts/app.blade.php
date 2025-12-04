@@ -175,8 +175,8 @@
         .btn-excel { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
         /* =========================================
-           5. CSS DROPDOWN SIDEBAR (PERBAIKAN FOKUS DI SINI)
-           ========================================= */
+            5. CSS DROPDOWN SIDEBAR (PERBAIKAN FOKUS DI SINI)
+            ========================================= */
         .sidebar-menu .menu-item-has-dropdown > a { 
             position: relative; 
             cursor: pointer; 
@@ -197,8 +197,8 @@
         .submenu a { font-size: 0.95rem !important; padding: 10px 12px !important; color: #ced4da !important; }
         .submenu a:hover, .submenu a.sub-active { color: #ffffff !important; background-color: transparent !important; }
         /* =========================================
-           PERBAIKAN DROPDOWN SELESAI
-           ========================================= */
+            PERBAIKAN DROPDOWN SELESAI
+            ========================================= */
 
         /* === 6. CSS WIDGET DASHBOARD === */
         .widget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
@@ -219,8 +219,8 @@
         .modal-close { position: absolute; top: -15px; right: 0px; color: #fff; font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; }
 
         /* =========================================
-           8. RESPONSIVE (HP & TABLET)
-           ========================================= */
+            8. RESPONSIVE (HP & TABLET)
+            ========================================= */
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
         }
@@ -299,59 +299,45 @@
             <button class="sidebar-close-btn" id="sidebarCloseBtn">&times;</button>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="#"><i class="fas fa-user-circle"></i> <span>Profil</span></a></li>
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
             
-            <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-box-open"></i> <span>Material Stand By</span><i class="fas fa-chevron-right arrow-icon"></i></a>
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.create') || request()->routeIs('material-retur.create') || request()->routeIs('material_keluar.create') || request()->routeIs('material_kembali.create') ? 'active open' : '' }}">
+                <a class="dropdown-toggle"><i class="fas fa-file-export"></i> <span>Tambah Material</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
-                    <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
+                    
+                    <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
+                    <li><a href="{{ route('material_keluar.create') }}" class="{{ request()->routeIs('material_keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
+                    <li><a href="{{ route('material_kembali.create') }}" class="{{ request()->routeIs('material_kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
+                    <li><a href="{{ route('material-retur.create') }}" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}"><i class="fas fa-undo"></i> <span>Material Retur</span></a></li>
                 </ul>
             </li>
-            <li class="menu-item-has-dropdown {{ request()->routeIs('material-retur.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-undo"></i> <span>Material Retur</span><i class="fas fa-chevron-right arrow-icon"></i></a>
+
+            {{-- 1. DROP DOWN UTAMA UNTUK TAMBAH SIAGA --}}
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.create') || request()->routeIs('siaga-kembali.create') ? 'active open' : '' }}">
+                <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Tambah Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    <li><a href="{{ route('material-retur.index') }}" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
-                    <li><a href="{{ route('material-retur.create') }}" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
+                    
+                    <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
+                    <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
+                    <li><a href="{{ route('siaga-kembali.create') }}" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
+                    
                 </ul>
             </li>
-             <li class="menu-item-has-dropdown {{ request()->routeIs('material-keluar.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-tools"></i> <span>Material Keluar</span><i class="fas fa-chevron-right arrow-icon"></i></a>
+
+            {{-- 2. DROP DOWN UTAMA UNTUK LAPORAN --}}
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.index') || request()->routeIs('material-retur.index') || request()->routeIs('material_keluar.index') || request()->routeIs('material_kembali.index') || request()->routeIs('material-siaga-stand-by.index') || request()->routeIs('siaga-keluar.index') || request()->routeIs('siaga-kembali.index') ? 'active open' : '' }}">
+                <a class="dropdown-toggle"><i class="fas fa-scroll"></i> <span>Laporan</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    <li><a href="{{ route('material_keluar.index') }}" class="{{ request()->routeIs('material_keluar.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
-                    <li><a href="{{ route('material_keluar.create') }}" class="{{ request()->routeIs('material_keluar.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
-                </ul>
-            </li>
-             <li class="menu-item-has-dropdown {{ request()->routeIs('material-kembali.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span><i class="fas fa-chevron-right arrow-icon"></i></a>
-                <ul class="submenu">
-                    <li><a href="{{ route('material_kembali.index') }}" class="{{ request()->routeIs('material_kembali.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
-                    <li><a href="{{ route('material_kembali.create') }}" class="{{ request()->routeIs('material_kembali.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
-                </ul>
-            </li>
-             <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span><i class="fas fa-chevron-right arrow-icon"></i></a>
-                <ul class="submenu">
-                    <!-- INI YANG DIPERBAIKI (href="#") -->
-                    <li><a href="{{ route('material-siaga-stand-by.index') }}" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}">Laporan Material</a></li>
-                    <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}">Tambah Material</a></li>
-                </ul>
-            </li>
-             <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-keluar.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-truck"></i> <span>Siaga Keluar</span><i class="fas fa-chevron-right arrow-icon"></i></a>
-                <ul class="submenu">
-                    <!-- INI YANG DIPERBAIKI (href="#") -->
-                    <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}">Laporan Siaga</a></li>
-                    <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">Tambah Siaga</a></li>
-                </ul>
-            </li>
-             <li class="menu-item-has-dropdown {{ request()->routeIs('siaga-kembali.*') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span><i class="fas fa-chevron-right arrow-icon"></i></a>
-                <ul class="submenu">
-                    <!-- INI YANG DIPERBAIKI (href="#") -->
-                    <li><a href="{{ route('siaga-kembali.index') }}" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}">Laporan Siaga</a></li>
-                    <li><a href="{{ route('siaga-kembali.create') }}" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}">Tambah Siaga</a></li>
+                    
+                    <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
+                    <li><a href="{{ route('material_keluar.index') }}" class="{{ request()->routeIs('material_keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
+                    <li><a href="{{ route('material_kembali.index') }}" class="{{ request()->routeIs('material_kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
+                    <li><a href="{{ route('material-retur.index') }}" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}"><i class="fas fa-undo"></i> <span>Material Retur</span></a></li>
+                    <hr style="border-top: 1px solid #4f565d; margin: 5px 0;">
+                    <li><a href="{{ route('material-siaga-stand-by.index') }}" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
+                    <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
+                    <li><a href="{{ route('siaga-kembali.index') }}" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
+                    
                 </ul>
             </li>
         </ul>
@@ -395,13 +381,31 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar-menu .dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
-            const parent = this.parentElement.closest('.menu-item-has-dropdown'); // Target li
-            if (!parent) return; // Keluar jika tidak ditemukan
             
-            // Tutup dropdown lain
-            document.querySelectorAll('.sidebar-menu .menu-item-has-dropdown.open').forEach(open => {
-                if (open !== parent) open.classList.remove('open');
-            });
+            const parent = this.closest('li.menu-item-has-dropdown');
+            if (!parent) return; 
+
+            // Cek apakah ini dropdown level 1 atau nested (level 2)
+            const isNested = parent.classList.contains('nested-dropdown');
+            
+            // Logika penanganan dropdown level 1
+            if (!isNested) {
+                document.querySelectorAll('.sidebar-menu > li.menu-item-has-dropdown.open').forEach(open => {
+                    if (open !== parent) {
+                        open.classList.remove('open');
+                    }
+                });
+            }
+            
+            // Logika penanganan dropdown nested (level 2)
+            if (isNested) {
+                 document.querySelectorAll('.submenu > li.nested-dropdown.open').forEach(open => {
+                    if (open !== parent) {
+                        open.classList.remove('open');
+                    }
+                });
+            }
+
             parent.classList.toggle('open');
         });
     });

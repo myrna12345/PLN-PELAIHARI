@@ -7,8 +7,8 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles; // Tambahan untuk styling header
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet; // Tambahan untuk worksheet
+use Maatwebsite\Excel\Concerns\WithStyles; 
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet; 
 use Carbon\Carbon;
 
 class MaterialReturExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
@@ -37,7 +37,9 @@ class MaterialReturExport implements FromQuery, WithHeadings, WithMapping, Shoul
             'No',
             'Nama Material',
             'Nama Petugas',
-            'Jumlah Retur',
+            'Jumlah Retur (Satuan)', // 💡 PERBAIKAN: Menambahkan Satuan
+            // ❌ Dihapus: Jumlah Keluar
+            // ❌ Dihapus: Jumlah Kembali
             'Status',
             'Keterangan',
             'Tanggal (WITA)',
@@ -54,8 +56,12 @@ class MaterialReturExport implements FromQuery, WithHeadings, WithMapping, Shoul
             $this->rowNumber,
             $item->material->nama_material ?? 'N/A',
             $item->nama_petugas,
-            $item->jumlah,
-            $item->status == 'baik' ? 'Baik' : 'Rusak',
+            $item->jumlah . ' ' . $item->satuan, // 💡 PERBAIKAN: Menampilkan Jumlah dan Satuan
+            
+            // 💡 PERBAIKAN KRUSIAL: Memanggil $item->status, yang sekarang menggunakan Accessor dari Model
+            // Accessor akan mengubah 'bekas_andal' menjadi 'Baik'.
+            $item->status, 
+            
             $item->keterangan,
             $tanggalWita,
         ];

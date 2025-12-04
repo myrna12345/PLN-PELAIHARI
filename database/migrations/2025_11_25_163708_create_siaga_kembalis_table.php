@@ -15,18 +15,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('material_id')->constrained('materials')->onDelete('cascade');
             
-            // START: PENAMBAHAN KOLOM BARU (NOMOR UNIT DAN NAMA LENGKAP)
-            $table->integer('nomor_unit')->nullable(); // Kolom baru harus diisi
-            $table->string('nama_material_lengkap')->nullable(); // Kolom baru harus diisi
-            // END: PENAMBAHAN KOLOM BARU
+            // Kolom Nomor Meter (Bukan nomor_unit)
+            $table->string('nomor_meter')->nullable(); 
+            // Nama Material Lengkap (yang dibutuhkan Controller)
+            $table->string('nama_material_lengkap')->nullable(); 
 
             $table->string('nama_petugas');
             $table->string('stand_meter')->nullable();
             
-            // PERUBAHAN: Mengganti 'jumlah' menjadi 'jumlah_siaga_kembali'
-            $table->integer('jumlah_siaga_kembali')->default(0);
+            // Kolom jumlah_siaga_kembali TELAH DIHAPUS
             
-            // PERBAIKAN: Mengubah keterangan menjadi status karena sudah ada kolom status di bawah
             $table->string('keterangan')->nullable(); 
             
             $table->string('status')->nullable(); // Untuk status seperti "Kembali"

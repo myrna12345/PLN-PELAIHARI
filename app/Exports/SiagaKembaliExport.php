@@ -34,11 +34,11 @@ class SiagaKembaliExport implements FromQuery, WithHeadings, WithMapping, Should
     {
         return [
             'No',
-            'Nama Material & Unit', // 🟢 PERBAIKAN: Menggabungkan Heading
+            'Nama Material & Nomor Meter', // PERBAIKAN HEADING: Diubah menjadi 'Nomor Meter'
             'Nama Petugas',
             'Stand Meter',
-            'Jumlah Siaga Keluar',
-            'Jumlah Siaga Kembali',
+            // HAPUS: 'Jumlah Siaga Keluar',
+            // HAPUS: 'Jumlah Siaga Kembali',
             'Status',
             'Tanggal (WITA)',
         ];
@@ -48,17 +48,17 @@ class SiagaKembaliExport implements FromQuery, WithHeadings, WithMapping, Should
     {
         $this->rowNumber++;
         
-        // 🟢 PERBAIKAN: Menggabungkan Nama Material dan Nomor Unit
+        // Menggabungkan Nama Material dan Nomor Meter (menggunakan field nomor_unit)
         $namaMaterialUnit = ($item->material->nama_material ?? 'N/A') . 
                             ($item->nomor_unit ? ' - ' . $item->nomor_unit : '');
 
         return [
             $this->rowNumber,
-            $namaMaterialUnit, // Menggunakan variabel gabungan
+            $namaMaterialUnit, 
             $item->nama_petugas,
             $item->stand_meter ?? '-',
-            $item->jumlah_siaga_keluar,
-            $item->jumlah_siaga_kembali,
+            // HAPUS DATA: $item->jumlah_siaga_keluar,
+            // HAPUS DATA: $item->jumlah_siaga_kembali,
             $item->status ?? 'Kembali',
             Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i'),
         ];

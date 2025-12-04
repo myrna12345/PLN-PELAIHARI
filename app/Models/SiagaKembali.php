@@ -4,46 +4,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\SiagaKeluar; // Pastikan ini diimpor
 
 class SiagaKembali extends Model
 {
     use HasFactory;
-
-    protected $table = 'siaga_kembalis';
-
+    
+    // SELARASKAN DENGAN KOLOM MIGRATION
     protected $fillable = [
         'material_id',
-        // START: PENAMBAHAN KOLOM BARU
-        'nomor_unit',
-        'nama_material_lengkap',
-        // END: PENAMBAHAN KOLOM BARU
+        'nomor_meter', // <-- Nama kolom baru (selaras)
+        'nama_material_lengkap', // <-- Kolom tambahan di migration
         'nama_petugas',
         'stand_meter',
-        'jumlah_siaga_kembali', 
-        'status', 
+        'keterangan',
+        'status',
         'tanggal',
         'foto_path',
     ];
 
+    /**
+     * Relasi ke Material
+     */
     public function material()
     {
         return $this->belongsTo(Material::class);
     }
-
+    
     /**
-     * Accessor untuk mengambil data 'jumlah_siaga_keluar' secara otomatis
-     * Berdasarkan kecocokan Material ID dan Nomor Unit TERBARU.
+     * ACCESSOR: Menghitung jumlah siaga keluar berdasarkan material_id dan nomor_meter.
+     * (Mengasumsikan kolom di SiagaKeluar juga sudah 'nomor_meter')
      */
     public function getJumlahSiagaKeluarAttribute()
     {
-        // 🟢 PERBAIKAN: Cari data di tabel Siaga Keluar berdasarkan material_id DAN nomor_unit
-        $dataKeluar = SiagaKeluar::where('material_id', $this->material_id)
-                                 ->where('nomor_unit', $this->nomor_unit) // ⬅️ Kunci perbaikan utama
-                                 ->latest('tanggal')
-                                 ->first();
+        // Cari data di Model SiagaKeluar menggunakan kolom baru 'nomor_meter'
+        $dataSiagaKeluar = SiagaKeluar::where('material_id', $this->material_id)
+                                    ->where('nomor_meter', $this->nomor_meter) // <-- DIGANTI menjadi 'nomor_meter'
+                                    ->latest('tanggal')
+                                    ->first();
 
-        // Jika ketemu, kembalikan jumlah keluar. Jika tidak, kembalikan 0.
-        return $dataKeluar ? $dataKeluar->jumlah_siaga_keluar : 0;
+        // Mengasumsikan SiagaKeluar memiliki kolom 'jumlah_siaga_keluar'
+        return $dataSiagaKeluar ? $dataSiagaKeluar->jumlah_siaga_keluar : 0;
     }
 }

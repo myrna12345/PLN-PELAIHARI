@@ -23,9 +23,9 @@
                 <th>No</th>
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
-                <th>Jumlah Retur</th>
-                <th>Jumlah Keluar</th>
-                <th>Jumlah Kembali</th>
+                <th>Jumlah Retur (Satuan)</th>
+                {{-- ❌ Dihapus: <th>Jumlah Keluar</th> --}}
+                {{-- ❌ Dihapus: <th>Jumlah Kembali</th> --}}
                 <th>Status</th>
                 <th>Keterangan</th>
                 <th>Tanggal (WITA)</th>
@@ -37,16 +37,21 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
                     <td>{{ $item->nama_petugas }}</td>
-                    <td class="text-center">{{ $item->jumlah }}</td>
-                    <td class="text-center">{{ $item->material_keluar ?? 0 }}</td>
-                    <td class="text-center">{{ $item->material_kembali ?? 0 }}</td>
-                    <td>{{ $item->status == 'baik' ? 'Baik' : 'Rusak' }}</td>
+                    <td class="text-center">{{ $item->jumlah }} {{ $item->satuan }}</td> 
+                    
+                    {{-- ❌ Dihapus: <td class="text-center">{{ $item->material_keluar ?? 0 }}</td> --}}
+                    {{-- ❌ Dihapus: <td class="text-center">{{ $item->material_kembali ?? 0 }}</td> --}}
+                    
+                    {{-- Menggunakan Accessor dari Model (bekas_andal -> Baik) --}}
+                    <td>{{ $item->status }}</td> 
+                    
                     <td>{{ $item->keterangan }}</td>
                     <td>{{ $item->tanggal->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center">Data tidak ditemukan pada periode ini.</td>
+                    {{-- 💡 PERBAIKAN: Colspan disesuaikan dari 9 menjadi 7 (9 - 2 kolom yang dihapus) --}}
+                    <td colspan="7" class="text-center">Data tidak ditemukan pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>

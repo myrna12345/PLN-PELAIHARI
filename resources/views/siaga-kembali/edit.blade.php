@@ -1,15 +1,18 @@
+{{-- resources/views/siaga-kembali/edit.blade.php --}}
+
 @extends('layouts.app')
 
 @section('title', 'Edit Siaga Kembali')
 
 @section('content')
+
 <div class="card-form-container">
     <div class="card-form-header">
-        <h2>Edit Material Siaga Kembali (ID: {{ $item->id }})</h2>
+        <h2>Edit Material Siaga Kembali</h2>
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger">
+        <div class="alert alert-danger" role="alert">
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -26,78 +29,99 @@
             {{-- Form Nama Material (Dropdown) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                <select name="material_id" id="material_id" class="form-control-new" required>
-                    <option value="" disabled>Pilih material</option>
+                <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
+                    <option value="" disabled {{ old('material_id', $item->material_id) == '' ? 'selected' : '' }}>Pilih material</option>
                     @foreach($materials as $material)
-                        @php
-                            $selected = (old('material_id') == $material->id) || ($item->material_id == $material->id);
-                        @endphp
-                        <option value="{{ $material->id }}" {{ $selected ? 'selected' : '' }}>
+                        <option value="{{ $material->id }}" {{ old('material_id', $item->material_id) == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
+                @error('material_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
-            {{-- Form Group Nomor Unit --}}
+            {{-- Form Group Nomor Meter (Input Teks) --}}
             <div class="form-group-new">
-                <label for="nomor_unit">Nomor Unit</label>
-                <select name="nomor_unit" id="nomor_unit" class="form-control-new" required>
-                    <option value="" disabled selected>Pilih Nomor</option>
-                    @for ($i = 1; $i <= 50; $i++)
-                        @php
-                            $selected_unit = (old('nomor_unit') == $i) || ($item->nomor_unit == $i);
-                        @endphp
-                        <option value="{{ $i }}" {{ $selected_unit ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                </select>
+                <label for="nomor_meter">Nomor Meter</label> 
+                {{-- PERBAIKAN: Menggunakan $item->nomor_meter, yang match dengan nama kolom database yang baru --}}
+                <input type="text" 
+                       name="nomor_meter" 
+                       id="nomor_meter" 
+                       class="form-control-new @error('nomor_meter') is-invalid @enderror" 
+                       value="{{ old('nomor_meter', $item->nomor_meter) }}" 
+                       required>
+                @error('nomor_meter')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             {{-- Form Nama Petugas --}}
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
-                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" 
-                       value="{{ old('nama_petugas', $item->nama_petugas) }}" required>
+                <input type="text" 
+                       name="nama_petugas" 
+                       id="nama_petugas" 
+                       class="form-control-new @error('nama_petugas') is-invalid @enderror" 
+                       value="{{ old('nama_petugas', $item->nama_petugas) }}" 
+                       required>
+                @error('nama_petugas')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             {{-- Form Stand Meter --}}
             <div class="form-group-new">
                 <label for="stand_meter">Stand Meter</label>
-                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" 
-                       value="{{ old('stand_meter', $item->stand_meter) }}" required>
-            </div>
-
-            {{-- Form Jumlah Siaga Kembali --}}
-            <div class="form-group-new">
-                <label for="jumlah_siaga_kembali">Jumlah Siaga Kembali</label>
-                <input type="number" name="jumlah_siaga_kembali" id="jumlah_siaga_kembali" class="form-control-new" 
-                       value="{{ old('jumlah_siaga_kembali', $item->jumlah_siaga_kembali) }}" min="1" required>
+                <input type="text" 
+                       name="stand_meter" 
+                       id="stand_meter" 
+                       class="form-control-new @error('stand_meter') is-invalid @enderror" 
+                       value="{{ old('stand_meter', $item->stand_meter) }}" 
+                       required>
+                @error('stand_meter')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             {{-- Status (Readonly) --}}
             <div class="form-group-new">
                 <label for="status">Status</label>
-                <input type="text" name="status" id="status" class="form-control-new" 
+                <input type="text" 
+                       name="status" 
+                       id="status" 
+                       class="form-control-new" 
                        value="{{ old('status', $item->status ?? 'Kembali') }}" 
-                       readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                       readonly 
+                       style="background-color: #e9ecef; cursor: not-allowed;">
             </div>
 
-            {{-- 🖼️ Form Group Foto dengan Pratinjau (Tanpa Tombol Unduh) 🖼️ --}}
+            {{-- 🖼 Form Group Foto dengan Pratinjau 🖼 --}}
             <div class="form-group-new">
                 <label for="foto">Foto</label>
+                
                 @if ($item->foto_path)
-                    <div style="margin-bottom: 10px;">
+                    <p class="text-sm text-gray-600 mb-2 mt-1">Foto Saat Ini:</p>
+                    <div style="margin-bottom: 15px; border: 1px solid #e0e0e0; padding: 5px; border-radius: 6px; display: inline-block;">
                         <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
                              alt="Foto Saat Ini" 
-                             style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
-                        
-                        {{-- ❌ BARIS TOMBOL UNDUH DIHAPUS ❌ --}}
+                             style="max-width: 250px; height: auto; display: block; border-radius: 4px;">
                     </div>
+                @else
+                    <p class="text-sm text-gray-600 mb-2 mt-1">Belum ada foto yang diunggah.</p>
                 @endif
-                <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Baru (Opsional)</label>
-                <input type="file" name="foto" id="foto" class="form-control-new-file">
+                
+                <label for="foto" style="display: block; margin-top: 10px; font-weight: 500;">Unggah Foto Baru (Opsional)</label>
+                <input type="file" 
+                       name="foto" 
+                       id="foto" 
+                       class="form-control-new-file @error('foto') is-invalid @enderror" 
+                       accept="image/*">
+                @error('foto')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
-            {{-- ⬆️ END KODE MODIFIKASI --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>

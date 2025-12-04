@@ -23,8 +23,7 @@ return new class extends Migration
             $table->string('nama_petugas');
             $table->string('stand_meter')->nullable();
             
-            $table->integer('jumlah_siaga_keluar')->default(0);
-            $table->integer('jumlah_siaga_masuk')->default(0); 
+            // Kolom jumlah_siaga_keluar dan jumlah_siaga_masuk telah dihapus
             
             $table->string('status')->default('Keluar');
             $table->dateTime('tanggal');

@@ -6,10 +6,10 @@ use App\Models\Material;
 use App\Models\MaterialRetur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\MaterialReturExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Carbon\Carbon;
 
 class MaterialReturController extends Controller
 {
@@ -42,7 +42,6 @@ class MaterialReturController extends Controller
 
     public function create()
     {
-        // PERBAIKAN: Menggunakan SORT_NATURAL agar urutan angka benar (1P 1, 1P 2, ... 1P 10)
         $materials = Material::where('kategori', '!=', 'siaga')
                              ->orWhereNull('kategori')
                              ->get()
@@ -51,26 +50,32 @@ class MaterialReturController extends Controller
         return view('material_retur.create', compact('materials'));
     }
 
+    /**
+     * FUNGSI STORE YANG SUDAH DIPERBAIKI
+     * Menambahkan 'baik' ke validasi status untuk mengatasi masalah "invalid status"
+     * dari input lama, sambil tetap mendorong penggunaan 'bekas_andal'.
+     */
     public function store(Request $request)
     {
-        // Validasi TANPA tanggal, karena tanggal diisi otomatis
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'status' => 'required|in:baik,rusak',
+            'satuan' => 'required|in:Buah,Meter',
+            
+            // 💡 PERBAIKAN: Menambahkan 'baik' ke daftar nilai yang diizinkan (in:).
+            // Ini akan menyelesaikan error 'Invalid Status' jika form mengirim 'baik' atau 'bekas_andal'.
+            'status' => 'required|in:bekas_andal,rusak,baik', 
+            
             'keterangan' => 'nullable|string',
-            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
-            // Menggunakan folder yang spesifik (fotos_material_standby)
             $path = $request->file('foto')->store('fotos_material_retur', 'public');
         }
 
-        // Isi tanggal otomatis dengan waktu sekarang (WITA)
         $dataToSave = array_merge($validated, [
             'foto_path' => $path,
             'tanggal' => Carbon::now('Asia/Makassar')
@@ -79,12 +84,11 @@ class MaterialReturController extends Controller
         MaterialRetur::create($dataToSave);
 
         return redirect()->route('material-retur.index')
-                         ->with('success', 'Data Material Retur berhasil ditambahkan.');
+                            ->with('success', 'Data Material Retur berhasil ditambahkan.');
     }
 
     public function edit(MaterialRetur $materialRetur)
     {
-        // PERBAIKAN: Terapkan juga SORT_NATURAL di halaman edit
         $materials = Material::where('kategori', '!=', 'siaga')
                              ->orWhereNull('kategori')
                              ->get()
@@ -98,32 +102,41 @@ class MaterialReturController extends Controller
 
     public function update(Request $request, MaterialRetur $materialRetur)
     {
-        // Validasi TANPA tanggal, agar user tidak bisa mengubah tanggal lama
+        // 1. Validasi Data
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
-            'status' => 'required|in:baik,rusak',
+            'satuan' => 'required|in:Buah,Meter',
+            'status' => 'required|in:bekas_andal,rusak', 
             'keterangan' => 'nullable|string',
-            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            
+            // Menggunakan 'nullable' agar foto tidak wajib.
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' 
         ]);
         
-        // PERBAIKAN: Menggunakan variabel yang benar ($materialRetur)
         $path = $materialRetur->foto_path;
+        
+        // 2. Logika Upload/Update Foto
         if ($request->hasFile('foto')) {
-            if ($path) { Storage::disk('public')->delete($path); }
-            // Menggunakan folder yang spesifik (fotos_material_standby)
-            $path = $request->file('foto')->store('fotos_material_standby', 'public');
+            if ($path) { 
+                Storage::disk('public')->delete($path); 
+            }
+            $path = $request->file('foto')->store('fotos_material_retur', 'public');
+            $validated['foto_path'] = $path; 
+        } else {
+            // Jika tidak ada foto baru diunggah, hapus key 'foto' dan pertahankan path lama.
+            unset($validated['foto']);
+            $validated['foto_path'] = $path; 
         }
 
-        // Update data TANPA mengubah kolom 'tanggal'
-        $materialRetur->update(array_merge($validated, ['foto_path' => $path]));
+        // 3. Update data ke database
+        $materialRetur->update($validated); 
 
         return redirect()->route('material-retur.index')
-                         ->with('success', 'Data Material Retur berhasil diperbarui.');
+                            ->with('success', 'Data Material Retur berhasil diperbarui.');
     }
-
+    
     public function destroy(MaterialRetur $materialRetur)
     {
         if ($materialRetur->foto_path) {
@@ -132,21 +145,14 @@ class MaterialReturController extends Controller
         $materialRetur->delete();
         
         return redirect()->route('material-retur.index')
-                         ->with('success', 'Data Material Retur berhasil dihapus.');
+                            ->with('success', 'Data Material Retur berhasil dihapus.');
     }
 
-    /**
-     * FUNGSI PERMANEN: Melayani file foto secara langsung melalui Controller.
-     * Menggunakan Storage::response() adalah solusi terbaik untuk masalah Symlink.
-     */
     public function showFoto(MaterialRetur $materialRetur)
     {
         if (!$materialRetur->foto_path || !Storage::disk('public')->exists($materialRetur->foto_path)) {
-            // Jika path kosong atau file tidak ditemukan
             return redirect()->back()->with('error', 'File foto tidak ditemukan untuk ditampilkan.');
         }
-
-        // PERBAIKAN UTAMA: Menggunakan Storage::response()
         return Storage::disk('public')->response($materialRetur->foto_path);
     }
 
@@ -173,9 +179,9 @@ class MaterialReturController extends Controller
 
         if ($request->has('submit_pdf')) {
             $items = MaterialRetur::with('material')
-                                 ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                                 ->orderBy('tanggal', 'asc')
-                                 ->get();
+                                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                        ->orderBy('tanggal', 'asc')
+                                        ->get();
 
             $data = [
                 'items' => $items,
@@ -188,7 +194,7 @@ class MaterialReturController extends Controller
         } 
         
         if ($request->has('submit_excel')) {
-            return Excel::download(new MaterialReturExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
+            return Excel::download(new \App\Exports\MaterialReturExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
         }
         
         return redirect()->back()->with('error', 'Pilih jenis laporan yang ingin diunduh.');

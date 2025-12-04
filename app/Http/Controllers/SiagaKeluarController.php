@@ -73,18 +73,16 @@ class SiagaKeluarController extends Controller
     {
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
-            // START: PERBAIKAN UTAMA UNTUK NOMOR UNIT DAN NAMA LENGKAP
-            'nomor_unit' => 'required|integer|min:1|max:50', // Tambahkan Nomor Unit
-            'nama_material_lengkap' => 'required|string|max:255', // Tambahkan Nama Material Lengkap
-            // END: PERBAIKAN UTAMA
+            // Nomor Unit sekarang adalah string (sesuai form)
+            'nomor_unit' => 'required|string|max:255', 
+            'nama_material_lengkap' => 'required|string|max:255', 
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
-            'jumlah_siaga_keluar' => 'required|integer|min:1',
-            // TAMBAHAN: Validasi untuk jumlah siaga masuk
-            'jumlah_siaga_masuk' => 'nullable|integer|min:0',
-            'status' => 'nullable|string',
-            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
+            
+            // HAPUS VALIDASI UNTUK JUMLAH SIAGA KELUAR/MASUK
+            
+            'status' => 'required|string', 
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', 
         ]);
 
         $path = null;
@@ -92,21 +90,26 @@ class SiagaKeluarController extends Controller
             // PERBAIKAN: Menggunakan folder yang spesifik 'fotos_siaga_keluar'
             $path = $request->file('foto')->store('fotos_siaga_keluar', 'public');
         }
-
-        $dataToSave = array_merge($validated, [
+        
+        // Data yang disimpan
+        $dataToSave = [
+            'material_id' => $validated['material_id'],
+            'nomor_unit' => $validated['nomor_unit'],
+            'nama_material_lengkap' => $validated['nama_material_lengkap'],
+            'nama_petugas' => $validated['nama_petugas'],
+            'stand_meter' => $validated['stand_meter'],
+            'status' => $validated['status'],
+            
+            // Kolom 'jumlah_siaga_keluar' dan 'jumlah_siaga_masuk' DIHAPUS dari array penyimpanan
+            
             'foto_path' => $path,
             'tanggal' => Carbon::now('Asia/Makassar'),
-            'status' => $request->status ?? 'Keluar',
-            // Pastikan jika null diisi 0 agar tidak error di tampilan
-            'jumlah_siaga_masuk' => $request->jumlah_siaga_masuk ?? 0 
-        ]);
+        ];
         
-        unset($dataToSave['foto']); 
-
         SiagaKeluar::create($dataToSave);
 
         return redirect()->route('siaga-keluar.index')
-                         ->with('success', 'Data Siaga Keluar berhasil ditambahkan.');
+                             ->with('success', 'Data Siaga Keluar berhasil ditambahkan.');
     }
 
     /**
@@ -132,21 +135,22 @@ class SiagaKeluarController extends Controller
     {
         $siagaKeluar = SiagaKeluar::findOrFail($id);
 
+        // Aturan validasi foto kondisional
+        $fotoRules = $siagaKeluar->foto_path ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' : 'required|image|mimes:jpeg,png,jpg,gif|max:5120';
+
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             // START: PERBAIKAN UTAMA UNTUK NOMOR UNIT DAN NAMA LENGKAP
-            'nomor_unit' => 'required|integer|min:1|max:50', // Tambahkan Nomor Unit
+            'nomor_unit' => 'required|string|max:255', // Validasi Nomor Unit
             'nama_material_lengkap' => 'required|string|max:255', // Tambahkan Nama Material Lengkap
             // END: PERBAIKAN UTAMA
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
-            'jumlah_siaga_keluar' => 'required|integer|min:1',
-            // TAMBAHAN: Validasi untuk update jumlah siaga masuk
-            'jumlah_siaga_masuk' => 'nullable|integer|min:0',
-            // PERBAIKAN: Status menjadi nullable
+            
+            // HAPUS VALIDASI: jumlah_siaga_keluar dan jumlah_siaga_masuk di Update
+            
             'status' => 'nullable|string', 
-            // PERBAIKAN: Menaikkan batas dari 2048 KB menjadi 5120 KB (5 MB)
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto' => $fotoRules,
         ]);
 
         $path = $siagaKeluar->foto_path;
@@ -156,18 +160,23 @@ class SiagaKeluarController extends Controller
             $path = $request->file('foto')->store('fotos_siaga_keluar', 'public');
         }
 
-        $dataToUpdate = array_merge($validated, [
-            'foto_path' => $path,
-            'jumlah_siaga_masuk' => $request->jumlah_siaga_masuk ?? 0,
-            // Jika status tidak ada di request (karena readonly), gunakan status lama dari model
-            'status' => $siagaKeluar->status 
-        ]);
+        // Ambil data yang divalidasi
+        $dataToUpdate = $validated;
+        
+        // HAPUS: Baris ini sudah tidak diperlukan karena kolomnya sudah dihapus
+        // $dataToUpdate['jumlah_siaga_keluar'] = $siagaKeluar->jumlah_siaga_keluar; 
+        // $dataToUpdate['jumlah_siaga_masuk'] = $siagaKeluar->jumlah_siaga_masuk;  
+        
+        // Tambahkan field yang tidak ada di form edit tetapi harus dipertahankan
+        $dataToUpdate['foto_path'] = $path;
+        $dataToUpdate['status'] = $siagaKeluar->status; // Mempertahankan status lama
+        
         unset($dataToUpdate['foto']);
 
         $siagaKeluar->update($dataToUpdate);
 
         return redirect()->route('siaga-keluar.index')
-                         ->with('success', 'Data Siaga Keluar berhasil diperbarui.');
+                             ->with('success', 'Data Siaga Keluar berhasil diperbarui.');
     }
 
     /**
@@ -184,7 +193,7 @@ class SiagaKeluarController extends Controller
         SiagaKeluar::destroy($id);
 
         return redirect()->route('siaga-keluar.index')
-                         ->with('success', 'Data Siaga Keluar berhasil dihapus.');
+                             ->with('success', 'Data Siaga Keluar berhasil dihapus.');
     }
     
     /**
@@ -229,9 +238,9 @@ class SiagaKeluarController extends Controller
         // === LOGIKA DOWNLOAD PDF ===
         if ($request->has('submit_pdf')) {
             $dataSiagaKeluar = SiagaKeluar::with('material')
-                                        ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                                        ->orderBy('tanggal', 'asc')
-                                        ->get();
+                                             ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                             ->orderBy('tanggal', 'asc')
+                                             ->get();
 
             $data = [
                 'dataSiagaKeluar' => $dataSiagaKeluar,

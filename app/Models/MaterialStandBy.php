@@ -14,7 +14,8 @@ class MaterialStandBy extends Model
     protected $fillable = [
         'material_id', 
         'nama_petugas', 
-        'jumlah', // ⬅️ Kolom stok yang akan di-decrement
+        'jumlah',
+        'satuan', // 🟢 BARU: Field Satuan
         'tanggal', 
         'foto_path'
     ];

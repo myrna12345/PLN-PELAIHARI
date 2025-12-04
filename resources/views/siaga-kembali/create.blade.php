@@ -34,19 +34,19 @@
                 </select>
             </div>
 
-            {{-- 🟢 KODE BARU: Form Input Text untuk Nomor Unit 🟢 --}}
+            {{-- 🟢 PERBAIKAN: Mengubah field menjadi Nomor Meter 🟢 --}}
             <div class="form-group-new">
-                <label for="nomor_unit">Nomor Unit</label>
-                {{-- Dibuat type="text" agar user bisa mengetik bebas --}}
-                <input type="text" name="nomor_unit" id="nomor_unit" class="form-control-new" 
-                       value="{{ old('nomor_unit') }}" 
-                       placeholder="Masukkan Nomor Unit" 
-                       required>
+                <label for="nomor_meter">Nomor Meter</label> {{-- LABEL DIUBAH --}}
+                {{-- name dan id DIUBAH menjadi 'nomor_meter' --}}
+                <input type="text" name="nomor_meter" id="nomor_meter" class="form-control-new" 
+                        value="{{ old('nomor_meter') }}" 
+                        placeholder="Masukkan Nomor Meter" 
+                        required>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    Pastikan nomor unit yang dimasukkan sesuai dengan data.
+                    Pastikan nomor meter yang dimasukkan sesuai dengan data.
                 </small>
             </div>
-            {{-- ⬆️ END KODE BARU --}}
+            {{-- ⬆ END KODE PERBAIKAN --}}
             
             {{-- Field tersembunyi untuk validasi 'nama_material_lengkap' --}}
             <div class="form-group-new" style="display: none;">
@@ -64,10 +64,13 @@
                 <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter') }}" required>
             </div>
 
+            {{-- HAPUS TOTAL: Blok Jumlah Siaga Kembali --}}
+            {{-- 
             <div class="form-group-new">
                 <label for="jumlah_siaga_kembali">Jumlah Siaga Kembali</label>
                 <input type="number" name="jumlah_siaga_kembali" id="jumlah_siaga_kembali" class="form-control-new" value="{{ old('jumlah_siaga_kembali') }}" min="1" required>
             </div>
+            --}}
 
             <div class="form-group-new">
                 <label for="status">Status</label>

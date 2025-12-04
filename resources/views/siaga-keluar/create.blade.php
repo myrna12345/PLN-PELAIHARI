@@ -35,12 +35,12 @@
                 </select>
             </div>
             
-            {{-- 🟢 KODE PERBAIKAN: Mengubah Placeholder dan Small Text 🟢 --}}
+            {{-- 🟢 KODE PERBAIKAN: Mengubah Placeholder dan Small Text (Nomor Unit) 🟢 --}}
             <div class="form-group-new">
                 <label for="nomor_unit">Nomor Unit</label>
                 <input type="text" name="nomor_unit" id="nomor_unit" class="form-control-new" 
                        value="{{ old('nomor_unit') }}" 
-                       placeholder="Masukkan Nomor Unit" {{-- ✅ Diubah menjadi ini --}}
+                       placeholder="Masukkan Nomor Unit"
                        required>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
                     Masukkan nomor unit.
@@ -64,10 +64,13 @@
                 <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter') }}" required>
             </div>
             
+            {{-- HAPUS TOTAL: Blok untuk Jumlah Siaga Keluar --}}
+            {{--
             <div class="form-group-new">
                 <label for="jumlah_siaga_keluar">Jumlah</label>
                 <input type="number" name="jumlah_siaga_keluar" id="jumlah_siaga_keluar" class="form-control-new" value="{{ old('jumlah_siaga_keluar') }}" required min="1">
             </div>
+            --}}
 
             <div class="form-group-new">
                 <label for="status">Status</label>
@@ -88,8 +91,11 @@
             </div>
 
             <div class="form-group-new">
-                <label for="foto">Unggah Foto (Opsional)</label>
-                <input type="file" name="foto" id="foto" class="form-control-new-file">
+                <label for="foto">Unggah Foto (Wajib)</label> 
+                <input type="file" name="foto" id="foto" class="form-control-new-file" required> 
+                <small class="text-muted" style="display: block; margin-top: 5px; color: red;">
+                    *Unggah foto material adalah wajib.
+                </small>
             </div>
 
             <div class="form-actions">

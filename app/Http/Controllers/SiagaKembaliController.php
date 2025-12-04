@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\SiagaKembali; 
-use App\Models\SiagaKeluar; // 🟢 IMPORT MODEL STOK LAWAN
+use App\Models\SiagaKeluar; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-// use App\Exports\SiagaKembaliExport; 
-use Maatwebsite\Excel\Facades\Excel; // Pastikan ini diimpor
-use App\Exports\SiagaKembaliExport; // Pastikan ini diimpor
+use Maatwebsite\Excel\Facades\Excel; 
+use App\Exports\SiagaKembaliExport; 
 
 class SiagaKembaliController extends Controller
 {
@@ -30,11 +29,11 @@ class SiagaKembaliController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', "%$search%")
-                  ->orWhere('stand_meter', 'like', "%$search%")
-                  ->orWhere('nomor_unit', 'like', "%$search%")
-                  ->orWhereHas('material', function($subQ) use ($search) {
-                      $subQ->where('nama_material', 'like', "%$search%");
-                  });
+                    ->orWhere('stand_meter', 'like', "%$search%")
+                    ->orWhere('nomor_meter', 'like', "%$search%") // <-- PERBAIKAN: Menggunakan 'nomor_meter'
+                    ->orWhereHas('material', function($subQ) use ($search) {
+                        $subQ->where('nama_material', 'like', "%$search%");
+                    });
             });
         }
         
@@ -55,7 +54,7 @@ class SiagaKembaliController extends Controller
         $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P'];
 
         $materials = Material::where('kategori', 'siaga')
-                             ->whereIn('nama_material', $allowedMaterials) // Filter berdasarkan nama material
+                             ->whereIn('nama_material', $allowedMaterials)
                              ->get()
                              ->sortBy('nama_material', SORT_NATURAL);
         
@@ -67,12 +66,12 @@ class SiagaKembaliController extends Controller
      */
     public function store(Request $request)
     {
+        // VALIDASI: Menggunakan 'nomor_meter' yang sekarang match dengan kolom database
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
-            'nomor_unit' => 'required|integer|min:1|max:50',
+            'nomor_meter' => 'required|string|max:255', 
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
-            'jumlah_siaga_kembali' => 'required|integer|min:1',
             'status' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
         ]);
@@ -82,29 +81,20 @@ class SiagaKembaliController extends Controller
             $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
         }
         
-        $jumlahKembali = $validated['jumlah_siaga_kembali'];
-
-        // 🟢 LOGIKA PENAMBAHAN JUMLAH MASUK PADA SIAGA KELUAR 🟢
-        $dataSiagaKeluar = SiagaKeluar::where('material_id', $validated['material_id'])
-                                      ->where('nomor_unit', $validated['nomor_unit'])
-                                      ->latest('tanggal')
-                                      ->first();
-
-        if ($dataSiagaKeluar) {
-            // Tambahkan jumlah_siaga_masuk di record Siaga Keluar
-            $dataSiagaKeluar->increment('jumlah_siaga_masuk', $jumlahKembali);
-        } else {
-             // Opsional: Berikan pesan error jika tidak ada transaksi Siaga Keluar yang cocok
-             return redirect()->back()->with('error', 'Gagal: Tidak ada transaksi Siaga Keluar yang cocok untuk material ini.')->withInput();
-        }
-        // END LOGIKA PENAMBAHAN JUMLAH MASUK
-
-        SiagaKembali::create(array_merge($validated, [
+        // Mapping data untuk disimpan ke SiagaKembali
+        $dataToSave = [
+            'material_id' => $validated['material_id'],
+            'nomor_meter' => $validated['nomor_meter'], // <-- LANGSUNG MENGGUNAKAN 'nomor_meter'
+            'nama_petugas' => $validated['nama_petugas'],
+            'stand_meter' => $validated['stand_meter'],
+            'status' => $validated['status'],
             'foto_path' => $path,
             'tanggal' => Carbon::now('Asia/Makassar'),
-        ]));
+        ];
+        
+        SiagaKembali::create($dataToSave);
 
-        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan! Jumlah masuk pada Siaga Keluar disesuaikan.');
+        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan!');
     }
 
     /**
@@ -119,6 +109,7 @@ class SiagaKembaliController extends Controller
                              ->get()
                              ->sortBy('nama_material', SORT_NATURAL);
                              
+        // $siagaKembali sekarang secara otomatis memiliki properti 'nomor_meter'
         return view('siaga-kembali.edit', ['item' => $siagaKembali, 'materials' => $materials]);
     }
 
@@ -127,38 +118,17 @@ class SiagaKembaliController extends Controller
      */
     public function update(Request $request, SiagaKembali $siagaKembali)
     {
-        $jumlahLama = $siagaKembali->jumlah_siaga_kembali;
-
+        // VALIDASI: Menggunakan 'nomor_meter'
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
-            'nomor_unit' => 'required|integer|min:1|max:50',
+            'nomor_meter' => 'required|string|max:255', // <-- KOLOM DATABASE BARU
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
-            'jumlah_siaga_kembali' => 'required|integer|min:1',
             'status' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        $jumlahBaru = $validated['jumlah_siaga_kembali'];
-        $stokSelisih = $jumlahBaru - $jumlahLama;
-
-        // 🟢 LOGIKA PENYESUAIAN JUMLAH MASUK PADA SIAGA KELUAR 🟢
-        if ($stokSelisih !== 0) {
-            $dataSiagaKeluar = SiagaKeluar::where('material_id', $validated['material_id'])
-                                          ->where('nomor_unit', $validated['nomor_unit'])
-                                          ->latest('tanggal')
-                                          ->first();
-            if ($dataSiagaKeluar) {
-                if ($stokSelisih > 0) {
-                    // Jika jumlah bertambah, tambahkan jumlah_siaga_masuk di Siaga Keluar
-                    $dataSiagaKeluar->increment('jumlah_siaga_masuk', $stokSelisih);
-                } else {
-                    // Jika jumlah berkurang, kurangi jumlah_siaga_masuk di Siaga Keluar
-                    $dataSiagaKeluar->decrement('jumlah_siaga_masuk', abs($stokSelisih));
-                }
-            }
-        }
-        // END LOGIKA PENYESUAIAN
+        // ... (Logika lama yang dihapus tidak berubah)
 
         $path = $siagaKembali->foto_path;
         if ($request->hasFile('foto')) {
@@ -166,9 +136,13 @@ class SiagaKembaliController extends Controller
             $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
         }
         
-        $siagaKembali->update(array_merge($validated, ['foto_path' => $path]));
+        // Sekarang $validated sudah berisi kunci 'nomor_meter', yang match dengan kolom DB.
+        $dataToUpdate = $validated;
+        $dataToUpdate['foto_path'] = $path;
+        
+        $siagaKembali->update($dataToUpdate);
 
-        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil diperbarui! Jumlah masuk pada Siaga Keluar disesuaikan.');
+        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil diperbarui!');
     }
 
 
@@ -177,18 +151,7 @@ class SiagaKembaliController extends Controller
      */
     public function destroy(SiagaKembali $siagaKembali)
     {
-        // 🟢 LOGIKA PENGEMBALIAN JUMLAH MASUK PADA SIAGA KELUAR SAAT DELETE 🟢
-        $jumlahDikembalikan = $siagaKembali->jumlah_siaga_kembali;
-
-        $dataSiagaKeluar = SiagaKeluar::where('material_id', $siagaKembali->material_id)
-                                      ->where('nomor_unit', $siagaKembali->nomor_unit)
-                                      ->latest('tanggal')
-                                      ->first();
-        if ($dataSiagaKeluar) {
-            // Kurangi kembali jumlah_siaga_masuk karena record Siaga Kembali dihapus (undo increment)
-            $dataSiagaKeluar->decrement('jumlah_siaga_masuk', $jumlahDikembalikan);
-        }
-        // END LOGIKA PENGEMBALIAN
+        // ... (Logika lama yang dihapus tidak berubah)
 
         if ($siagaKembali->foto_path) {
             Storage::disk('public')->delete($siagaKembali->foto_path);
@@ -196,7 +159,7 @@ class SiagaKembaliController extends Controller
 
         $siagaKembali->delete();
 
-        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus! Jumlah masuk pada Siaga Keluar dikurangi kembali.');
+        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus!');
     }
 
     public function showFoto(SiagaKembali $siagaKembali) 
@@ -229,21 +192,18 @@ class SiagaKembaliController extends Controller
         $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         
-        $filename = 'laporan_siaga_kembali_' . $tanggalMulai->format('Y-m-d') . '_sd_' . $tanggalAkhir->format('Y-m-d');
+        $filename = 'laporan_siaga_kembali_' . $tanggalMulai->format('Y-m-d') . 'sd' . $tanggalAkhir->format('Y-m-d');
         
-        // 🟢 LOGIKA DOWNLOAD EXCEL 🟢
         if ($request->has('submit_excel')) {
-            // Menggunakan class SiagaKembaliExport yang Anda sediakan
             return Excel::download(new SiagaKembaliExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
         }
         
-        // 2. LOGIKA DOWNLOAD PDF
         if ($request->has('submit_pdf')) {
-            $items = SiagaKembali::with('material') // Pastikan relasi material dimuat
+            $items = SiagaKembali::with('material') 
                                  ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                                 ->orderBy('tanggal', 'asc')
                                  ->get();
 
-            // Mengirim variabel dalam bentuk array dengan kunci snake_case (agar sesuai dengan Blade PDF)
             $data = [
                 'items' => $items,
                 'tanggal_mulai' => $tanggalMulai, 
@@ -254,7 +214,6 @@ class SiagaKembaliController extends Controller
             return $pdf->download($filename . '.pdf');
         }
         
-        // Fallback error
         return redirect()->back()->with('error', 'Pilih jenis laporan yang ingin diunduh.');
     }
 }

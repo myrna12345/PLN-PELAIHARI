@@ -1,3 +1,5 @@
+{{-- resources/views/material_retur/index.blade.php --}}
+
 @extends('layouts.app')
 
 @section('title', 'Laporan Material Retur')
@@ -46,26 +48,31 @@
                         <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah }}</td>
+                        
+                        {{-- 💡 PERBAIKAN: Menggunakan Accessor $item->status --}}
                         <td>
-                            @if($item->status == 'baik')
-                                <span style="color: #198754; font-weight: 500;">Baik</span>
-                            @else
+                            {{-- Accessor di Model MaterialRetur.php akan mengubah 'bekas_andal' menjadi 'Baik' --}}
+                            @if($item->status == 'Baik')
+                                <span style="color: #198754; font-weight: 500;">{{ $item->status }}</span>
+                            @elseif($item->status == 'rusak' || $item->status == 'Rusak')
                                 <span style="color: #d06368ff; font-weight: 500;">Rusak</span>
+                            @else
+                                <span>{{ $item->status }}</span>
                             @endif
                         </td>
+                        
                         <td>{{ \Illuminate\Support\Str::limit($item->keterangan, 30) ?? '-' }}</td>
                         
-                        <!-- Format tanggal WITA -->
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
                         <td style="text-align: center; vertical-align: top;"> 
                             @if($item->foto_path)
-                                {{-- PERBAIKAN AKHIR: Menggunakan route show-foto yang mengambil file langsung dari Storage --}}
+                                {{-- Menggunakan route show-foto --}}
                                 <img src="{{ route('material-retur.show-foto', $item->id) }}" 
-                                     alt="Foto Material" 
-                                     class="table-foto" 
-                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
-                                     title="Klik untuk memperbesar">
+                                      alt="Foto Material" 
+                                      class="table-foto" 
+                                      style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                      title="Klik untuk memperbesar">
                                 
                                 <a href="{{ route('material-retur.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download Foto

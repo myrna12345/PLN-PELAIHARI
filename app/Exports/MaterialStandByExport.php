@@ -17,7 +17,6 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
     protected $tanggalAkhir;
     private $rowNumber = 0;
 
-    // Menerima objek Carbon dari controller
     public function __construct($tanggalMulai, $tanggalAkhir)
     {
         $this->tanggalMulai = $tanggalMulai;
@@ -36,8 +35,7 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
         return [
             'No',
             'Nama Material',
-            'Nama Petugas',
-            'Jumlah',
+            'Jumlah & Satuan', // Digabungkan
             'Tanggal (WITA)',
         ];
     }
@@ -45,13 +43,14 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
     public function map($item): array
     {
         $this->rowNumber++;
+        
+        // Menggabungkan Jumlah dan Satuan menjadi satu string
+        $jumlahSatuan = $item->jumlah . ' ' . ($item->satuan ?? '');
 
-        // Format tanggal disesuaikan dengan zona waktu WITA (Asia/Makassar)
         return [
             $this->rowNumber,
             $item->material->nama_material ?? 'N/A',
-            $item->nama_petugas,
-            $item->jumlah,
+            $jumlahSatuan, 
             Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i'),
         ];
     }
