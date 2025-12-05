@@ -6,6 +6,11 @@
 <div class="card-form-container mx-auto">
     <div class="card-form-header">
         <h2>Edit Material Kembali</h2>
+        
+        {{-- Tampilkan error dari controller, misalnya unit tidak cocok atau perubahan nama/satuan tidak diizinkan --}}
+        @if(session('error'))
+            <div class="alert alert-danger text-center mb-3 mt-3">{{ session('error') }}</div>
+        @endif
     </div>
 
     <div class="card-form-body">
@@ -13,12 +18,13 @@
             @csrf
             @method('PUT')
 
-            {{-- Nama Material --}}
+            {{-- Nama Material (SEKARANG BISA DIUBAH) --}}
             <div class="form-group-new">
                 <label for="nama_material">Nama Material</label>
                 <select name="nama_material" id="nama_material" class="form-control-new" required>
                     @foreach($materialList as $material)
-                        <option value="{{ $material->nama_material }}" {{ $materialKembali->nama_material == $material->nama_material ? 'selected' : '' }}>
+                        <option value="{{ $material->nama_material }}" 
+                            {{ (old('nama_material') ?? $materialKembali->nama_material) == $material->nama_material ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
@@ -27,39 +33,63 @@
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
+            
+            {{-- Group Jumlah dan Satuan Material (Satuan SEKARANG BISA DIUBAH) --}}
+            <div class="d-flex-group-form">
+                {{-- Jumlah Material Kembali --}}
+                <div class="form-group-new half-width">
+                    <label for="jumlah_material">Jumlah Material Kembali</label>
+                    <input type="number" 
+                        name="jumlah_material" 
+                        id="jumlah_material" 
+                        class="form-control-new"
+                        min="1"
+                        value="{{ old('jumlah_material') ?? $materialKembali->jumlah_material }}" 
+                        required>
+                    @error('jumlah_material')
+                        <small style="color:red;">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                {{-- Satuan Material (SEKARANG BISA DIUBAH) --}}
+                <div class="form-group-new half-width">
+                    <label for="satuan_material">Satuan Material</label>
+                    <select name="satuan_material" id="satuan_material" class="form-control-new" required>
+                        <option value="" disabled>Pilih Satuan</option>
+                        @foreach($satuanList as $satuan)
+                            <option value="{{ $satuan }}" 
+                                {{ (old('satuan_material') ?? $materialKembali->satuan_material) == $satuan ? 'selected' : '' }}>
+                                {{ $satuan }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('satuan_material')
+                        <small style="color:red;">{{ $message }}</small>
+                    @enderror
+                </div>
+            </div>
 
             {{-- Nama Petugas --}}
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
                 <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new"
-                    value="{{ $materialKembali->nama_petugas }}" placeholder="Masukkan nama petugas" required>
+                    value="{{ old('nama_petugas') ?? $materialKembali->nama_petugas }}" placeholder="Masukkan nama petugas" required>
                 @error('nama_petugas')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
 
-            {{-- Jumlah Material --}}
-            <div class="form-group-new">
-                <label for="jumlah_material">Jumlah Material Kembali</label>
-                <input type="number" name="jumlah_material" id="jumlah_material" class="form-control-new"
-                    value="{{ $materialKembali->jumlah_material }}" required>
-                @error('jumlah_material')
-                    <small style="color:red;">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <!-- Tanggal dan Waktu (Hanya tampil, user tidak bisa ubah) -->
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
 
-                <!-- Tampilan tanggal (disabled) -->
-                <input type="datetime-local" id="tanggal_display"
+                <input type="text" 
+                    id="tanggal_display" 
                     class="form-control-new"
-                    value="{{ \Carbon\Carbon::parse($materialKembali->tanggal)->format('Y-m-d\TH:i') }}"
+                    value="{{ \Carbon\Carbon::parse($materialKembali->tanggal)->format('d M Y, H:i') }} WITA"
                     disabled>
+                <small>Hanya tanggal ini yang tidak dapat diubah.</small>
             </div>
 
-            <!-- Hidden input agar tanggal tetap terkirim ke server -->
             <input type="hidden" name="tanggal"
                 value="{{ \Carbon\Carbon::parse($materialKembali->tanggal)->format('Y-m-d H:i:s') }}">
 
@@ -68,9 +98,10 @@
                 <label for="foto">Foto</label>
                 @if($materialKembali->foto)
                     <div style="margin-bottom: 10px;">
-                        <img src="{{ asset('storage/' . $materialKembali->foto) }}" 
-                             alt="Foto Material" 
-                             class="table-foto">
+                        <img src="{{ route('material_kembali.show-foto', $materialKembali->id) }}" 
+                            alt="Foto Material" 
+                            class="table-foto" 
+                            style="max-width: 150px; height: auto; border: 1px solid #ddd; padding: 5px;">
                     </div>
                 @endif
                 <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
@@ -85,7 +116,6 @@
                 <a href="{{ route('material_kembali.index') }}" class="btn-batal">Batal</a>
                 <button type="submit" class="btn-simpan">Simpan</button>
             </div>
-
         </form>
     </div>
 </div>
@@ -103,5 +133,16 @@ Swal.fire({
 });
 </script>
 @endif
+
+{{-- Optional: CSS untuk tata letak bersebelahan --}}
+<style>
+    .d-flex-group-form {
+        display: flex;
+        gap: 20px; /* Jarak antar kolom */
+    }
+    .d-flex-group-form .half-width {
+        flex: 1; /* Agar kedua kolom memiliki lebar yang sama */
+    }
+</style>
 
 @endsection

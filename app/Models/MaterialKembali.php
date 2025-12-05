@@ -15,6 +15,7 @@ class MaterialKembali extends Model
         'nama_material',
         'nama_petugas',
         'jumlah_material',
+        'satuan_material',
         'tanggal',
         'foto'
     ];

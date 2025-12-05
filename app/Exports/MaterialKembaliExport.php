@@ -6,6 +6,7 @@ use App\Models\MaterialKembali;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Illuminate\Support\Collection; // Import Collection
 
 class MaterialKembaliExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
@@ -13,36 +14,55 @@ class MaterialKembaliExport implements FromCollection, WithHeadings, ShouldAutoS
     protected $akhir;
 
     public function __construct($mulai, $akhir)
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Menampilkan data material kembali beserta pencarian nama material atau nama petugas
- *
- * @param \Illuminate\Http\Request $request
- * @return \Illuminate\Http\Response
- */
-/*******  93afff6d-2a9d-495a-9c32-95c784bb4c20  *******/    {
+    {
         $this->mulai = $mulai;
         $this->akhir = $akhir;
     }
 
-    public function collection()
+    /**
+     * Mengambil data material kembali, menggabungkan Jumlah dan Satuan, lalu memformat tanggal.
+     */
+    public function collection(): Collection
     {
-        return MaterialKembali::whereBetween('tanggal', [$this->mulai, $this->akhir])
+        $materialKembali = MaterialKembali::whereBetween('tanggal', [$this->mulai, $this->akhir])
             ->orderBy('tanggal', 'asc')
             ->get([
                 'nama_material',
                 'nama_petugas',
                 'jumlah_material',
+                'satuan_material', // 🟢 PENAMBAHAN: Ambil kolom satuan
                 'tanggal',
             ]);
+
+        // 🟢 PERBAIKAN: Gunakan map() untuk memanipulasi collection (menggabungkan kolom)
+        return $materialKembali->map(function ($item) {
+            // Gabungkan jumlah_material dan satuan_material
+            $jumlahSatuan = $item->jumlah_material . ' ' . $item->satuan_material;
+
+            // Format tanggal ke zona waktu WITA (Asia/Makassar)
+            $tanggalWITA = \Carbon\Carbon::parse($item->tanggal)
+                ->setTimezone('Asia/Makassar')
+                ->format('d M Y, H:i');
+
+            return [
+                $item->nama_material,
+                $item->nama_petugas,
+                $jumlahSatuan, // Kolom yang sudah digabungkan
+                $tanggalWITA,
+            ];
+        });
     }
 
+    /**
+     * Menentukan judul kolom pada file Excel
+     */
     public function headings(): array
     {
+        // 🟢 PERBAIKAN: Judul kolom disesuaikan dengan urutan di collection()
         return [
             'Nama Material',
             'Nama Petugas',
-            'Jumlah / Unit',
+            'Jumlah', // 🟢 PENYESUAIAN: Judul kolom diganti menjadi 'Jumlah'
             'Tanggal (WITA)',
         ];
     }

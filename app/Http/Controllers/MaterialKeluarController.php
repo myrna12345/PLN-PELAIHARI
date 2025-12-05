@@ -40,8 +40,8 @@ class MaterialKeluarController extends Controller
     {
         // Ambil material yang kategorinya BUKAN 'siaga' (bisa 'teknik' atau null)
         $materialList = Material::where('kategori', '!=', 'siaga')
-                                 ->orWhereNull('kategori')
-                                 ->get();
+                                     ->orWhereNull('kategori')
+                                     ->get();
                                      
         return view('material_keluar.create', compact('materialList'));
     }
@@ -54,6 +54,8 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
+            // 💡 TAMBAH VALIDASI UNTUK SATUAN
+            'satuan_material' => 'required|string|max:50', 
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
 
@@ -76,17 +78,19 @@ class MaterialKeluarController extends Controller
             
             if ($materialStok) {
                 // Cek ketersediaan stok
+                // ⚠️ Anda juga mungkin perlu membandingkan satuan di sini jika stok menyimpan satuan yang berbeda
                 if ($materialStok->jumlah >= $jumlahKeluar) {
                     // Kurangi stok
                     $materialStok->decrement('jumlah', $jumlahKeluar);
                     
                     // 4. Buat record Material Keluar
+                    // Array $validated sudah berisi 'satuan'
                     MaterialKeluar::create($validated);
 
                     return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil disimpan dan stok Stand By berhasil dikurangi!');
                 } else {
                     // Stok tidak cukup
-                    return redirect()->back()->with('error', 'Gagal: Jumlah material keluar melebihi stok yang tersedia di Material Stand By (Stok tersedia: ' . $materialStok->jumlah . ')')->withInput();
+                    return redirect()->back()->with('error', 'Gagal: Jumlah material keluar melebihi stok yang tersedia di Material Stand By (Stok tersedia: ' . $materialStok->jumlah . ' ' . $materialStok->satuan . ')')->withInput();
                 }
             } else {
                  // Tidak ada stok awal yang tercatat
@@ -111,8 +115,8 @@ class MaterialKeluarController extends Controller
         $data = MaterialKeluar::findOrFail($id);
         
         $materialList = Material::where('kategori', '!=', 'siaga')
-                                 ->orWhereNull('kategori')
-                                 ->get();
+                                     ->orWhereNull('kategori')
+                                     ->get();
 
         return view('material_keluar.edit', compact('data', 'materialList'));
     }
@@ -129,6 +133,7 @@ class MaterialKeluarController extends Controller
             'nama_material' => 'required|string|max:255',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
+            'satuan_material' => 'required|string|max:50', 
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
         
@@ -148,7 +153,7 @@ class MaterialKeluarController extends Controller
                     if ($materialStok->jumlah >= $stokSelisih) {
                         $materialStok->decrement('jumlah', $stokSelisih);
                     } else {
-                        return redirect()->back()->with('error', 'Gagal update: Penambahan pengeluaran melebihi stok yang tersedia (Tersedia: ' . $materialStok->jumlah . ')')->withInput();
+                        return redirect()->back()->with('error', 'Gagal update: Penambahan pengeluaran melebihi stok yang tersedia (Tersedia: ' . $materialStok->jumlah . ' ' . $materialStok->satuan . ')')->withInput();
                     }
                 } else {
                     // Jika jumlah berkurang (pengeluaran ditarik), tambahkan stok
@@ -166,6 +171,7 @@ class MaterialKeluarController extends Controller
             $validated['foto'] = $request->file('foto')->store('material_keluar', 'public');
         }
 
+        // Array $validated sudah berisi 'satuan'
         $data->update($validated);
 
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil diperbarui dan stok Stand By disesuaikan!');
