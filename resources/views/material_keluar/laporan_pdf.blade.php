@@ -24,7 +24,6 @@
                 <th>No</th>
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
-                {{-- 🟢 PERBAIKAN: Nama kolom diubah menjadi "Jumlah" saja --}}
                 <th>Jumlah</th>
                 <th>Tanggal (WITA)</th>
             </tr>
@@ -33,7 +32,7 @@
             @forelse ($items as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item->material->nama_material ?? $item->nama_material }}</td> 
+                    <td>{{ $item->material->nama_material ?? '-' }}</td>
                     <td>{{ $item->nama_petugas }}</td>
                     
                     {{-- 🟢 PERBAIKAN: Gabungkan jumlah_material dan satuan_material --}}

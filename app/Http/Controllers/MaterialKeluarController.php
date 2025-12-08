@@ -13,6 +13,14 @@ use Carbon\Carbon;
 
 class MaterialKeluarController extends Controller
 {
+    /**
+     * Pastikan Anda telah menambahkan relasi berikut di model MaterialKeluar:
+     * * public function material()
+     * {
+     * return $this->belongsTo(Material::class, 'material_id');
+     * }
+     */
+
     // INDEX: Tampilkan data + fitur pencarian
     public function index(Request $request)
     {
@@ -20,12 +28,25 @@ class MaterialKeluarController extends Controller
         $tanggalMulai = $request->query('tanggal_mulai');
         $tanggalAkhir = $request->query('tanggal_akhir');
 
-        $query = MaterialKeluar::query();
+        // Menggunakan with('material') untuk eager loading data relasi Material
+        $query = MaterialKeluar::with('material');
 
-        // Filter pencarian nama material / petugas
+        // Filter pencarian:
         if ($search) {
-            $query->where('nama_material', 'like', "%{$search}%")
-                  ->orWhere('nama_petugas', 'like', "%{$search}%");
+            // Perbaikan: Cari berdasarkan nama_petugas di tabel material_keluar
+            // ATAU cari nama_material di tabel 'materials' melalui relasi.
+            $query->where('nama_petugas', 'like', "%{$search}%")
+                  ->orWhereHas('material', function ($q) use ($search) {
+                      $q->where('nama_material', 'like', "%{$search}%");
+                  });
+        }
+
+        // Filter tanggal (Tambahan: jika Anda menggunakan filter tanggal)
+        if ($tanggalMulai && $tanggalAkhir) {
+             $query->whereBetween('tanggal', [
+                Carbon::parse($tanggalMulai)->startOfDay(),
+                Carbon::parse($tanggalAkhir)->endOfDay()
+            ]);
         }
 
 
@@ -38,24 +59,26 @@ class MaterialKeluarController extends Controller
     // CREATE
     public function create()
     {
-        // Ambil material yang kategorinya BUKAN 'siaga' (bisa 'teknik' atau null)
         $materialList = Material::where('kategori', '!=', 'siaga')
-                                     ->orWhereNull('kategori')
-                                     ->get();
-                                     
-        return view('material_keluar.create', compact('materialList'));
+                                ->orWhereNull('kategori')
+                                ->get();
+
+        // Daftar satuan, samakan dengan Material Kembali
+        $satuanList = ['Buah', 'Meter'];
+
+        return view('material_keluar.create', compact('materialList', 'satuanList'));
     }
+
 
 
     // 💾 STORE
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nama_material' => 'required|string|max:255',
+            $validated = $request->validate([
+            'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            // 💡 TAMBAH VALIDASI UNTUK SATUAN
-            'satuan_material' => 'required|string|max:50', 
+            'satuan_material' => 'required|string|in:Buah,Meter',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
 
@@ -66,25 +89,26 @@ class MaterialKeluarController extends Controller
             $validated['foto'] = $request->file('foto')->store('material_keluar', 'public');
         }
         
-        // 2. TENTUKAN KUNCI MATERIAL ID DARI NAMA MATERIAL (Bridging Relasi)
-        $materialSource = Material::where('nama_material', $validated['nama_material'])->first();
+        // 2. Mengambil material_id langsung dari $validated
+        $materialId = $validated['material_id'];
+        $jumlahKeluar = $validated['jumlah_material'];
+
+        // Cek apakah material_id valid (Sudah divalidasi dengan 'exists', tapi untuk mengambil data)
+        $materialSource = Material::find($materialId);
 
         // 🟢 3. LOGIKA PENGURANGAN STOK (INVENTORY LOGIC) 🟢
         if ($materialSource) {
-            $materialId = $materialSource->id;
-            $jumlahKeluar = $validated['jumlah_material'];
-            
+            // materialId sudah tersedia
             $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
             
             if ($materialStok) {
                 // Cek ketersediaan stok
-                // ⚠️ Anda juga mungkin perlu membandingkan satuan di sini jika stok menyimpan satuan yang berbeda
                 if ($materialStok->jumlah >= $jumlahKeluar) {
                     // Kurangi stok
                     $materialStok->decrement('jumlah', $jumlahKeluar);
                     
                     // 4. Buat record Material Keluar
-                    // Array $validated sudah berisi 'satuan'
+                    // Array $validated sudah berisi 'material_id' dan 'satuan_material'
                     MaterialKeluar::create($validated);
 
                     return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil disimpan dan stok Stand By berhasil dikurangi!');
@@ -98,14 +122,15 @@ class MaterialKeluarController extends Controller
             }
         }
         
-        // Fallback jika nama material tidak ditemukan
-        return redirect()->back()->with('error', 'Gagal: Nama Material tidak ditemukan dalam daftar Material utama.')->withInput();
+        // Fallback (Sebenarnya tidak tercapai jika validasi exists:materials,id berhasil)
+        return redirect()->back()->with('error', 'Gagal: Material ID tidak ditemukan dalam daftar Material utama.')->withInput();
     }
     
     // lihat show
     public function lihat($id)
     {
-        $item = MaterialKeluar::findOrFail($id);
+        // Menggunakan with('material') untuk memuat data material
+        $item = MaterialKeluar::with('material')->findOrFail($id);
         return view('material_keluar.lihat', compact('item'));
     }
 
@@ -113,13 +138,17 @@ class MaterialKeluarController extends Controller
     public function edit($id)
     {
         $data = MaterialKeluar::findOrFail($id);
-        
-        $materialList = Material::where('kategori', '!=', 'siaga')
-                                     ->orWhereNull('kategori')
-                                     ->get();
 
-        return view('material_keluar.edit', compact('data', 'materialList'));
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->get();
+
+        // Sama seperti create()
+        $satuanList = ['Buah', 'Meter'];
+
+        return view('material_keluar.edit', compact('data', 'materialList', 'satuanList'));
     }
+
 
     // 🔁 UPDATE
     public function update(Request $request, $id)
@@ -130,22 +159,57 @@ class MaterialKeluarController extends Controller
         $jumlahLama = $data->jumlah_material; 
 
         $validated = $request->validate([
-            'nama_material' => 'required|string|max:255',
+            'material_id' => 'required|exists:materials,id',
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'satuan_material' => 'required|string|max:50', 
+            'satuan_material' => 'required|string|in:Buah,Meter',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
+
         
         $jumlahBaru = $validated['jumlah_material'];
-        $materialSource = Material::where('nama_material', $validated['nama_material'])->first();
+        // PERBAIKAN: Gunakan material_id dari input baru
+        $materialIdBaru = $validated['material_id'];
         
-        // Tentukan selisih stok yang harus diubah
+        // Cek apakah material_id berubah
+        $materialIdLama = $data->material_id;
+        
         $stokSelisih = $jumlahBaru - $jumlahLama;
+
+        // Logika kompleks karena ID material mungkin berubah
         
-        if ($materialSource && $stokSelisih !== 0) {
-            $materialId = $materialSource->id;
-            $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
+        // KASUS 1: ID Material Berubah (Perlu mengembalikan stok lama & mengurangi stok baru)
+        if ($materialIdBaru != $materialIdLama) {
+             // 1. Kembalikan stok lama (berdasarkan material_id lama)
+             $materialStokLama = MaterialStandBy::where('material_id', $materialIdLama)->first();
+             if ($materialStokLama) {
+                // Tambahkan kembali jumlah yang lama
+                $materialStokLama->increment('jumlah', $jumlahLama);
+             }
+
+             // 2. Kurangi stok baru (berdasarkan material_id baru)
+             $materialStokBaru = MaterialStandBy::where('material_id', $materialIdBaru)->first();
+             if ($materialStokBaru) {
+                 if ($materialStokBaru->jumlah >= $jumlahBaru) {
+                     $materialStokBaru->decrement('jumlah', $jumlahBaru);
+                 } else {
+                     // Gagal, kembalikan stok lama lagi
+                     if ($materialStokLama) {
+                         $materialStokLama->decrement('jumlah', $jumlahLama);
+                     }
+                     return redirect()->back()->with('error', 'Gagal update: Jumlah material baru melebihi stok yang tersedia (Tersedia: ' . $materialStokBaru->jumlah . ' ' . $materialStokBaru->satuan . ')')->withInput();
+                 }
+             } else {
+                 // Gagal, kembalikan stok lama lagi
+                 if ($materialStokLama) {
+                     $materialStokLama->decrement('jumlah', $jumlahLama);
+                 }
+                 return redirect()->back()->with('error', 'Gagal update: Stok Material Stand By baru tidak ditemukan.')->withInput();
+             }
+
+        // KASUS 2: ID Material SAMA & Jumlah Berubah (Perlu menyesuaikan selisih)
+        } elseif ($stokSelisih !== 0) {
+            $materialStok = MaterialStandBy::where('material_id', $materialIdBaru)->first(); // materialIdBaru = materialIdLama
             
             if ($materialStok) {
                 if ($stokSelisih > 0) {
@@ -163,7 +227,10 @@ class MaterialKeluarController extends Controller
                  return redirect()->back()->with('error', 'Gagal update: Stok Material Stand By tidak ditemukan.')->withInput();
             }
         }
-        
+        // KASUS 3: ID Material SAMA & Jumlah SAMA (Tidak ada penyesuaian stok)
+        // Lanjutkan update data non-stok
+
+        // LOGIKA UPLOAD FOTO (Tidak Berubah)
         if ($request->hasFile('foto')) {
             if ($data->foto) {
                 Storage::disk('public')->delete($data->foto);
@@ -171,7 +238,7 @@ class MaterialKeluarController extends Controller
             $validated['foto'] = $request->file('foto')->store('material_keluar', 'public');
         }
 
-        // Array $validated sudah berisi 'satuan'
+        // Array $validated sudah berisi 'material_id', 'satuan_material', dll.
         $data->update($validated);
 
         return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil diperbarui dan stok Stand By disesuaikan!');
@@ -183,13 +250,14 @@ class MaterialKeluarController extends Controller
         $data = MaterialKeluar::findOrFail($id);
         
         // 🟢 LOGIKA PENGEMBALIAN STOK SAAT DELETE 🟢
-        $materialSource = Material::where('nama_material', $data->nama_material)->first();
-        if ($materialSource) {
-            $materialStok = MaterialStandBy::where('material_id', $materialSource->id)->first();
-            if ($materialStok) {
-                // Tambahkan kembali jumlah yang dikeluarkan
-                $materialStok->increment('jumlah', $data->jumlah_material);
-            }
+        // PERBAIKAN: Gunakan material_id dari data lama
+        $materialId = $data->material_id;
+        $jumlahKeluar = $data->jumlah_material;
+
+        $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
+        if ($materialStok) {
+            // Tambahkan kembali jumlah yang dikeluarkan
+            $materialStok->increment('jumlah', $jumlahKeluar);
         }
         // END LOGIKA PENGEMBALIAN STOK
 
@@ -236,7 +304,9 @@ class MaterialKeluarController extends Controller
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         $filename = 'laporan_material_keluar_' . $tanggalMulai->format('Ymd') . '_sd_' . $tanggalAkhir->format('Ymd');
 
-        $items = MaterialKeluar::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+        // PERBAIKAN: Menggunakan with('material') untuk memuat data material
+        $items = MaterialKeluar::with('material') 
+                               ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
                                ->orderBy('tanggal', 'asc')
                                ->get();
 

@@ -59,7 +59,8 @@
                 @forelse($materialKeluar as $item)
                     <tr>
                         <td>{{ $materialKeluar->firstItem() + $loop->index }}</td>
-                        <td>{{ $item->material->nama_material ?? $item->nama_material }}</td> 
+                        {{-- 🛠️ PERBAIKAN: Mengambil nama material dari relasi 'material' --}}
+                        <td>{{ $item->material->nama_material ?? '-' }}</td> 
                         <td>{{ $item->nama_petugas }}</td>
                         
                         {{-- Data Jumlah (termasuk Satuan) --}}

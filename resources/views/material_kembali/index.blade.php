@@ -15,7 +15,7 @@
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" placeholder="Cari Nama Material / Petugas..." value="{{ request('search') }}">
             </div>
-            
+
             {{-- 🟢 PENAMBAHAN: Input Tanggal Mulai dan Akhir untuk Filter 🟢 --}}
             <div class="date-filter-group">
                 <input type="date" name="tanggal_mulai" 
@@ -38,6 +38,7 @@
         <div class="alert alert-success text-center">{{ session('success') }}</div>
     @endif
     
+    {{-- Tambahkan error alert untuk laporan --}}
     @if(session('error'))
         <div class="alert alert-danger text-center">{{ session('error') }}</div>
     @endif
@@ -49,7 +50,7 @@
                     <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
-                    <th>Jumlah & Satuan</th>
+                    <th>Jumlah</th> 
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
@@ -59,21 +60,27 @@
                 @forelse($materialKembali as $item)
                     <tr>
                         <td>{{ $materialKembali->firstItem() + $loop->index }}</td>
-                        <td>{{ $item->material->nama_material ?? $item->nama_material }}</td>
+                        
+                        {{-- Mengambil nama material melalui relasi 'material' --}}
+                        <td>{{ $item->material->nama_material ?? 'Material Dihapus' }}</td>
+                        
                         <td>{{ $item->nama_petugas }}</td>
                         
-                        <td>{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
+                        {{-- Menggabungkan jumlah dan satuan --}}
+                        <td>{{ $item->jumlah_material }} {{ $item->satuan }}</td> 
                         
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
 
                         <td style="text-align: center; vertical-align: top;">
                             @if($item->foto)
+                                {{-- Menggunakan route showFoto --}}
                                 <img src="{{ route('material_kembali.show-foto', $item->id) }}" 
                                     alt="Foto Material" 
                                     class="table-foto zoomable"
                                     style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;"
                                     title="Klik untuk memperbesar">
 
+                                {{-- Menggunakan route downloadFoto --}}
                                 <a href="{{ route('material_kembali.download-foto', $item->id) }}" 
                                     class="btn-foto-download" 
                                     title="Download Foto">
@@ -86,8 +93,8 @@
 
                         <td>
                             <div class="table-actions">
-                                <a href="{{ route('material_kembali.edit', $item->id) }}" class="btn btn-edit">Edit</a>
-                                <form action="{{ route('material_kembali.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Aksi ini akan mengurangi stok Stand By!')">
+                                <a href="{{ route('material_kembali.edit', $item->id) }}" class="btn-edit">Edit</a>
+                                <form action="{{ route('material_kembali.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Aksi ini akan mengurangi stok Stand By.')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-hapus">Hapus</button>
@@ -97,6 +104,7 @@
                     </tr>
                 @empty
                     <tr>
+                        {{-- Colspan 7 untuk 7 kolom --}}
                         <td colspan="7" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
@@ -111,13 +119,21 @@
     <div class="index-footer-form">
         <form action="{{ route('material_kembali.download') }}" method="POST" class="form-download">
             @csrf
+            
+            @error('tanggal_mulai')
+                <div class="text-danger small mb-2" style="margin-left: 10px;">{{ $message }}</div>
+            @enderror
+            @error('tanggal_akhir')
+                <div class="text-danger small mb-2" style="margin-left: 10px;">{{ $message }}</div>
+            @enderror
+            
             <div class="form-group-tanggal">
                 <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" value="{{ old('tanggal_mulai') }}" required>
             </div>
             <div class="form-group-tanggal">
                 <label for="tanggal_akhir_pdf">Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir" id="tanggal_akhir_pdf" class="form-control-tanggal" required>
+                <input type="date" name="tanggal_akhir" id="tanggal_akhir_pdf" class="form-control-tanggal" value="{{ old('tanggal_akhir') }}" required>
             </div>
             <button type="submit" name="submit_pdf" value="1" class="btn btn-pdf">
                 <i class="fas fa-file-pdf"></i> Unduh PDF
@@ -130,21 +146,12 @@
 
 </div>
 
-{{-- CSS Tambahan --}}
+{{-- 🟢 PENAMBAHAN: Tambahkan CSS untuk date-filter-group agar layout pencarian berfungsi --}}
 <style>
-    /* Mengubah nama kelas header agar bisa diatur display: block; (atau menggunakan div terpisah) */
-    .index-header-material-kembali {
-        margin-bottom: 20px; /* Jarak antara header/judul dan form pencarian/tabel */
-    }
-    .index-header-material-kembali h2 {
-        margin-bottom: 15px; /* Jarak antara judul dan form di bawahnya */
-    }
-    
-    /* Search Form (Tetap sama, memastikan elemen sejajar horizontal) */
     .search-form {
         display: flex;
         align-items: center;
-        gap: 15px; 
+        gap: 15px; /* Jarak antar elemen */
     }
     .date-filter-group {
         display: flex;
@@ -154,7 +161,7 @@
         padding: 5px 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        width: 130px; 
+        width: 130px; /* Atur lebar agar tidak terlalu panjang */
     }
 </style>
 @endsection

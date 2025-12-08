@@ -27,14 +27,16 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
      */
     public function collection(): Collection
     {
-        $materialKeluar = MaterialKeluar::whereBetween('tanggal', [$this->tanggalMulai, $this->tanggalAkhir])
+        // 🛠️ PERBAIKAN: Gunakan with('material') untuk memuat data relasi Material
+        $materialKeluar = MaterialKeluar::with('material')
+            ->whereBetween('tanggal', [$this->tanggalMulai, $this->tanggalAkhir])
             ->orderBy('tanggal', 'asc')
-            // Ambil semua kolom yang diperlukan, termasuk 'satuan_material'
+            // Ambil kolom yang ada di tabel material_keluar
             ->get([
-                'nama_material',
+                'material_id', // Diperlukan untuk mengakses relasi
                 'nama_petugas',
                 'jumlah_material',
-                'satuan_material', // 👈 Ambil kolom satuan
+                'satuan_material',
                 'tanggal',
             ]);
 
@@ -48,8 +50,11 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
                 ->setTimezone('Asia/Makassar')
                 ->format('d M Y, H:i');
 
+            // 🛠️ PERBAIKAN: Ambil nama material dari relasi material->nama_material
+            $namaMaterial = $item->material->nama_material ?? '-';
+
             return [
-                $item->nama_material,
+                $namaMaterial, // Data Nama Material dari relasi
                 $item->nama_petugas,
                 $jumlahSatuan, // Kolom yang sudah digabungkan
                 $tanggalWITA,
@@ -62,11 +67,11 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
      */
     public function headings(): array
     {
-        // 🟢 PERBAIKAN: Judul kolom disesuaikan dengan urutan di collection()
+        // 🟢 Judul kolom disesuaikan dengan urutan di collection() (Tidak ada perubahan di sini)
         return [
             'Nama Material',
             'Nama Petugas',
-            'Jumlah', // 👈 Nama kolom diganti menjadi 'Jumlah' saja
+            'Jumlah',
             'Tanggal (WITA)',
         ];
     }

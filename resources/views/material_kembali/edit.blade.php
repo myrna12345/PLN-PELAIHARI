@@ -7,7 +7,6 @@
     <div class="card-form-header">
         <h2>Edit Material Kembali</h2>
         
-        {{-- Tampilkan error dari controller, misalnya unit tidak cocok atau perubahan nama/satuan tidak diizinkan --}}
         @if(session('error'))
             <div class="alert alert-danger text-center mb-3 mt-3">{{ session('error') }}</div>
         @endif
@@ -18,32 +17,35 @@
             @csrf
             @method('PUT')
 
-            {{-- Nama Material (SEKARANG BISA DIUBAH) --}}
+            {{-- Nama Material (Select) --}}
             <div class="form-group-new">
-                <label for="nama_material">Nama Material</label>
-                <select name="nama_material" id="nama_material" class="form-control-new" required>
+                <label for="material_id">Nama Material</label>
+                <select name="material_id" id="material_id" class="form-control-new" required>
+                    <option value="" disabled>Pilih Material</option>
                     @foreach($materialList as $material)
-                        <option value="{{ $material->nama_material }}" 
-                            {{ (old('nama_material') ?? $materialKembali->nama_material) == $material->nama_material ? 'selected' : '' }}>
+                        <option value="{{ $material->id }}" 
+                            {{ (old('material_id') == $material->id || $materialKembali->material_id == $material->id) ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                @error('nama_material')
+                @error('material_id')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
             
-            {{-- Group Jumlah dan Satuan Material (Satuan SEKARANG BISA DIUBAH) --}}
+            {{-- Group Jumlah dan Satuan Material --}}
             <div class="d-flex-group-form">
                 {{-- Jumlah Material Kembali --}}
                 <div class="form-group-new half-width">
                     <label for="jumlah_material">Jumlah Material Kembali</label>
                     <input type="number" 
+                        {{-- Nama input disesuaikan agar cocok dengan Controller (Diasumsikan menggunakan 'jumlah_material' untuk jumlah) --}}
                         name="jumlah_material" 
                         id="jumlah_material" 
                         class="form-control-new"
                         min="1"
+                        {{-- Pemuatan nilai yang benar --}}
                         value="{{ old('jumlah_material') ?? $materialKembali->jumlah_material }}" 
                         required>
                     @error('jumlah_material')
@@ -51,19 +53,22 @@
                     @enderror
                 </div>
 
-                {{-- Satuan Material (SEKARANG BISA DIUBAH) --}}
+                {{-- Satuan Material --}}
                 <div class="form-group-new half-width">
-                    <label for="satuan_material">Satuan Material</label>
-                    <select name="satuan_material" id="satuan_material" class="form-control-new" required>
+                    <label for="satuan">Satuan Material</label>
+                    {{-- ✅ PERBAIKAN UTAMA: Name diubah kembali menjadi 'satuan' agar lolos validasi 'The satuan field is required.' --}}
+                    <select name="satuan" id="satuan" class="form-control-new" required>
                         <option value="" disabled>Pilih Satuan</option>
                         @foreach($satuanList as $satuan)
                             <option value="{{ $satuan }}" 
-                                {{ (old('satuan_material') ?? $materialKembali->satuan_material) == $satuan ? 'selected' : '' }}>
+                                {{-- Menggunakan nama field/kolom 'satuan' untuk memuat nilai lama --}}
+                                {{ (old('satuan') == $satuan || $materialKembali->satuan == $satuan) ? 'selected' : '' }}>
                                 {{ $satuan }}
                             </option>
                         @endforeach
                     </select>
-                    @error('satuan_material')
+                    {{-- Error message disesuaikan menggunakan nama 'satuan' --}}
+                    @error('satuan')
                         <small style="color:red;">{{ $message }}</small>
                     @enderror
                 </div>
@@ -81,7 +86,6 @@
 
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
-
                 <input type="text" 
                     id="tanggal_display" 
                     class="form-control-new"

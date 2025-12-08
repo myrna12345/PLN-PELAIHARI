@@ -23,7 +23,7 @@
                 <th>No</th>
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
-                {{-- 🟢 PERBAIKAN: Mengganti "Jumlah/Unit" menjadi "Jumlah" --}}
+                {{-- Judul kolom sudah benar: "Jumlah" --}}
                 <th>Jumlah</th>
                 <th>Tanggal (WITA)</th>
             </tr>
@@ -32,17 +32,20 @@
             @forelse ($items as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item->nama_material }}</td>
+                    
+                    {{-- 🛠️ PERBAIKAN: Mengambil nama material dari relasi (jika menggunakan relasi material_id) --}}
+                    {{-- Menggunakan $item->material->nama_material (jika material_id digunakan) atau $item->nama_material (jika nama material disimpan langsung) --}}
+                    <td>{{ $item->material->nama_material ?? $item->nama_material }}</td> 
+                    
                     <td>{{ $item->nama_petugas }}</td>
                     
-                    {{-- 🟢 PERBAIKAN: Menampilkan Jumlah dan Satuan Material --}}
-                    <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
+                    {{-- ✅ PERBAIKAN: Menggunakan $item->satuan, sesuai dengan properti yang dimuat di view edit terakhir --}}
+                    <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan }}</td>
                     
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty
                 <tr>
-                    {{-- colspan disesuaikan menjadi 5 --}}
                     <td colspan="5" class="text-center">Tidak ada data pada periode ini.</td>
                 </tr>
             @endforelse

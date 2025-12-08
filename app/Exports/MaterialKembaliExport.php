@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Illuminate\Support\Collection; // Import Collection
+use Carbon\Carbon; // Import Carbon untuk kejelasan
 
 class MaterialKembaliExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
@@ -24,30 +25,31 @@ class MaterialKembaliExport implements FromCollection, WithHeadings, ShouldAutoS
      */
     public function collection(): Collection
     {
-        $materialKembali = MaterialKembali::whereBetween('tanggal', [$this->mulai, $this->akhir])
+        // 🛠️ PERBAIKAN: Gunakan with('material') untuk memuat data relasi Material
+        $materialKembali = MaterialKembali::with('material')
+            ->whereBetween('tanggal', [$this->mulai, $this->akhir])
             ->orderBy('tanggal', 'asc')
-            ->get([
-                'nama_material',
-                'nama_petugas',
-                'jumlah_material',
-                'satuan_material', // 🟢 PENAMBAHAN: Ambil kolom satuan
-                'tanggal',
-            ]);
+            ->get(); 
+            // 💡 Catatan: Menghapus get([...]) agar relasi material dapat diakses dengan mudah
 
-        // 🟢 PERBAIKAN: Gunakan map() untuk memanipulasi collection (menggabungkan kolom)
         return $materialKembali->map(function ($item) {
-            // Gabungkan jumlah_material dan satuan_material
-            $jumlahSatuan = $item->jumlah_material . ' ' . $item->satuan_material;
+            
+            // ✅ PERBAIKAN NAMA MATERIAL: Ambil nama material dari relasi material->nama_material
+            // Menggunakan null coalescing operator untuk fallback jika relasi gagal dimuat
+            $namaMaterial = $item->material->nama_material ?? '-';
+            
+            // ✅ PERBAIKAN SATUAN: Gabungkan jumlah_material dan satuan (menggunakan $item->satuan sesuai model yang diunggah)
+            $jumlahSatuan = $item->jumlah_material . ' ' . $item->satuan;
 
             // Format tanggal ke zona waktu WITA (Asia/Makassar)
-            $tanggalWITA = \Carbon\Carbon::parse($item->tanggal)
+            $tanggalWITA = Carbon::parse($item->tanggal)
                 ->setTimezone('Asia/Makassar')
                 ->format('d M Y, H:i');
 
             return [
-                $item->nama_material,
+                $namaMaterial,      // Data Nama Material dari relasi
                 $item->nama_petugas,
-                $jumlahSatuan, // Kolom yang sudah digabungkan
+                $jumlahSatuan,      // Kolom yang sudah digabungkan
                 $tanggalWITA,
             ];
         });
@@ -58,11 +60,11 @@ class MaterialKembaliExport implements FromCollection, WithHeadings, ShouldAutoS
      */
     public function headings(): array
     {
-        // 🟢 PERBAIKAN: Judul kolom disesuaikan dengan urutan di collection()
+        // Judul kolom sudah benar dan sesuai dengan urutan di collection()
         return [
             'Nama Material',
             'Nama Petugas',
-            'Jumlah', // 🟢 PENYESUAIAN: Judul kolom diganti menjadi 'Jumlah'
+            'Jumlah', // Kolom gabungan Jumlah dan Satuan
             'Tanggal (WITA)',
         ];
     }

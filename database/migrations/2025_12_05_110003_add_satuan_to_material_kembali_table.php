@@ -6,20 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-{
-    Schema::table('material_kembali', function (Blueprint $table) {
-        $table->string('satuan_material', 50)->after('jumlah_material'); 
-    });
-}
+    {
+        Schema::table('material_kembali', function (Blueprint $table) {
+            // 🟢 Tambahkan kolom satuan (string, max 50 karakter)
+            $table->string('satuan', 50)->nullable()->after('jumlah_material');
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('material_kembalis', function (Blueprint $table) {
-        $table->dropColumn('satuan_material');
-    });
-}
+    public function down(): void
+    {
+        Schema::table('material_kembali', function (Blueprint $table) {
+            // 🔴 Hapus kolom satuan jika migration di-rollback
+            $table->dropColumn('satuan');
+        });
+    }
 };

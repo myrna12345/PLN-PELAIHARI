@@ -19,17 +19,19 @@
 
             {{-- Nama Material (Select) --}}
             <div class="form-group-new">
-                <label for="nama_material">Nama Material</label>
-                <select name="nama_material" id="nama_material" class="form-control-new" required>
+                <label for="material_id">Nama Material</label>
+                {{-- 🛠️ PERBAIKAN: name diubah menjadi material_id --}}
+                <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="">Pilih Material</option>
                     @foreach($materialList as $material)
-                        {{-- Mempertahankan input value setelah error --}}
-                        <option value="{{ $material->nama_material }}" {{ old('nama_material') == $material->nama_material ? 'selected' : '' }}>
+                        {{-- 🛠️ PERBAIKAN: value diubah menjadi $material->id --}}
+                        <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                @error('nama_material')
+                {{-- 🛠️ PERBAIKAN: Error message menggunakan material_id --}}
+                @error('material_id')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
@@ -62,6 +64,7 @@
                         {{-- Anda bisa menambahkan opsi satuan lain jika diperlukan --}}
                     </select>
                     @error('satuan_material')
+                        <small style="color:red;">{{ $message }}</small>
                     @enderror
                 </div>
             </div>

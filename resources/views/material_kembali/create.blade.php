@@ -19,30 +19,31 @@
 
             {{-- Nama Material (Select) --}}
             <div class="form-group-new">
-                <label for="nama_material">Nama Material</label>
-                <select name="nama_material" id="nama_material" class="form-control-new" required>
+                <label for="material_id">Nama Material</label>
+                <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
                     <option value="">Pilih Material</option>
                     @foreach($materialList as $material)
-                        {{-- Mempertahankan input value setelah error --}}
-                        <option value="{{ $material->nama_material }}" {{ old('nama_material') == $material->nama_material ? 'selected' : '' }}>
+                        <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                @error('nama_material')
+                @error('material_id') 
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
             
             {{-- Group Jumlah dan Satuan Material --}}
             <div class="d-flex-group-form">
+                
                 {{-- Jumlah Material Kembali --}}
                 <div class="form-group-new half-width">
                     <label for="jumlah_material">Jumlah Material Kembali</label>
+                    {{-- ✅ PERBAIKAN: name diubah dari 'jumlah' menjadi 'jumlah_material' --}}
                     <input type="number" 
                         name="jumlah_material" 
                         id="jumlah_material" 
-                        class="form-control-new" 
+                        class="form-control-new @error('jumlah_material') is-invalid @enderror" 
                         placeholder="Masukkan jumlah material" 
                         value="{{ old('jumlah_material') }}"
                         min="1"
@@ -52,17 +53,20 @@
                     @enderror
                 </div>
 
-                {{-- Satuan Material (BARU) --}}
+                {{-- Satuan Material (Dropdown Dinamis) --}}
                 <div class="form-group-new half-width">
-                    <label for="satuan_material">Satuan Material</label>
-                    <select name="satuan_material" id="satuan_material" class="form-control-new" required>
+                    <label for="satuan">Satuan Material</label>
+                    {{-- ✅ PERBAIKAN: name diubah dari 'satuan_material' menjadi 'satuan' --}}
+                    <select name="satuan" id="satuan" class="form-control-new @error('satuan') is-invalid @enderror" required>
                         <option value="" selected disabled>Pilih Satuan</option>
-                        {{-- Menggunakan data $satuanList dari Controller --}}
-                        @foreach($satuanList as $satuan)
-                            <option value="{{ $satuan }}" {{ old('satuan_material') == $satuan ? 'selected' : '' }}>{{ $satuan }}</option>
+                        {{-- $satuanList dikirim dari Controller --}}
+                        @foreach($satuanList as $satuan) 
+                            <option value="{{ $satuan }}" {{ old('satuan') == $satuan ? 'selected' : '' }}>
+                                {{ $satuan }}
+                            </option>
                         @endforeach
                     </select>
-                    @error('satuan_material')
+                    @error('satuan')
                         <small style="color:red;">{{ $message }}</small>
                     @enderror
                 </div>
@@ -74,7 +78,7 @@
                 <input type="text" 
                     name="nama_petugas" 
                     id="nama_petugas" 
-                    class="form-control-new" 
+                    class="form-control-new @error('nama_petugas') is-invalid @enderror" 
                     placeholder="Masukkan nama petugas" 
                     value="{{ old('nama_petugas') }}"
                     required>
@@ -86,8 +90,6 @@
             {{-- Tanggal dan Waktu (hanya tampil, tidak bisa diubah) --}}
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
-
-                {{-- Menampilkan waktu lokal, disabled --}}
                 <input type="text" 
                     id="tanggal_display" 
                     class="form-control-new"
@@ -102,7 +104,7 @@
                 <input type="file" 
                     name="foto" 
                     id="foto" 
-                    class="form-control-new-file" 
+                    class="form-control-new-file @error('foto') is-invalid @enderror" 
                     accept="image/*"
                     required> {{-- Foto wajib diisi --}}
                 @error('foto')
@@ -135,7 +137,7 @@ Swal.fire({
 </script>
 @endif
 
-{{-- Optional: CSS untuk tata letak bersebelahan (sama seperti Material Keluar) --}}
+{{-- CSS untuk tata letak bersebelahan --}}
 <style>
     .d-flex-group-form {
         display: flex;
@@ -143,6 +145,10 @@ Swal.fire({
     }
     .d-flex-group-form .half-width {
         flex: 1; /* Agar kedua kolom memiliki lebar yang sama */
+    }
+    /* Tambahkan style is-invalid jika Anda belum memilikinya di CSS utama */
+    .is-invalid {
+        border-color: red !important;
     }
 </style>
 

@@ -18,18 +18,23 @@
             @csrf
             @method('PUT')
 
+            {{-- Nama Material (Select) --}}
             <div class="form-group-new">
-                <label for="nama_material">Nama Material</label>
-                <select name="nama_material" id="nama_material" class="form-control-new" required>
+                <label for="material_id">Nama Material</label>
+                {{-- 🛠️ PERBAIKAN: name diubah menjadi material_id --}}
+                <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="">-- Pilih Material --</option>
                     @foreach($materialList as $material)
-                        <option value="{{ $material->nama_material }}" 
-                            {{ old('nama_material', $data->nama_material) == $material->nama_material ? 'selected' : '' }}>
+                        {{-- 🛠️ PERBAIKAN: value diubah menjadi $material->id --}}
+                        {{-- Logika selected disesuaikan ke material_id --}}
+                        <option value="{{ $material->id }}" 
+                            {{ old('material_id', $data->material_id) == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                @error('nama_material') 
+                {{-- 🛠️ PERBAIKAN: Error message menggunakan material_id --}}
+                @error('material_id') 
                     <small style="color:red;">{{ $message }}</small> 
                 @enderror
             </div>
@@ -51,7 +56,7 @@
                     @enderror
                 </div>
                 
-                {{-- 🟢 PERBAIKAN: Satuan Material Keluar 🟢 --}}
+                {{-- Satuan Material Keluar --}}
                 <div class="form-group-new half-width">
                     <label for="satuan_material">Satuan Material</label>
                     <select name="satuan_material" id="satuan_material" class="form-control-new" required>
