@@ -25,6 +25,7 @@
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
                 <th>Jumlah</th>
+                <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
                 <th>Tanggal (WITA)</th>
             </tr>
         </thead>
@@ -35,15 +36,19 @@
                     <td>{{ $item->material->nama_material ?? '-' }}</td>
                     <td>{{ $item->nama_petugas }}</td>
                     
-                    {{-- 🟢 PERBAIKAN: Gabungkan jumlah_material dan satuan_material --}}
+                    {{-- Gabungkan jumlah_material dan satuan_material --}}
                     <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
+                    
+                    {{-- 🟢 TAMPILKAN DATA STOK 🟢 --}}
+                    <td class="text-center">{{ $item->stok_saat_ini }}</td>
+                    {{-- ----------------------------- --}}
                     
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty
                 <tr>
-                    {{-- colspan disesuaikan menjadi 5 (No, Nama Material, Nama Petugas, Jumlah, Tanggal) --}}
-                    <td colspan="5" class="text-center">Tidak ada data pada periode ini.</td>
+                    {{-- colspan disesuaikan menjadi 6 --}}
+                    <td colspan="6" class="text-center">Tidak ada data pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>

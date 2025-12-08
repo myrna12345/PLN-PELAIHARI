@@ -53,6 +53,21 @@ class MaterialKeluarController extends Controller
         // Urutkan dari terbaru dan paginate
         $materialKeluar = $query->orderByDesc('tanggal')->paginate(10);
 
+        // 🟢 PENAMBAHAN: Ambil Stok Material Stand By untuk setiap item 🟢
+        $materialKeluar->each(function ($item) {
+            // Ambil satu baris MaterialStandBy berdasarkan material_id yang terkait
+            $materialStok = MaterialStandBy::where('material_id', $item->material_id)->first();
+            
+            // Tambahkan properti 'stok_saat_ini' pada objek $item
+            if ($materialStok) {
+                // Format jumlah dan satuan, misal: "10 Buah"
+                $item->stok_saat_ini = $materialStok->jumlah . ' ' . $materialStok->satuan;
+            } else {
+                // Jika tidak ada stok tercatat (walaupun seharusnya tidak terjadi jika Store/Update berjalan normal)
+                $item->stok_saat_ini = '0';
+            }
+        });
+
         return view('material_keluar.index', compact('materialKeluar'));
     }
 
@@ -309,7 +324,17 @@ class MaterialKeluarController extends Controller
                                ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
                                ->orderBy('tanggal', 'asc')
                                ->get();
-
+        // 🟢 PENAMBAHAN: Sisipkan data Stok Material Stand By saat ini untuk setiap item 🟢
+        // Logika ini sama dengan yang digunakan di fungsi index() sebelumnya.
+        $items->each(function ($item) {
+            // Ambil satu baris MaterialStandBy (stok material saat ini)
+            $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
+            
+            // Tambahkan properti 'stok_saat_ini' pada objek $item
+            $item->stok_saat_ini = $materialStok 
+                                    ? $materialStok->jumlah . ' ' . $materialStok->satuan 
+                                    : '0';
+        });
         if ($request->has('submit_pdf')) {
             $data = [
                 'items' => $items,

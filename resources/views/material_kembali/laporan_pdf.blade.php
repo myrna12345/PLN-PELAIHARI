@@ -23,8 +23,8 @@
                 <th>No</th>
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
-                {{-- Judul kolom sudah benar: "Jumlah" --}}
                 <th>Jumlah</th>
+                <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
                 <th>Tanggal (WITA)</th>
             </tr>
         </thead>
@@ -33,20 +33,23 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     
-                    {{-- 🛠️ PERBAIKAN: Mengambil nama material dari relasi (jika menggunakan relasi material_id) --}}
-                    {{-- Menggunakan $item->material->nama_material (jika material_id digunakan) atau $item->nama_material (jika nama material disimpan langsung) --}}
-                    <td>{{ $item->material->nama_material ?? $item->nama_material }}</td> 
+                    {{-- Mengambil nama material dari relasi --}}
+                    <td>{{ $item->material->nama_material ?? 'Material Dihapus' }}</td> 
                     
                     <td>{{ $item->nama_petugas }}</td>
                     
-                    {{-- ✅ PERBAIKAN: Menggunakan $item->satuan, sesuai dengan properti yang dimuat di view edit terakhir --}}
+                    {{-- Jumlah Kembali + Satuan --}}
                     <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan }}</td>
+                    
+                    {{-- 🟢 TAMPILKAN DATA STOK SAAT INI 🟢 --}}
+                    <td class="text-center">{{ $item->stok_saat_ini }}</td>
                     
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">Tidak ada data pada periode ini.</td>
+                    {{-- 🛠️ PERBAIKAN: Colspan menjadi 6 (No, Nama Material, Nama Petugas, Jumlah, Stok, Tanggal) --}}
+                    <td colspan="6" class="text-center">Tidak ada data pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>

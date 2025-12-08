@@ -50,6 +50,7 @@
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Jumlah</th> 
+                    <th>Satuan</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
@@ -66,6 +67,8 @@
                         {{-- Data Jumlah (termasuk Satuan) --}}
                         <td>{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
                         
+                        <td>{{ $item->stok_saat_ini }}</td>
+
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
 
                         <td style="text-align: center; vertical-align: top;">

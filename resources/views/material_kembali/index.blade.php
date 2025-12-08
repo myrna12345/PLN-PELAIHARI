@@ -50,7 +50,8 @@
                     <th>No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
-                    <th>Jumlah</th> 
+                    <th>Jumlah</th>
+                    <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
@@ -69,6 +70,10 @@
                         {{-- Menggabungkan jumlah dan satuan --}}
                         <td>{{ $item->jumlah_material }} {{ $item->satuan }}</td> 
                         
+                        {{-- 🟢 TAMPILKAN DATA STOK 🟢 --}}
+                        <td>{{ $item->stok_saat_ini }}</td>
+
+
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
 
                         <td style="text-align: center; vertical-align: top;">
@@ -104,8 +109,8 @@
                     </tr>
                 @empty
                     <tr>
-                        {{-- Colspan 7 untuk 7 kolom --}}
-                        <td colspan="7" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
+                        {{-- Colspan 8 untuk 8 kolom --}}
+                        <td colspan="8" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

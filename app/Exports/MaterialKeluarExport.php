@@ -3,10 +3,12 @@
 namespace App\Exports;
 
 use App\Models\MaterialKeluar;
+use App\Models\MaterialStandBy; // 🟢 IMPORT MODEL BARU: Untuk mengambil data stok saat ini
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Illuminate\Support\Collection;
+use Carbon\Carbon; // Pastikan Carbon diimpor jika belum
 
 class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
@@ -31,32 +33,37 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
         $materialKeluar = MaterialKeluar::with('material')
             ->whereBetween('tanggal', [$this->tanggalMulai, $this->tanggalAkhir])
             ->orderBy('tanggal', 'asc')
-            // Ambil kolom yang ada di tabel material_keluar
-            ->get([
-                'material_id', // Diperlukan untuk mengakses relasi
-                'nama_petugas',
-                'jumlah_material',
-                'satuan_material',
-                'tanggal',
-            ]);
+            ->get(); // Hapus seleksi kolom agar relasi dapat diakses dengan mudah
 
         // 🟢 PERBAIKAN: Gunakan map() untuk memanipulasi collection (menggabungkan kolom)
         return $materialKeluar->map(function ($item) {
+            
             // Gabungkan jumlah_material dan satuan_material
             $jumlahSatuan = $item->jumlah_material . ' ' . $item->satuan_material;
 
             // Format tanggal ke zona waktu WITA
-            $tanggalWITA = \Carbon\Carbon::parse($item->tanggal)
+            $tanggalWITA = Carbon::parse($item->tanggal)
                 ->setTimezone('Asia/Makassar')
                 ->format('d M Y, H:i');
 
             // 🛠️ PERBAIKAN: Ambil nama material dari relasi material->nama_material
             $namaMaterial = $item->material->nama_material ?? '-';
+            
+            // 🟢 PENAMBAHAN LOGIKA STOK SAAT INI 🟢
+            // Ambil data stok terbaru dari MaterialStandBy
+            $materialStok = MaterialStandBy::where('material_id', $item->material_id)->first();
+            
+            // Format stok (jumlah dan satuan)
+            $stokSaatIni = $materialStok 
+                ? $materialStok->jumlah . ' ' . $materialStok->satuan 
+                : '0';
+            // ------------------------------------------
 
             return [
-                $namaMaterial, // Data Nama Material dari relasi
+                $namaMaterial, 
                 $item->nama_petugas,
-                $jumlahSatuan, // Kolom yang sudah digabungkan
+                $jumlahSatuan, 
+                $stokSaatIni, // 🟢 TAMBAH DATA STOK
                 $tanggalWITA,
             ];
         });
@@ -67,11 +74,11 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
      */
     public function headings(): array
     {
-        // 🟢 Judul kolom disesuaikan dengan urutan di collection() (Tidak ada perubahan di sini)
         return [
             'Nama Material',
             'Nama Petugas',
             'Jumlah',
+            'Stok', // 🟢 TAMBAH JUDUL KOLOM STOK
             'Tanggal (WITA)',
         ];
     }

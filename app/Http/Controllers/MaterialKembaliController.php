@@ -42,8 +42,15 @@ class MaterialKembaliController extends Controller
 
         $materialKembali = $query->orderByDesc('tanggal')->paginate(10);
 
-        // 💡 Catatan: Di sini, Anda mungkin perlu memuat (eager load) data Material atau
-        // memetakan (map) data untuk menampilkan nama material di view index.
+        // 🟢 PENAMBAHAN: Sisipkan data Stok Material Stand By saat ini 🟢
+        $materialKembali->each(function ($item) {
+            $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
+            
+            // Tambahkan properti 'stok_saat_ini'
+            $item->stok_saat_ini = $materialStok 
+                                    ? $materialStok->jumlah . ' ' . $materialStok->satuan 
+                                    : '0';
+        });
 
         return view('material_kembali.index', compact('materialKembali'));
     }
@@ -256,13 +263,22 @@ class MaterialKembaliController extends Controller
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         $filename = 'laporan_material_kembali_' . $tanggalMulai->format('Ymd') . 'sd' . $tanggalAkhir->format('Ymd');
 
-        $items = MaterialKembali::whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                               ->orderBy('tanggal', 'asc')
-                               ->get();
-
-        // 💡 Catatan: Di sini, Anda mungkin perlu memuat (eager load) data Material atau
-        // memetakan (map) data untuk menampilkan nama material di laporan.
-
+        // 🟢 PERBAIKAN: Eager Load relasi 'material'
+        $items = MaterialKembali::with('material')
+                            ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                            ->orderBy('tanggal', 'asc')
+                            ->get();
+        
+        // 🟢 PENAMBAHAN: Sisipkan data Stok Material Stand By saat ini 🟢
+        $items->each(function ($item) {
+            // Ambil stok Material Stand By saat ini
+            $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
+            
+            // Tambahkan properti 'stok_saat_ini' pada objek $item
+            $item->stok_saat_ini = $materialStok 
+                                    ? $materialStok->jumlah . ' ' . $materialStok->satuan 
+                                    : '0';
+        });
         // PDF
         if ($request->has('submit_pdf')) {
             $data = [
