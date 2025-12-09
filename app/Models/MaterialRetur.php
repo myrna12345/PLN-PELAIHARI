@@ -26,9 +26,7 @@ class MaterialRetur extends Model
         'tanggal', 
         'status', // 'baik' or 'rusak'
         'keterangan',
-        'foto_path',
-        'material_keluar',
-        'material_kembali' 
+        'foto_path', 
     ];
 
     /**

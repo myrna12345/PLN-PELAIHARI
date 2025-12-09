@@ -18,11 +18,6 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->datetime('tanggal');
             $table->enum('status', ['baik', 'rusak']); 
-            
-            // --- ATRIBUT BARU (DIISI OTOMATIS NANTI) ---
-            $table->integer('material_keluar')->nullable()->default(0);
-            $table->integer('material_kembali')->nullable()->default(0);
-
             $table->text('keterangan')->nullable(); 
             $table->string('foto_path')->nullable(); 
             $table->timestamps();
