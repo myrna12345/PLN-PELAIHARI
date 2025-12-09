@@ -33,7 +33,7 @@
                     <th>Nama Material & Nomor Meter</th> 
                     <th>Nama Petugas</th>
                     <th>Stand Meter</th>
-                    <th>Keterangan</th> {{-- <--- TAMBAHAN KOLOM HEADER --}}
+                    <th>Keterangan</th> 
                     <th>Status</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
@@ -47,8 +47,8 @@
                         
                         <td>
                             {{ $item->material->nama_material ?? 'N/A' }} 
-                            @if ($item->nomor_unit) 
-                                - {{ $item->nomor_unit }} 
+                            @if ($item->nomor_meter) 
+                                - {{ $item->nomor_meter }} {{-- KOREKSI: Mengganti $item->nomor_unit dengan $item->nomor_meter --}}
                             @endif
                         </td>
                         
@@ -56,7 +56,7 @@
                         
                         <td>{{ $item->stand_meter ?? '-' }}</td>
                         
-                        <td>{{ $item->keterangan }}</td> {{-- <--- TAMBAHAN DATA KETERANGAN --}}
+                        <td>{{ $item->keterangan }}</td>
 
                         <td>{{ $item->status }}</td>
                         
