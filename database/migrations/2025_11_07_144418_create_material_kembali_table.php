@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('material_kembali', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_material');
+            $table->foreignId('material_id')->constrained('materials');
             $table->string('nama_petugas');
             $table->string('jumlah_material');
             $table->dateTime('tanggal');
