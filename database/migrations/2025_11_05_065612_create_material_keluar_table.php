@@ -14,6 +14,7 @@ return new class extends Migration
     $table->string('nama_petugas');
     $table->string('jumlah_material');
     $table->dateTime('tanggal');
+    $table->text('keterangan');
     $table->string('foto')->nullable();
     $table->timestamps();
 });

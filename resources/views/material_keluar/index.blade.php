@@ -16,7 +16,7 @@
                 <input type="text" name="search" placeholder="Cari Nama Material / Petugas..." value="{{ request('search') }}">
             </div>
             
-            {{-- 🟢 PENAMBAHAN: Input Tanggal Mulai dan Akhir untuk Filter 🟢 --}}
+            {{-- 🟢 Input Tanggal Mulai dan Akhir untuk Filter 🟢 --}}
             <div class="date-filter-group">
                 <input type="date" name="tanggal_mulai" 
                     class="form-control-tanggal" 
@@ -46,11 +46,12 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>No</th>
+                    <th class="col-no">No</th>
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
-                    <th>Jumlah</th> 
-                    <th>Satuan</th>
+                    <th class="col-jumlah">Jumlah</th> {{-- Ditambah class untuk styling --}}
+                    <th class="col-stok">Stok</th> {{-- Ditambah class untuk styling --}}
+                    <th>Keterangan</th>                    
                     <th>Tanggal (WITA)</th>
                     <th>Foto & Download</th>
                     <th>Aksi</th>
@@ -60,15 +61,17 @@
                 @forelse($materialKeluar as $item)
                     <tr>
                         <td>{{ $materialKeluar->firstItem() + $loop->index }}</td>
-                        {{-- 🛠️ PERBAIKAN: Mengambil nama material dari relasi 'material' --}}
                         <td>{{ $item->material->nama_material ?? '-' }}</td> 
                         <td>{{ $item->nama_petugas }}</td>
                         
-                        {{-- Data Jumlah (termasuk Satuan) --}}
-                        <td>{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
+                        {{-- Data Jumlah (diberi style untuk mencegah wrap) --}}
+                        <td class="text-nowrap">{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
                         
-                        <td>{{ $item->stok_saat_ini }}</td>
-
+                        {{-- Data Stok (diberi style untuk mencegah wrap) --}}
+                        <td class="text-nowrap">{{ $item->stok_saat_ini }}</td>
+                        
+                        <td class="col-keterangan">{{ $item->keterangan }}</td> {{-- Ditambah class untuk styling --}}
+                        
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
 
                         <td style="text-align: center; vertical-align: top;">
@@ -102,7 +105,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
+                        <td colspan="9" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td> {{-- Kolom disesuaikan menjadi 9 --}}
                     </tr>
                 @endforelse
             </tbody>
@@ -134,12 +137,13 @@
     </div>
 </div>
 
-{{-- Optional: CSS Tambahan untuk date-filter-group --}}
+{{-- CSS Tambahan untuk tata letak tabel yang lebih rapi --}}
 <style>
+    /* CSS sebelumnya */
     .search-form {
         display: flex;
         align-items: center;
-        gap: 15px; /* Jarak antar elemen */
+        gap: 15px;
     }
     .date-filter-group {
         display: flex;
@@ -149,7 +153,30 @@
         padding: 5px 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        width: 130px; /* Atur lebar agar tidak terlalu panjang */
+        width: 130px;
+    }
+    
+    /* 🛠️ CSS BARU UNTUK MERAPIKAN KOLOM JUMLAH DAN STOK 🛠️ */
+    
+    /* Mencegah teks memecah baris pada kolom Jumlah dan Stok */
+    .text-nowrap {
+        white-space: nowrap; /* Mencegah pemisahan kata */
+        text-align: center; /* Merapikan konten di tengah */
+    }
+
+    /* Memastikan Keterangan tetap bisa memecah baris jika panjang */
+    .col-keterangan {
+        max-width: 150px; /* Batasi lebar */
+        word-wrap: break-word; /* Biarkan teks memecah baris jika terlalu panjang */
+    }
+    
+    /* Mengatur lebar minimum untuk kolom tertentu agar data Jumlah/Stok tidak terlalu sempit */
+    .table th.col-jumlah, 
+    .table th.col-stok {
+        min-width: 80px; 
+    }
+    .table th.col-no {
+        width: 50px;
     }
 </style>
 @endsection

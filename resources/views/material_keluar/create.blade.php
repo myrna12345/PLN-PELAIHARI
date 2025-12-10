@@ -84,6 +84,20 @@
                 @enderror
             </div>
 
+            <div class="form-group-new">
+                <label for="keterangan">Keterangan</label>
+                <textarea 
+                    name="keterangan" 
+                    id="keterangan" 
+                    class="form-control-new" 
+                    rows="3"
+                    placeholder="Masukkan keterangan material keluar" 
+                    required>{{ old('keterangan') }}</textarea>
+                @error('keterangan')
+                    <small style="color:red;">{{ $message }}</small>
+                @enderror
+            </div>
+
             {{-- Tanggal dan Waktu (hanya tampil, tidak bisa diubah) --}}
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>

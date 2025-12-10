@@ -94,6 +94,7 @@ class MaterialKeluarController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
+            'keterangan' => 'required|string|max:1000',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
 
@@ -178,6 +179,7 @@ class MaterialKeluarController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
+            'keterangan' => 'required|string|max:1000',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
         ]);
 

@@ -25,7 +25,8 @@
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
                 <th>Jumlah</th>
-                <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
+                <th>Stok</th> 
+                <th>Keterangan</th> 
                 <th>Tanggal (WITA)</th>
             </tr>
         </thead>
@@ -41,8 +42,7 @@
                     
                     {{-- 🟢 TAMPILKAN DATA STOK 🟢 --}}
                     <td class="text-center">{{ $item->stok_saat_ini }}</td>
-                    {{-- ----------------------------- --}}
-                    
+                    <td>{{ $item->keterangan }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty

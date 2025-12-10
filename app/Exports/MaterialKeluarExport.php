@@ -63,7 +63,8 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
                 $namaMaterial, 
                 $item->nama_petugas,
                 $jumlahSatuan, 
-                $stokSaatIni, // 🟢 TAMBAH DATA STOK
+                $stokSaatIni,
+                $item->keterangan,
                 $tanggalWITA,
             ];
         });
@@ -78,7 +79,8 @@ class MaterialKeluarExport implements FromCollection, WithHeadings, ShouldAutoSi
             'Nama Material',
             'Nama Petugas',
             'Jumlah',
-            'Stok', // 🟢 TAMBAH JUDUL KOLOM STOK
+            'Stok',
+            'Keterangan',
             'Tanggal (WITA)',
         ];
     }

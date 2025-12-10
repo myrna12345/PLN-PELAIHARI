@@ -17,6 +17,7 @@ class MaterialKeluar extends Model
         'jumlah_material',
         'satuan_material', 
         'tanggal',
+        'keterangan',
         'foto'
     ];
     public function material()
