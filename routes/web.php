@@ -139,3 +139,4 @@ Route::get('/material-siaga/{id}/edit', [MaterialSiagaStandByController::class, 
 Route::put('/material-siaga/{id}', [MaterialSiagaStandByController::class, 'update'])->name('material-siaga.update');
 Route::get('/material-siaga/tambah', [MaterialSiagaStandByController::class, 'create'])
         ->name('materialsiaga.tambah');
+        Route::get('/get-unit/{id}', [MaterialSiagaStandByController::class, 'getUnit']);
