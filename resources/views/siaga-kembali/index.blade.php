@@ -13,7 +13,7 @@
         <div class="search-bar">
             <i class="fas fa-search"></i>
             {{-- PERBAIKAN: Mengganti "Nomor Unit" di placeholder menjadi "Nomor Meter" --}}
-            <input type="text" name="search" placeholder="Cari Material/Petugas/Nomor Meter..." value="{{ request('search') }}">
+            <input type="text" name="search" placeholder="Cari Material/Petugas" value="{{ request('search') }}">
         </div>
         <div class="form-group-tanggal-filter">
             <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">

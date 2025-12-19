@@ -57,30 +57,29 @@
                         {{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y, H:i') }}
                     </td>
                     
-                    <td style="text-align: center; vertical-align: middle; border: 1px solid #dee2e6; padding: 10px;">
-                        @if ($data->unggah_foto)
-                            <div class="img-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                                <img src="{{ asset('storage/' . $data->unggah_foto) }}" 
-                                     class="table-foto zoomable" 
-                                     style="width: 85px; height: auto; border-radius: 4px; cursor: pointer; border: 1px solid #ddd;"
-                                     onerror="this.src='{{ asset('images/placeholder.png') }}'">
-                                
-                                <a href="{{ asset('storage/' . $data->unggah_foto) }}" 
-                                   download="foto_{{ $data->nomor_meter }}" 
-                                   style="background-color: #5bc0de; color: white; padding: 5px 12px; border-radius: 4px; text-decoration: none; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; font-weight: bold; width: fit-content;">
-                                    <i class="fas fa-download"></i> Download Foto
-                                </a>
-
-                                <div class="modal-image" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:9999;">
-                                    <span class="close-modal" style="position:absolute; top:20px; right:30px; font-size:45px; color:white; cursor:pointer;">&times;</span>
-                                    <img src="{{ asset('storage/' . $data->unggah_foto) }}" style="max-width:90%; max-height:90%; border-radius:8px; border: 4px solid white;">
-                                </div>
-                            </div>
-                        @else
-                            <span class="text-muted" style="font-size: 11px;">Tidak ada foto</span>
-                        @endif
-                    </td>
-
+                   <td style="text-align: center; vertical-align: middle; border: 1px solid #dee2e6;"> 
+    @if($data->unggah_foto && \Storage::disk('public')->exists($data->unggah_foto))
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            {{-- Preview Foto --}}
+            <img src="{{ route('material-siaga.show-foto', $data->id) }}" 
+                 alt="Foto Siaga" 
+                 style="width: 80px; height: auto; border-radius: 4px; border: 1px solid #ddd; cursor: pointer;"
+                 onclick="window.open(this.src)">
+            
+            {{-- Tombol Download Sesuai Gambar --}}
+            <a href="{{ route('material-siaga.download-foto', $data->id) }}" 
+               style="display: inline-flex; align-items: center; gap: 8px; background-color: #89c6d3; color: #1a3a4a; padding: 6px 15px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background-color 0.2s;">
+                <i class="fas fa-download" style="font-size: 11px;"></i> 
+                Download Foto
+            </a>
+        </div>
+    @else
+        <div style="color: #bbb; font-style: italic; font-size: 11px;">
+            <i class="fas fa-image" style="font-size: 20px; color: #eee; margin-bottom: 4px;"></i><br>
+            Tidak ada foto
+        </div>
+    @endif
+</td>
                     <td style="vertical-align: middle; text-align: center; border: 1px solid #dee2e6; text-transform: capitalize;">
                         {{ $data->status }}
                     </td>

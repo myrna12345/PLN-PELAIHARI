@@ -13,15 +13,11 @@ class SiagaKeluar extends Model
 
     protected $fillable = [
         'material_id',
-        'nomor_unit', 
+        'nomor_meter', 
         'nama_material_lengkap', 
         'nama_petugas',
         'stand_meter',
-<<<<<<< HEAD
-        // 'jumlah_siaga_keluar' dan 'jumlah_siaga_masuk' DIHAPUS dari fillable
-=======
         'keterangan',
->>>>>>> cc9a267bda4b4962e10bd56f9d2880d0840578b9
         'status',
         'tanggal',
         'foto_path',

@@ -15,15 +15,20 @@ return new class extends Migration
             $table->id();
             $table->foreignId('material_id')->constrained('materials')->onDelete('cascade');
             
-            // START: KOLOM BARU UNTUK NOMOR UNIT DAN NAMA LENGKAP
-            $table->integer('nomor_unit')->nullable(); // Menyimpan nomor 1 s/d 50
-            $table->string('nama_material_lengkap')->nullable(); // Menyimpan hasil gabungan nama material + nomor unit
-            // END: KOLOM BARU
+            // START: PERBAIKAN KOLOM NOMOR UNIT -> NOMOR METER
+            $table->string('nomor_meter')->nullable(); 
+            // END: PERBAIKAN KOLOM
+            
+            $table->string('nama_material_lengkap')->nullable(); 
             
             $table->string('nama_petugas');
             $table->string('stand_meter')->nullable();
             
-            // Kolom jumlah_siaga_keluar dan jumlah_siaga_masuk telah dihapus
+            // START: TAMBAHAN KOLOM KETERANGAN (WAJIB DIISI)
+            // Menggunakan tipe data text karena keterangan cenderung panjang.
+            // Tanpa nullable(), ini otomatis NOT NULL (wajib diisi).
+            $table->text('keterangan');
+            // END: TAMBAHAN KOLOM
             
             $table->string('status')->default('Keluar');
             $table->dateTime('tanggal');

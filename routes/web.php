@@ -128,15 +128,27 @@ Route::get('siaga-kembali/{siagaKembali}/download-foto', [SiagaKembaliController
 
 Route::resource('siaga-kembali', SiagaKembaliController::class);
 
-// Rute untuk Halaman Material Siaga Stand By
-Route::get('/material-siaga', [MaterialSiagaStandByController::class, 'index'])->name('material-siaga.index');
-Route::get('/material-siaga/create', [MaterialSiagaStandByController::class, 'create'])->name('material-siaga.create');
-Route::post('/material-siaga', [MaterialSiagaStandByController::class, 'store'])->name('material-siaga.store');
-Route::delete('/material-siaga/{id}', [MaterialSiagaStandByController::class, 'destroy'])->name('material-siaga.destroy');
-Route::put('/material-siaga/update-status/{id}', [MaterialSiagaStandByController::class, 'updateStatus'])->name('material-siaga.update-status');
-Route::get('/material-siaga/export', [MaterialSiagaStandByController::class, 'export'])->name('material-siaga.export');
-Route::get('/material-siaga/{id}/edit', [MaterialSiagaStandByController::class, 'edit'])->name('material-siaga.edit');
-Route::put('/material-siaga/{id}', [MaterialSiagaStandByController::class, 'update'])->name('material-siaga.update');
-Route::get('/material-siaga/tambah', [MaterialSiagaStandByController::class, 'create'])
-        ->name('materialsiaga.tambah');
-        Route::get('/get-unit/{id}', [MaterialSiagaStandByController::class, 'getUnit']);
+/// --- RUTE MATERIAL SIAGA STAND BY ---
+
+// 1. Rute Khusus (Wajib di atas resource agar tidak dianggap sebagai ID)
+Route::get('material-siaga/export', [MaterialSiagaStandByController::class, 'export'])
+    ->name('material-siaga.export'); 
+
+// 2. Rute Foto & Download (Menggunakan {id} agar sesuai dengan controller Anda yang memakai $id)
+Route::get('material-siaga/foto/{id}', [MaterialSiagaStandByController::class, 'showFoto'])
+    ->name('material-siaga.show-foto');
+
+Route::get('material-siaga/download-foto/{id}', [MaterialSiagaStandByController::class, 'downloadFoto'])
+    ->name('material-siaga.download-foto');
+
+// 3. Rute Aksi Status
+Route::put('material-siaga/update-status/{id}', [MaterialSiagaStandByController::class, 'updateStatus'])
+    ->name('material-siaga.update-status');
+
+// 4. Route Resource
+// Kita gunakan parameter 'material-siaga' agar URL-nya konsisten /material-siaga/
+Route::resource('material-siaga', MaterialSiagaStandByController::class)->parameters([
+    'material-siaga' => 'id'
+]);
+
+// Hapus rute manual yang duplikat di bagian bawah file Anda agar tidak bentrok
