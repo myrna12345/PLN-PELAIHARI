@@ -70,6 +70,7 @@ class SiagaKeluarController extends Controller
      * Store data
      */
     public function store(Request $request)
+<<<<<<< HEAD
     {
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
@@ -111,6 +112,44 @@ class SiagaKeluarController extends Controller
         return redirect()->route('siaga-keluar.index')
                              ->with('success', 'Data Siaga Keluar berhasil ditambahkan.');
     }
+=======
+{
+    $validated = $request->validate([
+        'material_id' => 'required|exists:materials,id',
+        'nomor_meter' => 'required|string|max:255', 
+        'nama_petugas' => 'required|string|max:255',
+        'stand_meter' => 'required|string|max:255',
+        'keterangan' => 'required|string|max:500', 
+        'status' => 'required|string|max:255', 
+        'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+    ]);
+
+    $path = $request->file('foto')->store('fotos_siaga_keluar', 'public');
+    
+    $material = Material::findOrFail($validated['material_id']);
+
+    $dataToSave = [
+        'material_id' => $validated['material_id'],
+        'nomor_meter' => $validated['nomor_meter'], 
+        'nama_material_lengkap' => $material->nama_material, 
+        'nama_petugas' => $validated['nama_petugas'],
+        'stand_meter' => $validated['stand_meter'],
+        'keterangan' => $validated['keterangan'], 
+        'status' => $validated['status'],
+        'foto_path' => $path,
+        'tanggal' => Carbon::now('Asia/Makassar'),
+    ];
+    
+    // Simpan data ke tabel Siaga Keluar
+    SiagaKeluar::create($dataToSave);
+
+    // LOGIKA RELASI: Update status di tabel Standby menjadi Terpakai
+    \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
+        ->update(['status' => 'Terpakai']);
+
+    return redirect()->route('siaga-keluar.index')->with('success', 'Data Siaga Keluar berhasil disimpan dan status Standby diperbarui!');
+}
+>>>>>>> cc9a267bda4b4962e10bd56f9d2880d0840578b9
 
     /**
      * Halaman edit

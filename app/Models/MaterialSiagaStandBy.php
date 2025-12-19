@@ -13,11 +13,18 @@ class MaterialSiagaStandBy extends Model
 
     protected $fillable = [
         'nama_material',
-        'nama_petugas',
+        'nomor_meter',
         'stand_meter',
-        'jumlah_siaga_standby',
         'tanggal',
-        'foto',
+        'unggah_foto',
         'status',
     ];
+    
+    protected $casts = [
+        'tanggal' => 'datetime', 
+    ];
+
+    protected $primaryKey = 'id';
+    
+    public $timestamps = true;
 }

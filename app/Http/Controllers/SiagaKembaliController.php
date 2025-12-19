@@ -65,6 +65,7 @@ class SiagaKembaliController extends Controller
      * Store data
      */
     public function store(Request $request)
+<<<<<<< HEAD
     {
         // VALIDASI: Menggunakan 'nomor_meter' yang sekarang match dengan kolom database
         $validated = $request->validate([
@@ -95,7 +96,47 @@ class SiagaKembaliController extends Controller
         SiagaKembali::create($dataToSave);
 
         return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan!');
+=======
+{
+    $validated = $request->validate([
+        'material_id' => 'required|exists:materials,id',
+        'nomor_meter' => 'required|string|max:255', 
+        'nama_petugas' => 'required|string|max:255',
+        'stand_meter' => 'required|string|max:255',
+        'status' => 'nullable|string',
+        'keterangan' => 'nullable|string',
+        'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+    ]);
+
+    $path = null;
+    if ($request->hasFile('foto')) {
+        $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
+>>>>>>> cc9a267bda4b4962e10bd56f9d2880d0840578b9
     }
+    
+    $material = Material::findOrFail($validated['material_id']);
+
+    $dataToSave = [
+        'material_id' => $validated['material_id'],
+        'nomor_meter' => $validated['nomor_meter'], 
+        'nama_material_lengkap' => $material->nama_material,
+        'nama_petugas' => $validated['nama_petugas'],
+        'stand_meter' => $validated['stand_meter'],
+        'status' => $validated['status'],
+        'keterangan' => $validated['keterangan'] ?? null,
+        'foto_path' => $path,
+        'tanggal' => Carbon::now('Asia/Makassar'),
+    ];
+    
+    // Simpan data ke tabel Siaga Kembali
+    SiagaKembali::create($dataToSave);
+
+    // LOGIKA RELASI: Update status di tabel Standby kembali menjadi Ready
+    \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
+        ->update(['status' => 'Ready']);
+
+    return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan dan status Standby kini Ready!');
+}
 
     /**
      * Halaman edit
