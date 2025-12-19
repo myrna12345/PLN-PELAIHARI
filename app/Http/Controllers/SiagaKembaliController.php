@@ -65,43 +65,45 @@ class SiagaKembaliController extends Controller
      * Store data
      */
     public function store(Request $request)
-    {
-        // PERBAIKAN UTAMA: Mengubah 'foto' dari nullable menjadi required
-        $validated = $request->validate([
-            'material_id' => 'required|exists:materials,id',
-            'nomor_meter' => 'required|string|max:255', 
-            'nama_petugas' => 'required|string|max:255',
-            'stand_meter' => 'required|string|max:255',
-            'status' => 'nullable|string',
-            'keterangan' => 'nullable|string', // Menambahkan keterangan (sesuai migration)
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // <--- Wajib (required)
-        ]);
+{
+    $validated = $request->validate([
+        'material_id' => 'required|exists:materials,id',
+        'nomor_meter' => 'required|string|max:255', 
+        'nama_petugas' => 'required|string|max:255',
+        'stand_meter' => 'required|string|max:255',
+        'status' => 'nullable|string',
+        'keterangan' => 'nullable|string',
+        'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+    ]);
 
-        $path = null;
-        if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
-        }
-        
-        // Dapatkan nama material untuk kolom 'nama_material_lengkap'
-        $material = Material::findOrFail($validated['material_id']);
-
-        // Mapping data untuk disimpan ke SiagaKembali
-        $dataToSave = [
-            'material_id' => $validated['material_id'],
-            'nomor_meter' => $validated['nomor_meter'], 
-            'nama_material_lengkap' => $material->nama_material, // Menyimpan nama material
-            'nama_petugas' => $validated['nama_petugas'],
-            'stand_meter' => $validated['stand_meter'],
-            'status' => $validated['status'],
-            'keterangan' => $validated['keterangan'] ?? null,
-            'foto_path' => $path,
-            'tanggal' => Carbon::now('Asia/Makassar'),
-        ];
-        
-        SiagaKembali::create($dataToSave);
-
-        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan!');
+    $path = null;
+    if ($request->hasFile('foto')) {
+        $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
     }
+    
+    $material = Material::findOrFail($validated['material_id']);
+
+    $dataToSave = [
+        'material_id' => $validated['material_id'],
+        'nomor_meter' => $validated['nomor_meter'], 
+        'nama_material_lengkap' => $material->nama_material,
+        'nama_petugas' => $validated['nama_petugas'],
+        'stand_meter' => $validated['stand_meter'],
+        'status' => $validated['status'],
+        'keterangan' => $validated['keterangan'] ?? null,
+        'foto_path' => $path,
+        'tanggal' => Carbon::now('Asia/Makassar'),
+    ];
+    
+    // Simpan data ke tabel Siaga Kembali
+    SiagaKembali::create($dataToSave);
+
+    // LOGIKA RELASI: Update status di tabel Standby kembali menjadi Ready
+    \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
+        ->update(['status' => 'Ready']);
+
+    return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan dan status Standby kini Ready!');
+}
 
     /**
      * Halaman edit

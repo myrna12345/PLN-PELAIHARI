@@ -15,7 +15,6 @@ class MaterialSiagaStandBy extends Model
         'nama_material',
         'nomor_meter',
         'stand_meter',
-        // Dihapus: 'jumlah_siaga_standby', 'nama_petugas'
         'tanggal',
         'unggah_foto',
         'status',
