@@ -14,11 +14,11 @@ class SiagaKeluar extends Model
     // DAFTAR KOLOM YANG BOLEH DISIMPAN (Mass Assignment)
     protected $fillable = [
         'material_id',
-        'nomor_meter', 
+        'nomor_unit', 
         'nama_material_lengkap', 
         'nama_petugas',
         'stand_meter',
-        'keterangan', // <--- BARIS KRUSIAL YANG DITAMBAHKAN
+        // 'jumlah_siaga_keluar' dan 'jumlah_siaga_masuk' DIHAPUS dari fillable
         'status',
         'tanggal',
         'foto_path',

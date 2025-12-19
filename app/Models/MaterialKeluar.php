@@ -12,16 +12,10 @@ class MaterialKeluar extends Model
     protected $table = 'material_keluar';
 
     protected $fillable = [
-        'material_id',
+        'nama_material',
         'nama_petugas',
         'jumlah_material',
-        'satuan_material', 
         'tanggal',
-        'keterangan',
         'foto'
     ];
-    public function material()
-    {
-        return $this->belongsTo(Material::class);
-    }
 }

@@ -30,7 +30,7 @@ class SiagaKembaliController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', "%$search%")
                     ->orWhere('stand_meter', 'like', "%$search%")
-                    ->orWhere('nomor_meter', 'like', "%$search%")
+                    ->orWhere('nomor_meter', 'like', "%$search%") // <-- PERBAIKAN: Menggunakan 'nomor_meter'
                     ->orWhereHas('material', function($subQ) use ($search) {
                         $subQ->where('nama_material', 'like', "%$search%");
                     });
@@ -66,15 +66,14 @@ class SiagaKembaliController extends Controller
      */
     public function store(Request $request)
     {
-        // PERBAIKAN UTAMA: Mengubah 'foto' dari nullable menjadi required
+        // VALIDASI: Menggunakan 'nomor_meter' yang sekarang match dengan kolom database
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nomor_meter' => 'required|string|max:255', 
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
             'status' => 'nullable|string',
-            'keterangan' => 'nullable|string', // Menambahkan keterangan (sesuai migration)
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // <--- Wajib (required)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
         ]);
 
         $path = null;
@@ -82,18 +81,13 @@ class SiagaKembaliController extends Controller
             $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
         }
         
-        // Dapatkan nama material untuk kolom 'nama_material_lengkap'
-        $material = Material::findOrFail($validated['material_id']);
-
         // Mapping data untuk disimpan ke SiagaKembali
         $dataToSave = [
             'material_id' => $validated['material_id'],
-            'nomor_meter' => $validated['nomor_meter'], 
-            'nama_material_lengkap' => $material->nama_material, // Menyimpan nama material
+            'nomor_meter' => $validated['nomor_meter'], // <-- LANGSUNG MENGGUNAKAN 'nomor_meter'
             'nama_petugas' => $validated['nama_petugas'],
             'stand_meter' => $validated['stand_meter'],
             'status' => $validated['status'],
-            'keterangan' => $validated['keterangan'] ?? null,
             'foto_path' => $path,
             'tanggal' => Carbon::now('Asia/Makassar'),
         ];
@@ -124,29 +118,27 @@ class SiagaKembaliController extends Controller
      */
     public function update(Request $request, SiagaKembali $siagaKembali)
     {
-        // Biarkan foto sebagai 'nullable' di sini agar user tidak wajib mengupload ulang
+        // VALIDASI: Menggunakan 'nomor_meter'
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
-            'nomor_meter' => 'required|string|max:255', 
+            'nomor_meter' => 'required|string|max:255', // <-- KOLOM DATABASE BARU
             'nama_petugas' => 'required|string|max:255',
             'stand_meter' => 'required|string|max:255',
             'status' => 'nullable|string',
-            'keterangan' => 'nullable|string', // Menambahkan keterangan (sesuai migration)
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
+
+        // ... (Logika lama yang dihapus tidak berubah)
 
         $path = $siagaKembali->foto_path;
         if ($request->hasFile('foto')) {
             if ($path) { Storage::disk('public')->delete($path); }
             $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
         }
-
-        // Dapatkan nama material untuk kolom 'nama_material_lengkap'
-        $material = Material::findOrFail($validated['material_id']);
         
+        // Sekarang $validated sudah berisi kunci 'nomor_meter', yang match dengan kolom DB.
         $dataToUpdate = $validated;
         $dataToUpdate['foto_path'] = $path;
-        $dataToUpdate['nama_material_lengkap'] = $material->nama_material;
         
         $siagaKembali->update($dataToUpdate);
 
@@ -159,6 +151,8 @@ class SiagaKembaliController extends Controller
      */
     public function destroy(SiagaKembali $siagaKembali)
     {
+        // ... (Logika lama yang dihapus tidak berubah)
+
         if ($siagaKembali->foto_path) {
             Storage::disk('public')->delete($siagaKembali->foto_path);
         }

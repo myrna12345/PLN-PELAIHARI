@@ -9,7 +9,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger" role="alert"> 
+        <div class="alert alert-danger">
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -23,10 +23,9 @@
         <form action="{{ route('siaga-keluar.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
-            {{-- 1. Nama Material (Dropdown) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
+                <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="" disabled selected>Pilih material</option>
                     @foreach($materials as $material)
                         <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
@@ -34,100 +33,51 @@
                         </option>
                     @endforeach
                 </select>
-                @error('material_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
             </div>
             
-            {{-- 2. Nomor Meter --}}
+            {{-- 🟢 KODE PERBAIKAN: Mengubah Placeholder dan Small Text (Nomor Unit) 🟢 --}}
             <div class="form-group-new">
-                <label for="nomor_meter">Nomor Meter</label> 
-                <input type="text" 
-                        name="nomor_meter" 
-                        id="nomor_meter" 
-                        class="form-control-new @error('nomor_meter') is-invalid @enderror" 
-                        value="{{ old('nomor_meter') }}" 
-                        placeholder="Masukkan Nomor Meter"
-                        required>
+                <label for="nomor_unit">Nomor Unit</label>
+                <input type="text" name="nomor_unit" id="nomor_unit" class="form-control-new" 
+                       value="{{ old('nomor_unit') }}" 
+                       placeholder="Masukkan Nomor Unit"
+                       required>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    Pastikan nomor meter yang dimasukkan sesuai dengan data.
+                    Masukkan nomor unit.
                 </small>
-                @error('nomor_meter')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
             </div>
-            
-            {{-- 3. Nama Petugas --}}
-            <div class="form-group-new">
-                <label for="nama_petugas">Nama Petugas</label>
-                <input type="text" 
-                        name="nama_petugas" 
-                        id="nama_petugas" 
-                        class="form-control-new @error('nama_petugas') is-invalid @enderror" 
-                        value="{{ old('nama_petugas') }}" 
-                        required>
-                @error('nama_petugas')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-            
-            {{-- 4. Stand Meter --}}
-            <div class="form-group-new">
-                <label for="stand_meter">Stand Meter</label>
-                <input type="text" 
-                        name="stand_meter" 
-                        id="stand_meter" 
-                        class="form-control-new @error('stand_meter') is-invalid @enderror" 
-                        value="{{ old('stand_meter') }}" 
-                        required>
-                @error('stand_meter')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-            
-            {{-- 5. KETERANGAN (WAJIB) --}}
-            <div class="form-group-new">
-                <label for="keterangan">Keterangan</label>
-                <textarea name="keterangan" 
-                          id="keterangan" 
-                          class="form-control-new @error('keterangan') is-invalid @enderror" 
-                          placeholder="Masukkan keterangan material keluar"
-                          required>{{ old('keterangan') }}</textarea>
-                @error('keterangan')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            {{-- ⬆️ END KODE PERBAIKAN --}}
+
+            {{-- Field tersembunyi untuk validasi 'nama_material_lengkap' --}}
+            <div class="form-group-new" style="display: none;"> 
+                <label for="nama_material_lengkap">Nama Material Lengkap</label>
+                <input type="hidden" name="nama_material_lengkap" id="nama_material_lengkap" class="form-control-new" value="siaga-keluar-dummy" required>
             </div>
 
-            {{-- 6. UNGGAH FOTO --}}
             <div class="form-group-new">
-                <label for="foto">Unggah Foto</label> 
-                <input type="file" 
-                        name="foto" 
-                        id="foto" 
-                        class="form-control-new-file @error('foto') is-invalid @enderror" 
-                        accept="image/*"
-                        required> 
-                @error('foto')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                <small class="text-danger" style="display: block; margin-top: 5px;">
-                    *Unggah foto material adalah wajib.
-                </small>
+                <label for="nama_petugas">Nama Petugas</label>
+                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas') }}" required>
             </div>
             
-            {{-- 7. Status (Readonly - Keluar) --}}
+            <div class="form-group-new">
+                <label for="stand_meter">Stand Meter</label>
+                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter') }}" required>
+            </div>
+            
+            {{-- HAPUS TOTAL: Blok untuk Jumlah Siaga Keluar --}}
+            {{--
+            <div class="form-group-new">
+                <label for="jumlah_siaga_keluar">Jumlah</label>
+                <input type="number" name="jumlah_siaga_keluar" id="jumlah_siaga_keluar" class="form-control-new" value="{{ old('jumlah_siaga_keluar') }}" required min="1">
+            </div>
+            --}}
+
             <div class="form-group-new">
                 <label for="status">Status</label>
-                <input type="text" 
-                        name="status" 
-                        id="status" 
-                        class="form-control-new" 
-                        value="{{ old('status', 'Keluar') }}" 
-                        readonly 
-                        style="background-color: #e9ecef; cursor: not-allowed;">
+                <input type="text" name="status" id="status" class="form-control-new" value="{{ old('status', 'Keluar') }}" required>
             </div>
             
-            {{-- 8. TANGGAL DAN JAM (READONLY) --}}
+            <!-- Input Tanggal READONLY -->
             <div class="form-group-new">
                 <label>Tanggal dan Jam</label>
                 <input type="text" 
@@ -140,6 +90,13 @@
                 </small>
             </div>
 
+            <div class="form-group-new">
+                <label for="foto">Unggah Foto (Wajib)</label> 
+                <input type="file" name="foto" id="foto" class="form-control-new-file" required> 
+                <small class="text-muted" style="display: block; margin-top: 5px; color: red;">
+                    *Unggah foto material adalah wajib.
+                </small>
+            </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>

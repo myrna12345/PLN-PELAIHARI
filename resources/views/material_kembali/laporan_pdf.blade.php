@@ -23,8 +23,7 @@
                 <th>No</th>
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
-                <th>Jumlah</th>
-                <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
+                <th>Jumlah/Unit</th>
                 <th>Tanggal (WITA)</th>
             </tr>
         </thead>
@@ -32,24 +31,14 @@
             @forelse ($items as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    
-                    {{-- Mengambil nama material dari relasi --}}
-                    <td>{{ $item->material->nama_material ?? 'Material Dihapus' }}</td> 
-                    
+                    <td>{{ $item->nama_material }}</td>
                     <td>{{ $item->nama_petugas }}</td>
-                    
-                    {{-- Jumlah Kembali + Satuan --}}
-                    <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan }}</td>
-                    
-                    {{-- 🟢 TAMPILKAN DATA STOK SAAT INI 🟢 --}}
-                    <td class="text-center">{{ $item->stok_saat_ini }}</td>
-                    
+                    <td class="text-center">{{ $item->jumlah_material }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty
                 <tr>
-                    {{-- 🛠️ PERBAIKAN: Colspan menjadi 6 (No, Nama Material, Nama Petugas, Jumlah, Stok, Tanggal) --}}
-                    <td colspan="6" class="text-center">Tidak ada data pada periode ini.</td>
+                    <td colspan="5" class="text-center">Tidak ada data pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>

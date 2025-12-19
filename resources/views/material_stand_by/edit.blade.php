@@ -42,7 +42,7 @@
             
             {{-- Input Jumlah dan Satuan --}}
             <div class="form-group-new">
-                <label for="jumlah">Jumlah dan Satuan</label>
+                <label for="jumlah">Jumlah dan Satuan (Wajib)</label>
                 <div style="display: flex; gap: 10px;">
                     
                     {{-- Input Jumlah --}}
@@ -95,6 +95,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>
+                <a href="{{ route('material-stand-by.index') }}" class="btn-batal">Batal</a>
             </div>
         </form>
     </div>

@@ -10,11 +10,10 @@ return new class extends Migration
     {
         Schema::create('material_keluar', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('material_id')->constrained('materials'); 
+    $table->string('nama_material');
     $table->string('nama_petugas');
     $table->string('jumlah_material');
     $table->dateTime('tanggal');
-    $table->text('keterangan');
     $table->string('foto')->nullable();
     $table->timestamps();
 });

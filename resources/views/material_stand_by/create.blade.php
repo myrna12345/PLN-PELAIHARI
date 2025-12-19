@@ -54,7 +54,7 @@
             
             {{-- 🟢 PERBAIKAN: Menggabungkan Input Jumlah dan Dropdown Satuan 🟢 --}}
             <div class="form-group-new">
-                <label for="jumlah">Jumlah dan Satuan</label>
+                <label for="jumlah">Jumlah dan Satuan (Wajib)</label>
                 <div style="display: flex; gap: 10px;">
                     
                     {{-- Input Jumlah (Manual Number Input) --}}
@@ -64,6 +64,7 @@
                             style="flex: 2;"
                             required min="1">
                     
+                    {{-- Dropdown Satuan (Wajib) --}}
                     <select name="satuan" id="satuan" class="form-control-new" style="flex: 1; min-width: 120px;" required>
                         <option value="" disabled selected>Pilih Satuan</option>
                         <option value="Buah" {{ old('satuan') == 'Buah' ? 'selected' : '' }}>Buah</option>
@@ -92,7 +93,7 @@
             </div>
 
             <div class="form-group-new">
-                <label for="foto">Unggah Foto</label> 
+                <label for="foto">Unggah Foto (Wajib)</label> 
                 <input type="file" name="foto" id="foto" class="form-control-new-file" required>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: red;">
                     *Unggah foto material adalah wajib.

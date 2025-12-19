@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Laporan Siaga Kembali</title>
+
+    <html>
+        <head>
+            <title>Laporan Siaga Kembali</title>
         <style>
         body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10px; }
         h2 { text-align: center; margin-bottom: 5px; }
@@ -12,7 +13,7 @@
         td { vertical-align: top; }
         .text-center { text-align: center; }
         </style>
-    </head>
+        </head>
     <body>
     <h2>LAPORAN SIAGA KEMBALI</h2>
     <p>Periode: {{ \Carbon\Carbon::parse($tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggal_akhir)->format('d M Y') }}</p>
@@ -20,12 +21,13 @@
 <thead>
     <tr>
         <th style="width: 5%;">No</th>
-        <th style="width: 20%;">Nama Material & Nomor Meter</th> 
-        <th style="width: 15%;">Nama Petugas</th>
-        <th style="width: 10%;">Stand Meter</th>
-        <th style="width: 25%;">Keterangan</th> {{-- <--- KOLOM HEADER KETERANGAN BARU --}}
+        <th>Nama Material & Nomor Meter</th> {{-- PERBAIKAN: Diubah menjadi 'Nomor Meter' --}}
+        <th>Nama Petugas</th>
+        <th>Stand Meter</th>
+        {{-- HAPUS: Jumlah Siaga Keluar --}}
+        {{-- HAPUS: Jumlah Siaga Kembali --}}
         <th>Status</th>
-        <th style="width: 15%;">Tanggal (WITA)</th>
+        <th>Tanggal (WITA)</th>
     </tr>
 </thead>
     <tbody>
@@ -34,21 +36,20 @@
         <td class="text-center">{{ $index + 1 }}</td>
         <td>
             {{ $item->material->nama_material ?? 'N/A' }} 
-            @if ($item->nomor_meter) {{-- MENGGUNAKAN nomor_meter SESUAI PERBAIKAN --}}
-                - {{ $item->nomor_meter }}
+            @if ($item->nomor_unit)
+                - {{ $item->nomor_unit }}
             @endif
         </td>
         <td>{{ $item->nama_petugas }}</td>
         <td>{{ $item->stand_meter ?? '-' }}</td>
-        <td>{{ $item->keterangan }}</td> {{-- <--- DATA KETERANGAN BARU --}}
-        
+        {{-- HAPUS DATA: Jumlah Siaga Keluar --}}
+        {{-- HAPUS DATA: Jumlah Siaga Kembali --}}
         <td>{{ $item->status ?? 'Kembali' }}</td>
         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
     </tr>
 @empty
     <tr>
-        {{-- COLSPAN diubah dari 6 menjadi 7: (No, Mat&Meter, Petugas, Stand, Keterangan, Status, Tgl) --}}
-        <td colspan="7" class="text-center">Data tidak ditemukan pada periode ini.</td>
+        <td colspan="6" class="text-center">Data tidak ditemukan pada periode ini.</td>
     </tr>
 @endforelse
 </tbody>

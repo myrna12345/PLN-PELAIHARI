@@ -12,7 +12,8 @@
     <form action="{{ route('siaga-kembali.index') }}" method="GET" class="search-form">
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" name="search" placeholder="Cari Material/Petugas" value="{{ request('search') }}">
+            {{-- PERBAIKAN: Mengganti "Nomor Unit" di placeholder menjadi "Nomor Meter" --}}
+            <input type="text" name="search" placeholder="Cari Material/Petugas/Nomor Meter..." value="{{ request('search') }}">
         </div>
         <div class="form-group-tanggal-filter">
             <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
@@ -33,7 +34,10 @@
                 <th>Nama Material & Nomor Meter</th>
                 <th>Nama Petugas</th>
                 <th>Stand Meter</th>
-                <th>Keterangan</th> {{-- <--- KOLOM BARU --}}
+                {{-- HAPUS KOLOM JUMLAH SIAGA KELUAR --}}
+                {{-- <th>Jumlah Siaga Keluar</th> --}}
+                {{-- HAPUS KOLOM JUMLAH SIAGA KEMBALI --}}
+                {{-- <th>Jumlah Siaga Kembali</th> --}}
                 <th>Status</th>
                 <th>Tanggal (WITA)</th>
                 <th>Foto & Download</th>
@@ -47,6 +51,7 @@
                     
                     <td>
                         {{ $item->material->nama_material ?? 'N/A' }} 
+                        {{-- PERBAIKAN: Mengganti $item->nomor_unit menjadi $item->nomor_meter --}}
                         @if ($item->nomor_meter)
                             - {{ $item->nomor_meter }} 
                         @endif
@@ -54,7 +59,12 @@
                     
                     <td>{{ $item->nama_petugas }}</td>
                     <td>{{ $item->stand_meter ?? '-' }}</td>
-                    <td>{{ $item->keterangan }}</td> {{-- <--- DATA KETERANGAN --}}
+                    
+                    {{-- HAPUS DATA JUMLAH SIAGA KELUAR --}}
+                    {{-- <td>{{ $item->jumlah_siaga_keluar }}</td> --}}
+                    
+                    {{-- HAPUS DATA JUMLAH SIAGA KEMBALI --}}
+                    {{-- <td>{{ $item->jumlah_siaga_kembali }}</td> --}}
                     
                     <td>{{ $item->status ?? 'Kembali' }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
@@ -62,16 +72,17 @@
                     <td style="text-align: center; vertical-align: top;"> 
                         @if($item->foto_path)
                             <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
-                                    alt="Foto Siaga Kembali" 
-                                    class="table-foto" 
-                                    style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
-                                    title="Klik untuk memperbesar">
+                                            alt="Foto Siaga Kembali" 
+                                            class="table-foto" 
+                                            style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
+                                            title="Klik untuk memperbesar">
 
                             <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                 <i class="fas fa-download"></i> Download Foto
                             </a>
                         @else
                             <span>-</span>
+                        {{-- PERBAIKAN: Menghapus tag penutup button yang tidak perlu --}}
                         @endif
                     </td>
                     <td>
@@ -85,8 +96,8 @@
                     </td>
                 </tr>
             @empty
-                {{-- COLSPAN Disesuaikan: Ada 9 Kolom sekarang (No, Mat&Meter, Petugas, Stand, Keterangan, Status, Tgl, Foto, Aksi) --}}
-                <tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr> 
+                {{-- COLSPAN dihitung ulang menjadi 8 --}}
+                <tr><td colspan="8" style="text-align:center;">Data tidak ditemukan.</td></tr>
             @endforelse
         </tbody>
     </table>

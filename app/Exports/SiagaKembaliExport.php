@@ -37,7 +37,6 @@ class SiagaKembaliExport implements FromQuery, WithHeadings, WithMapping, Should
             'Nama Material & Nomor Meter', // PERBAIKAN HEADING: Diubah menjadi 'Nomor Meter'
             'Nama Petugas',
             'Stand Meter',
-            'Keterangan', // <--- TAMBAHAN: KOLOM HEADER KETERANGAN
             // HAPUS: 'Jumlah Siaga Keluar',
             // HAPUS: 'Jumlah Siaga Kembali',
             'Status',
@@ -49,17 +48,15 @@ class SiagaKembaliExport implements FromQuery, WithHeadings, WithMapping, Should
     {
         $this->rowNumber++;
         
-        // CATATAN PENTING: Mengganti 'nomor_unit' menjadi 'nomor_meter'
-        // Jika Anda telah memperbarui database Anda, maka field yang benar adalah 'nomor_meter'.
+        // Menggabungkan Nama Material dan Nomor Meter (menggunakan field nomor_unit)
         $namaMaterialUnit = ($item->material->nama_material ?? 'N/A') . 
-                             ($item->nomor_meter ? ' - ' . $item->nomor_meter : ''); // <--- DIGANTI KE nomor_meter
+                            ($item->nomor_unit ? ' - ' . $item->nomor_unit : '');
 
         return [
             $this->rowNumber,
             $namaMaterialUnit, 
             $item->nama_petugas,
             $item->stand_meter ?? '-',
-            $item->keterangan, // <--- TAMBAHAN: DATA KETERANGAN
             // HAPUS DATA: $item->jumlah_siaga_keluar,
             // HAPUS DATA: $item->jumlah_siaga_kembali,
             $item->status ?? 'Kembali',
