@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class MaterialStandBy extends Model
 {
     use HasFactory;
-    
+
+    // Paksa Laravel menggunakan nama tabel tunggal sesuai database Anda
     protected $table = 'material_stand_by';
 
     protected $fillable = [
-        'material_id', 
-        'nama_petugas', 
+        'material_id',
         'jumlah',
-        'satuan', // 🟢 BARU: Field Satuan
-        'tanggal', 
-        'foto_path'
+        'satuan',
+        'foto_path',
+        'foto_petugas',
+        'tanggal',
     ];
 
     protected $casts = [
@@ -26,6 +27,6 @@ class MaterialStandBy extends Model
 
     public function material()
     {
-        return $this->belongsTo(Material::class);
+        return $this->belongsTo(Material::class, 'material_id');
     }
 }

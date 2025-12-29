@@ -35,7 +35,7 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
         return [
             'No',
             'Nama Material',
-            'Jumlah & Satuan', // Digabungkan
+            'Jumlah & Satuan',
             'Tanggal (WITA)',
         ];
     }

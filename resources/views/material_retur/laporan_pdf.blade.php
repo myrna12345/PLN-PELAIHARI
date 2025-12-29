@@ -1,59 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laporan Material Retur</title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10px; }
-        h2 { text-align: center; margin-bottom: 5px; }
-        p { text-align: center; font-size: 11px; margin-top: 0; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
-        th { background-color: #f2f2f2; font-weight: bold; }
-        td { vertical-align: top; }
-        .text-center { text-align: center; }
+        body { font-family: sans-serif; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: center; vertical-align: middle; }
     </style>
 </head>
 <body>
-    <h2>LAPORAN MATERIAL RETUR</h2>
-    <p>Periode: {{ \Carbon\Carbon::parse($tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggal_akhir)->format('d M Y') }}</p>
-
+    <h2 style="text-align: center;">LAPORAN MATERIAL RETUR</h2>
+    <p style="text-align: center;">Periode: {{ $tanggal_mulai }} s/d {{ $tanggal_akhir }}</p>
     <table>
         <thead>
             <tr>
-                <th>No</th>
-                <th>Nama Material</th>
-                <th>Nama Petugas</th>
-                <th>Jumlah Retur (Satuan)</th>
-                {{-- ❌ Dihapus: <th>Jumlah Keluar</th> --}}
-                {{-- ❌ Dihapus: <th>Jumlah Kembali</th> --}}
+                <th style="width: 5%;">No</th>
+                <th>Material</th>
+                <th>Petugas</th>
+                <th>Jumlah</th>
                 <th>Status</th>
-                <th>Keterangan</th>
-                <th>Tanggal (WITA)</th>
+                <th>Keterangan</th> {{-- Kolom Baru --}}
+                <th>Foto Material</th>
+                <th>Foto Petugas</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($items as $index => $item)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
-                    <td>{{ $item->nama_petugas }}</td>
-                    <td class="text-center">{{ $item->jumlah }} {{ $item->satuan }}</td> 
-                    
-                    {{-- ❌ Dihapus: <td class="text-center">{{ $item->material_keluar ?? 0 }}</td> --}}
-                    {{-- ❌ Dihapus: <td class="text-center">{{ $item->material_kembali ?? 0 }}</td> --}}
-                    
-                    {{-- Menggunakan Accessor dari Model (bekas_andal -> Baik) --}}
-                    <td>{{ $item->status }}</td> 
-                    
-                    <td>{{ $item->keterangan }}</td>
-                    <td>{{ $item->tanggal->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    {{-- 💡 PERBAIKAN: Colspan disesuaikan dari 9 menjadi 7 (9 - 2 kolom yang dihapus) --}}
-                    <td colspan="7" class="text-center">Data tidak ditemukan pada periode ini.</td>
-                </tr>
-            @endforelse
+            @foreach ($items as $index => $item)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $item->material->nama_material }}</td>
+                <td>{{ $item->nama_petugas }}</td>
+                <td>{{ $item->jumlah }} {{ $item->satuan }}</td>
+                <td>{{ $item->status }}</td>
+                <td>{{ $item->keterangan }}</td> {{-- Data Keterangan --}}
+                
+                {{-- Cek apakah foto ada sebelum ditampilkan agar tidak error --}}
+                <td>
+                    @if($item->foto_path)
+                        <img src="{{ public_path('storage/' . $item->foto_path) }}" width="50" style="display:block; margin:auto;">
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if($item->foto_petugas)
+                        <img src="{{ public_path('storage/' . $item->foto_petugas) }}" width="50" style="display:block; margin:auto;">
+                    @else
+                        -
+                    @endif
+                </td>
+            </tr>
+            @endforeach
         </tbody>
     </table>
 </body>

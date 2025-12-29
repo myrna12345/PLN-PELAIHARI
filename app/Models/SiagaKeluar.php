@@ -21,6 +21,7 @@ class SiagaKeluar extends Model
         'status',
         'tanggal',
         'foto_path',
+        'foto_petugas', // TAMBAHAN
     ];
 
     public function material()
@@ -28,7 +29,6 @@ class SiagaKeluar extends Model
         return $this->belongsTo(Material::class);
     }
 
-    // POSISI KODE RELASI DI SINI
     public function standbyDetail() 
     {
         return $this->belongsTo(MaterialSiagaStandBy::class, 'nomor_meter', 'nomor_meter');

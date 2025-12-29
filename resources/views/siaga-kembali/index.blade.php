@@ -12,7 +12,6 @@
     <form action="{{ route('siaga-kembali.index') }}" method="GET" class="search-form">
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            {{-- PERBAIKAN: Mengganti "Nomor Unit" di placeholder menjadi "Nomor Meter" --}}
             <input type="text" name="search" placeholder="Cari Material/Petugas" value="{{ request('search') }}">
         </div>
         <div class="form-group-tanggal-filter">
@@ -34,13 +33,10 @@
                 <th>Nama Material & Nomor Meter</th>
                 <th>Nama Petugas</th>
                 <th>Stand Meter</th>
-                {{-- HAPUS KOLOM JUMLAH SIAGA KELUAR --}}
-                {{-- <th>Jumlah Siaga Keluar</th> --}}
-                {{-- HAPUS KOLOM JUMLAH SIAGA KEMBALI --}}
-                {{-- <th>Jumlah Siaga Kembali</th> --}}
                 <th>Status</th>
                 <th>Tanggal (WITA)</th>
-                <th>Foto & Download</th>
+                <th>Foto Material</th>
+                <th>Foto Petugas</th> {{-- TAMBAHAN HEADER --}}
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -51,7 +47,6 @@
                     
                     <td>
                         {{ $item->material->nama_material ?? 'N/A' }} 
-                        {{-- PERBAIKAN: Mengganti $item->nomor_unit menjadi $item->nomor_meter --}}
                         @if ($item->nomor_meter)
                             - {{ $item->nomor_meter }} 
                         @endif
@@ -60,31 +55,38 @@
                     <td>{{ $item->nama_petugas }}</td>
                     <td>{{ $item->stand_meter ?? '-' }}</td>
                     
-                    {{-- HAPUS DATA JUMLAH SIAGA KELUAR --}}
-                    {{-- <td>{{ $item->jumlah_siaga_keluar }}</td> --}}
-                    
-                    {{-- HAPUS DATA JUMLAH SIAGA KEMBALI --}}
-                    {{-- <td>{{ $item->jumlah_siaga_kembali }}</td> --}}
-                    
                     <td>{{ $item->status ?? 'Kembali' }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                     
+                    {{-- Foto Material --}}
                     <td style="text-align: center; vertical-align: top;"> 
                         @if($item->foto_path)
                             <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
-                                            alt="Foto Siaga Kembali" 
-                                            class="table-foto" 
-                                            style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
-                                            title="Klik untuk memperbesar">
-
+                                 class="table-foto" 
+                                 style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;">
                             <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
-                                <i class="fas fa-download"></i> Download Foto
+                                <i class="fas fa-download"></i> Download
                             </a>
                         @else
                             <span>-</span>
-                        {{-- PERBAIKAN: Menghapus tag penutup button yang tidak perlu --}}
                         @endif
                     </td>
+
+                    {{-- TAMBAHAN: Foto Petugas --}}
+                    <td style="text-align: center; vertical-align: top;"> 
+                        @if($item->foto_petugas)
+                            <img src="{{ asset('storage/' . $item->foto_petugas) }}" 
+                                 class="table-foto" 
+                                 style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px;">
+                            {{-- Pastikan route ini didaftarkan di web.php --}}
+                            <a href="{{ route('siaga-kembali.download-foto-petugas', $item->id) }}" class="btn-foto-download" title="Download Foto Petugas">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        @else
+                            <span>-</span>
+                        @endif
+                    </td>
+
                     <td>
                         <div class="table-actions">
                             <a href="{{ route('siaga-kembali.edit', $item->id) }}" class="btn btn-edit">Edit</a>
@@ -96,8 +98,7 @@
                     </td>
                 </tr>
             @empty
-                {{-- COLSPAN dihitung ulang menjadi 8 --}}
-                <tr><td colspan="8" style="text-align:center;">Data tidak ditemukan.</td></tr>
+                <tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -119,7 +120,6 @@
         <button type="submit" name="submit_excel" value="1" class="btn btn-excel"><i class="fas fa-file-excel"></i> Unduh Excel</button>
     </form>
 </div>
-
 
 </div>
 @endsection

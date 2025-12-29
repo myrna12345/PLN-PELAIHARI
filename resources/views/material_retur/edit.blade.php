@@ -43,22 +43,17 @@
                 <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas', $item->nama_petugas) }}" required>
             </div>
             
-            {{-- Menggabungkan Input Jumlah dan Dropdown Satuan --}}
             <div class="form-group-new">
                 <label for="jumlah">Jumlah dan Satuan (Wajib)</label>
                 <div style="display: flex; gap: 10px;">
-                    
-                    {{-- Input Jumlah (Manual Number Input) --}}
                     <input type="number" name="jumlah" id="jumlah" class="form-control-new" 
                             value="{{ old('jumlah', $item->jumlah) }}" 
                             placeholder="Jumlah"
                             style="flex: 2;"
                             required min="1">
                     
-                    {{-- Dropdown Satuan (Wajib) --}}
                     <select name="satuan" id="satuan" class="form-control-new" style="flex: 1; min-width: 120px;" required>
                         <option value="" disabled>Pilih Satuan</option>
-                        {{-- Menampilkan nilai lama --}}
                         <option value="Buah" {{ old('satuan', $item->satuan) == 'Buah' ? 'selected' : '' }}>Buah</option>
                         <option value="Meter" {{ old('satuan', $item->satuan) == 'Meter' ? 'selected' : '' }}>Meter</option>
                     </select>
@@ -71,9 +66,7 @@
             <div class="form-group-new">
                 <label for="status">Status Material</label>
                 <select name="status" id="status" class="form-control-new" required>
-                    
-                    {{-- PERBAIKAN: Nilai yang dikirim tetap 'bekas_andal' atau 'rusak' --}}
-                    <option value="bekas_andal" {{ old('status', $item->status) == 'bekas_andal' || old('status', $item->status) == 'baik' ? 'selected' : '' }}>Bekas Andal</option>
+                    <option value="bekas_andal" {{ old('status', $item->status) == 'bekas_andal' || old('status', $item->status) == 'Baik' ? 'selected' : '' }}>Bekas Andal</option>
                     <option value="rusak" {{ old('status', $item->status) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                 </select>
             </div>
@@ -95,36 +88,44 @@
                 <textarea name="keterangan" id="keterangan" class="form-control-new" rows="3">{{ old('keterangan', $item->keterangan) }}</textarea>
             </div>
 
-            {{-- 🖼️ Form Group Foto dengan Pratinjau 🖼️ --}}
+            {{-- --- BAGIAN FOTO MATERIAL --- --}}
             <div class="form-group-new">
-                <label for="foto">Foto</label>
-                
+                <label>Foto Material</label>
                 @if ($item->foto_path)
                     <div style="margin-bottom: 10px;">
                         <img src="{{ route('material-retur.show-foto', $item->id) }}" 
-                              alt="Foto Saat Ini" 
+                              alt="Foto Material Saat Ini" 
                               style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
                     </div>
                 @endif
-
-                {{-- 💡 PERBAIKAN: Ganti label --}}
-                <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Baru (Opsional)</label>
-                
-                {{-- 💡 PERBAIKAN KRUSIAL: Hapus atribut `required` --}}
+                <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Material Baru (Opsional)</label>
                 <input type="file" name="foto" id="foto" class="form-control-new-file"> 
-                
-                {{-- 💡 PERBAIKAN: Ganti teks petunjuk --}}
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    Biarkan kosong jika Anda tidak ingin mengubah foto yang sudah ada.
+                    Biarkan kosong jika tidak ingin mengubah foto material.
                 </small>
-                 @error('foto')
-                    <div class="alert alert-danger">{{ $message }}</div>
-                @enderror
+            </div>
+
+            {{-- --- BAGIAN FOTO PETUGAS (TAMBAHAN BARU) --- --}}
+            <div class="form-group-new">
+                <label>Foto Petugas</label>
+                @if ($item->foto_petugas)
+                    <div style="margin-bottom: 10px;">
+                        {{-- Menggunakan asset storage atau route khusus jika ada --}}
+                        <img src="{{ asset('storage/' . $item->foto_petugas) }}" 
+                              alt="Foto Petugas Saat Ini" 
+                              style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
+                    </div>
+                @endif
+                <label for="foto_petugas" style="display: block; margin-top: 10px;">Unggah Foto Petugas Baru (Opsional)</label>
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file"> 
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    Biarkan kosong jika tidak ingin mengubah foto petugas.
+                </small>
             </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>
-                <a href="{{ route('material-retur.index') }}" class="btn-batal">Batal</a>
+                <a href="{{ route('material-retur.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
             </div>
         </form>
     </div>
