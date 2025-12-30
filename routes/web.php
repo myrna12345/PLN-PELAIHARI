@@ -39,34 +39,36 @@ Route::resource('material-stand-by', MaterialStandByController::class);
 
 
 // --- RUTE MATERIAL KELUAR ---
-Route::get('material-keluar/foto/{materialKeluar}', [MaterialKeluarController::class, 'showFoto'])
-     ->name('material_keluar.show-foto'); 
+Route::post('material-keluar/download-report',[MaterialKeluarController::class, 'downloadReport'])->name('material_keluar.download');
 
-Route::get('/material-keluar/{materialKeluar}/lihat', [MaterialKeluarController::class, 'lihat'])
-     ->name('material_keluar.lihat');
+Route::get('material-keluar/download-report', [MaterialKeluarController::class, 'downloadReport'])->name('material_keluar.download');
 
-Route::get('/material-keluar/{materialKeluar}/download-foto', [MaterialKeluarController::class, 'downloadFoto'])
-     ->name('material_keluar.download-foto'); 
+Route::get('material-keluar/{materialKeluar}/foto', [MaterialKeluarController::class, 'showFoto'])->name('material_keluar.show-foto');
 
-Route::post('/material-keluar/download', [MaterialKeluarController::class, 'downloadReport'])
-     ->name('material_keluar.download');
+Route::get('material-keluar/{materialKeluar}/download-foto', [MaterialKeluarController::class, 'downloadFoto'])->name('material_keluar.download-foto');
+
+Route::get('material-keluar/{materialKeluar}/foto-petugas', [MaterialKeluarController::class, 'showFotoPetugas'])->name('material_keluar.show-foto-petugas');
+
+Route::get('material-keluar/{materialKeluar}/download-foto-petugas', [MaterialKeluarController::class, 'downloadFotoPetugas'])->name('material_keluar.download-foto-petugas');
+
+Route::get('material-keluar/{materialKeluar}/lihat', [MaterialKeluarController::class, 'lihat'])->name('material_keluar.lihat');
 
 Route::resource('material_keluar', MaterialKeluarController::class);
 
 
+
 // --- RUTE MATERIAL KEMBALI ---
-Route::get('material-kembali/foto/{materialKembali}', [MaterialKembaliController::class, 'showFoto'])
-     ->name('material_kembali.show-foto'); 
+// RUTE BARU UNTUK MENAMPILKAN FOTO SECARA LANGSUNG (SOLUSI ANTI-SYMLINK)
+// PERBAIKAN: Mengganti {id} dengan {materialKembali} untuk Route Model Binding
+Route::get('material-kembali/foto/{materialKembali}', [MaterialKembaliController::class, 'showFoto'])->name('material_kembali.show-foto'); 
 
-Route::get('/material_kembali/{materialKembali}/lihat', [MaterialKembaliController::class, 'lihat'])
-     ->name('material_kembali.lihat');
+// PERBAIKAN: Mengganti {id} dengan {materialKembali}
+Route::get('/material_kembali/{materialKembali}/lihat', [MaterialKembaliController::class, 'lihat'])->name('material_kembali.lihat');
 
-Route::get('/material_kembali/{materialKembali}/download-foto', [MaterialKembaliController::class, 'downloadFoto'])
-     ->name('material_kembali.download-foto'); 
+// PERBAIKAN: Menambahkan rute download foto yang hilang (Mengganti {id} menjadi {materialKembali})
+Route::get('/material_kembali/{materialKembali}/download-foto', [MaterialKembaliController::class, 'downloadFoto'])->name('material_kembali.download-foto'); 
 
-Route::post('/material_kembali/download', [MaterialKembaliController::class, 'downloadReport'])
-     ->name('material_kembali.download');
-
+Route::post('/material_kembali/download', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
 Route::resource('material_kembali', MaterialKembaliController::class);
 
 

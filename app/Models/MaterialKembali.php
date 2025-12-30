@@ -12,10 +12,16 @@ class MaterialKembali extends Model
     protected $table = 'material_kembali';
 
     protected $fillable = [
-        'nama_material',
+        'material_id',
         'nama_petugas',
         'jumlah_material',
+        'satuan',
         'tanggal',
         'foto'
     ];
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class);
+    }
 }
