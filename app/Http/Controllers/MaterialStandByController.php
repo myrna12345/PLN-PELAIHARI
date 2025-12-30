@@ -7,14 +7,12 @@ use App\Models\MaterialStandBy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\MaterialStandByExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
 class MaterialStandByController extends Controller
 {
     /**
-     * Menampilkan daftar Material Stand By.
+     * Menampilkan daftar Material Stand By dengan fitur pencarian dan filter tanggal.
      */
     public function index(Request $request)
     {
@@ -22,191 +20,185 @@ class MaterialStandByController extends Controller
         $tanggalMulai = $request->query('tanggal_mulai');
         $tanggalAkhir = $request->query('tanggal_akhir');
 
-        // Menggunakan model MaterialStandBy
+        // Mengambil data dengan relasi material
         $query = MaterialStandBy::with('material');
 
         if ($search) {
-            // PERBAIKAN: Hanya mencari berdasarkan 'nama_material' dan kolom yang relevan
             $query->where(function($q) use ($search) {
-                // Mencari di tabel Material yang berelasi
                 $q->orWhereHas('material', function($subQ) use ($search) {
                     $subQ->where('nama_material', 'like', '%' . $search . '%');
                 });
-                // Mencari berdasarkan Satuan
                 $q->orWhere('satuan', 'like', '%' . $search . '%');
-                // Mencari berdasarkan Nama Petugas (jika ada data lama)
-                $q->orWhere('nama_petugas', 'like', '%' . $search . '%');
             });
         }
 
-        if ($tanggalMulai) {
-            $query->whereDate('tanggal', '>=', $tanggalMulai);
+        if ($tanggalMulai) { 
+            $query->whereDate('tanggal', '>=', $tanggalMulai); 
         }
 
-        if ($tanggalAkhir) {
-            $query->whereDate('tanggal', '<=', $tanggalAkhir);
+        if ($tanggalAkhir) { 
+            $query->whereDate('tanggal', '<=', $tanggalAkhir); 
         }
 
+        // Urutkan berdasarkan tanggal terbaru
         $items = $query->latest('tanggal')->paginate(10); 
 
         return view('material_stand_by.index', compact('items'));
     }
 
     /**
-     * Menampilkan form untuk membuat Material Stand By baru.
+     * Menampilkan form tambah data.
      */
     public function create()
     {
-        // Ambil dan urutkan material yang bukan kategori 'siaga'
+        // Mengambil material yang bukan kategori siaga untuk dropdown
         $materials = Material::where('kategori', '!=', 'siaga')
-                             ->orWhereNull('kategori')
-                             ->get()
-                             ->sortBy('nama_material', SORT_NATURAL);
-                             
+                            ->orWhereNull('kategori')
+                            ->get()
+                            ->sortBy('nama_material', SORT_NATURAL);
+                            
         return view('material_stand_by.create', compact('materials'));
     }
 
     /**
-     * Menyimpan Material Stand By baru ke database.
+     * Menyimpan data baru tanpa kolom keterangan.
      */
     public function store(Request $request)
     {
-        // Validasi input
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
-            // HAPUS VALIDASI INI: 'nomor_unit' => 'required|string|max:255', 
-            // HAPUS VALIDASI INI: 'stand_meter' => 'required|string|max:255', 
-            'jumlah' => 'required|integer|min:1',
-            'satuan' => 'required|string|in:Buah,Meter',
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120' 
+            'jumlah'      => 'required|integer|min:1',
+            'satuan'      => 'required|string|in:Buah,Meter',
+            'foto'         => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120' 
         ]);
 
-        // Hapus 'foto' dari array validated
-        $foto_file = $validated['foto'];
-        unset($validated['foto']);
+        // Proses simpan file ke storage
+        $pathMaterial = $request->file('foto')->store('fotos_material_standby', 'public');
+        $pathPetugas = $request->file('foto_petugas')->store('foto_petugas', 'public');
 
-        $path = null;
-        if ($request->hasFile('foto')) {
-            $path = $foto_file->store('fotos_material_standby', 'public');
-        }
-
-        // Jika kolom `nama_petugas` di database adalah NOT NULL, Anda harus memberikan nilai default.
-        $dataToSave = array_merge($validated, [
-            'foto_path' => $path,
-            'tanggal' => Carbon::now('Asia/Makassar'),
-            // Berikan nilai default untuk field yang dihapus dari form
-            'nama_petugas' => 'System', 
-            'nomor_unit' => null, 
-            'stand_meter' => null, 
+        MaterialStandBy::create([
+            'material_id'  => $validated['material_id'],
+            'jumlah'       => $validated['jumlah'],
+            'satuan'       => $validated['satuan'],
+            'foto_path'    => $pathMaterial,
+            'foto_petugas' => $pathPetugas,
+            'tanggal'      => Carbon::now('Asia/Makassar'), // Waktu otomatis WITA
         ]);
-
-        MaterialStandBy::create($dataToSave);
 
         return redirect()->route('material-stand-by.index')
-                             ->with('success', 'Data Material Stand By berhasil ditambahkan.');
+                         ->with('success', 'Data Material Stand By berhasil ditambahkan.');
     }
 
     /**
-     * Menampilkan form untuk mengedit Material Stand By.
+     * Menampilkan form edit data.
      */
-    public function edit(MaterialStandBy $materialStandBy)
+    public function edit($id)
     {
-        // Ambil dan urutkan material yang bukan kategori 'siaga'
+        $item = MaterialStandBy::findOrFail($id);
         $materials = Material::where('kategori', '!=', 'siaga')
-                             ->orWhereNull('kategori')
-                             ->get()
-                             ->sortBy('nama_material', SORT_NATURAL);
+                            ->orWhereNull('kategori')
+                            ->get()
+                            ->sortBy('nama_material', SORT_NATURAL);
 
-        return view('material_stand_by.edit', [
-            'item' => $materialStandBy,
-            'materials' => $materials
-        ]);
+        return view('material_stand_by.edit', compact('item', 'materials'));
     }
 
     /**
-     * Memperbarui Material Stand By di database.
+     * Memperbarui data (Keterangan telah dihapus).
      */
-    public function update(Request $request, MaterialStandBy $materialStandBy)
+    public function update(Request $request, $id)
     {
-        // Validasi input: 'foto' dibuat nullable agar tidak wajib saat update
+        $materialStandBy = MaterialStandBy::findOrFail($id);
+
         $validated = $request->validate([
-            'material_id' => 'required|exists:materials,id',
-            // HAPUS VALIDASI INI: 'nama_petugas' => 'required|string|max:255',
-            // HAPUS VALIDASI INI: 'nomor_unit' => 'required|string|max:255', 
-            // HAPUS VALIDASI INI: 'stand_meter' => 'required|string|max:255', 
-            'jumlah' => 'required|integer|min:1',
-            'satuan' => 'required|string|in:Buah,Meter', 
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' 
+            'material_id'  => 'required|exists:materials,id',
+            'jumlah'       => 'required|integer|min:1',
+            'satuan'       => 'required|string|in:Buah,Meter', 
+            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
-        $path = $materialStandBy->foto_path;
+        $data = [
+            'material_id' => $validated['material_id'],
+            'jumlah'      => $validated['jumlah'],
+            'satuan'      => $validated['satuan'],
+        ];
         
-        // Logika penanganan file foto
+        // Update foto material jika ada file baru
         if ($request->hasFile('foto')) {
-            if ($path) { 
-                Storage::disk('public')->delete($path); 
+            if ($materialStandBy->foto_path) {
+                Storage::disk('public')->delete($materialStandBy->foto_path);
             }
-            $path = $request->file('foto')->store('fotos_material_standby', 'public');
+            $data['foto_path'] = $request->file('foto')->store('fotos_material_standby', 'public');
         }
 
-        // Hapus 'foto' dari array validated 
-        unset($validated['foto']); 
-        
-        // Tambahkan field yang TIDAK ADA DI FORM EDIT (yaitu: nama_petugas, nomor_unit, stand_meter)
-        // Nilai lama akan dipertahankan.
-        $dataToUpdate = array_merge($validated, [
-            'foto_path' => $path,
-            'nama_petugas' => $materialStandBy->nama_petugas, // Pertahankan nilai lama
-            'nomor_unit' => $materialStandBy->nomor_unit,       // Pertahankan nilai lama
-            'stand_meter' => $materialStandBy->stand_meter,     // Pertahankan nilai lama
-        ]);
+        // Update foto petugas jika ada file baru
+        if ($request->hasFile('foto_petugas')) {
+            if ($materialStandBy->foto_petugas) {
+                Storage::disk('public')->delete($materialStandBy->foto_petugas);
+            }
+            $data['foto_petugas'] = $request->file('foto_petugas')->store('foto_petugas', 'public');
+        }
 
-        // Update data
-        $materialStandBy->update($dataToUpdate);
+        $materialStandBy->update($data);
 
         return redirect()->route('material-stand-by.index')
-                             ->with('success', 'Data Material Stand By berhasil diperbarui.');
+                         ->with('success', 'Data Material Stand By berhasil diperbarui.');
     }
-    
+
     /**
-     * Menghapus Material Stand By dari database.
+     * Menghapus data beserta file fisiknya.
      */
-    public function destroy(MaterialStandBy $materialStandBy)
+    public function destroy($id)
     {
+        $materialStandBy = MaterialStandBy::findOrFail($id);
+        
         if ($materialStandBy->foto_path) {
             Storage::disk('public')->delete($materialStandBy->foto_path);
         }
+        if ($materialStandBy->foto_petugas) {
+            Storage::disk('public')->delete($materialStandBy->foto_petugas);
+        }
+        
         $materialStandBy->delete();
+        
         return redirect()->route('material-stand-by.index')
-                             ->with('success', 'Data Material Stand By berhasil dihapus.');
+                         ->with('success', 'Data Material Stand By berhasil dihapus.');
     }
 
     /**
-     * Menampilkan foto.
+     * Menampilkan Foto Material.
      */
-    public function showFoto(MaterialStandBy $materialStandBy)
+    public function showFoto($id)
     {
-        if (!$materialStandBy->foto_path || !Storage::disk('public')->exists($materialStandBy->foto_path)) {
-            return abort(404, 'File foto tidak ditemukan untuk ditampilkan.');
-        }
-
-        return Storage::disk('public')->response($materialStandBy->foto_path);
+        $item = MaterialStandBy::findOrFail($id);
+        return Storage::disk('public')->response($item->foto_path);
     }
 
     /**
-     * Mengunduh foto.
+     * Mengunduh Foto Material.
      */
-    public function downloadFoto(MaterialStandBy $materialStandBy)
+    public function downloadFoto($id)
     {
-        if ($materialStandBy->foto_path && Storage::disk('public')->exists($materialStandBy->foto_path)) {
-            return Storage::disk('public')->download($materialStandBy->foto_path);
-        } else {
-            return redirect()->back()->with('error', 'File foto tidak ditemukan.');
-        }
+        $item = MaterialStandBy::findOrFail($id);
+        return Storage::disk('public')->download($item->foto_path);
     }
-    
+
     /**
-     * Mengunduh laporan dalam format PDF atau Excel.
+     * Mengunduh Foto Petugas.
+     */
+    public function downloadFotoPetugas($id)
+    {
+        $item = MaterialStandBy::findOrFail($id);
+        if ($item->foto_petugas && Storage::disk('public')->exists($item->foto_petugas)) {
+            return Storage::disk('public')->download($item->foto_petugas);
+        }
+        return redirect()->back()->with('error', 'File foto petugas tidak ditemukan.');
+    }
+
+    /**
+     * Generate Laporan PDF & Excel.
      */
     public function downloadReport(Request $request)
     {
@@ -218,28 +210,26 @@ class MaterialStandByController extends Controller
         $tanggalMulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
         
-        $filename = 'laporan_material_stand_by_' . $tanggalMulai->format('Y-m-d') . '_sd_' . $tanggalAkhir->format('Y-m-d');
+        $items = MaterialStandBy::with('material')
+                    ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
+                    ->orderBy('tanggal', 'asc')
+                    ->get();
 
         if ($request->has('submit_pdf')) {
-            $items = MaterialStandBy::with('material')
-                                       ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
-                                       ->orderBy('tanggal', 'asc')
-                                       ->get();
-
-            $data = [
+            $pdf = Pdf::loadView('material_stand_by.laporan_pdf', [
                 'items' => $items,
-                'tanggal_mulai' => $tanggalMulai->format('d M Y'),
-                'tanggal_akhir' => $tanggalAkhir->format('d M Y'),
-            ];
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_akhir' => $tanggalAkhir,
+            ]);
             
-            $pdf = Pdf::loadView('material_stand_by.laporan_pdf', $data);
-            return $pdf->download($filename . '.pdf');
-        } 
-        
-        if ($request->has('submit_excel')) {
-            return Excel::download(new \App\Exports\MaterialStandByExport($tanggalMulai, $tanggalAkhir), $filename . '.xlsx');
+            return $pdf->download('laporan_material_stand_by.pdf');
         }
         
-        return redirect()->back()->with('error', 'Pilih jenis laporan yang ingin diunduh.');
+        if ($request->has('submit_excel')) {
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\MaterialStandByExport($tanggalMulai, $tanggalAkhir), 
+                'laporan_material_stand_by.xlsx'
+            );
+        }
     }
 }

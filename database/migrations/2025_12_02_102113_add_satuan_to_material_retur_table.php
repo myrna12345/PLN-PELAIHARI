@@ -6,24 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // TARGET YANG BENAR: material_retur
         Schema::table('material_retur', function (Blueprint $table) {
-            $table->string('satuan')->after('jumlah'); // Menambahkan kolom satuan
+            // Cek apakah kolom 'satuan' sudah ada, jika belum baru tambahkan
+            if (!Schema::hasColumn('material_retur', 'satuan')) {
+                $table->string('satuan')->after('jumlah');
+            }
+            
+            // Tambahkan juga kolom foto_petugas jika belum ada
+            if (!Schema::hasColumn('material_retur', 'foto_petugas')) {
+                $table->string('foto_petugas')->nullable()->after('foto_path');
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('material_retur', function (Blueprint $table) {
-            $table->dropColumn('satuan');
+            $table->dropColumn(['satuan', 'foto_petugas']);
         });
     }
 };

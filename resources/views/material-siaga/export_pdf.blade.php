@@ -7,57 +7,59 @@
     <style>
         body {
             font-family: sans-serif;
-            font-size: 12px;
-            margin: 20px;
+            font-size: 11px;
+            margin: 10px;
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 3px;
-            font-size: 18px;
+            margin-bottom: 5px;
+            font-size: 16px;
             text-transform: uppercase;
         }
 
         p {
             text-align: center;
             margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 13px;
+            margin-bottom: 20px;
+            font-size: 12px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
             table-layout: fixed;
         }
 
         th, td {
             border: 1px solid #000;
-            padding: 6px;
-            font-size: 11px;
+            padding: 8px 5px;
             word-wrap: break-word;
+            vertical-align: middle;
         }
 
         th {
-            background: #e6e6e6;
+            background: #f2f2f2;
             font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
         }
 
-        /* Rata kiri untuk teks panjang */
+        .center {
+            text-align: center;
+        }
+
         .left {
             text-align: left;
-            padding-left: 5px;
+            padding-left: 8px;
         }
 
-        /* Rata kanan untuk angka */
-        .right {
-            text-align: right;
-            padding-right: 5px;
+        .uppercase {
+            text-transform: uppercase;
         }
 
         @page {
-            margin: 20px;
+            margin: 30px;
         }
     </style>
 </head>
@@ -66,35 +68,33 @@
     <h2>LAPORAN MATERIAL SIAGA STANDBY</h2>
 
     <p>
-        Periode:
-        {{ \Carbon\Carbon::parse($start_date)->format('d-m-Y') }}
-        s/d
+        Periode: 
+        {{ \Carbon\Carbon::parse($start_date)->format('d-m-Y') }} 
+        s/d 
         {{ \Carbon\Carbon::parse($end_date)->format('d-m-Y') }}
     </p>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 35px;">No</th>
-                <th style="width: 150px;">Nama Material</th>
-                <th style="width: 140px;">Nama Petugas</th>
-                <th style="width: 90px;">Stand Meter</th>
-                <th style="width: 110px;">Jumlah Material</th>
-                <th style="width: 120px;">Tanggal</th>
-                <th style="width: 90px;">Status</th> 
+                <th style="width: 30px;">No</th>
+                <th style="width: 220px;">Nama Material & Nomor Meter</th>
+                <th style="width: 80px;">Stand Meter</th>
+                <th style="width: 110px;">Tanggal Input</th>
+                <th style="width: 80px;">Status</th> 
             </tr>
         </thead>
 
         <tbody>
             @foreach($data as $index => $item)
             <tr>
-                <td>{{ $index + 1 }}</td>
-                <td class="left">{{ $item->nama_material }}</td>
-                <td class="left">{{ $item->nama_petugas }}</td>
-                <td class="right">{{ $item->stand_meter }}</td>
-                <td class="right">{{ $item->jumlah_siaga_standby }}</td>
-                <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y H:i') }}</td>
-                <td>{{ $item->status }}</td>
+                <td class="center">{{ $index + 1 }}</td>
+                <td class="left">
+                    <span class="uppercase">{{ $item->nama_material }}</span> - {{ $item->nomor_meter }}
+                </td>
+                <td class="center">{{ $item->stand_meter }}</td>
+                <td class="center">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y H:i') }}</td>
+                <td class="center uppercase">{{ $item->status }}</td>
             </tr>
             @endforeach
         </tbody>

@@ -36,7 +36,8 @@
                     <th>Keterangan</th> 
                     <th>Status</th>
                     <th>Tanggal (WITA)</th>
-                    <th>Foto & Download</th>
+                    <th>Foto Material</th>
+                    <th>Foto Petugas</th> {{-- TAMBAHAN HEADER --}}
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -48,7 +49,7 @@
                         <td>
                             {{ $item->material->nama_material ?? 'N/A' }} 
                             @if ($item->nomor_meter) 
-                                - {{ $item->nomor_meter }} {{-- KOREKSI: Mengganti $item->nomor_unit dengan $item->nomor_meter --}}
+                                - {{ $item->nomor_meter }} 
                             @endif
                         </td>
                         
@@ -62,35 +63,40 @@
                         
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
-                        <td style="text-align: center; vertical-align: top;"> 
+                        {{-- Foto Material --}}
+                        <td style="text-align: center;"> 
                             @if($item->foto_path)
-                                <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" 
-                                    alt="Foto Siaga Keluar" 
-                                    class="table-foto" 
-                                    title="Klik untuk memperbesar">
-                                
-                                <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
-                                    <i class="fas fa-download"></i> Download Foto
-                                </a>
+                                <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
                             @else
                                 <span>-</span>
                             @endif
                         </td>
+
+                        {{-- TAMBAHAN: Foto Petugas --}}
+                        <td style="text-align: center;"> 
+                            @if($item->foto_petugas)
+                                <img src="{{ asset('storage/' . $item->foto_petugas) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                {{-- Pastikan route ini didaftarkan di web.php jika ingin fitur download berfungsi, atau hapus tombol ini jika cukup preview --}}
+                                <a href="{{ route('siaga-keluar.download-foto-petugas', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
+                            @else
+                                <span>-</span>
+                            @endif
+                        </td>
+
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('siaga-keluar.edit', $item->id) }}" class="btn btn-edit">Edit</a>
                                 <form action="{{ route('siaga-keluar.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
-                                    @csrf
-                                    @method('DELETE')
+                                    @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-hapus">Hapus</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 @empty
-                    {{-- COLSPAN disesuaikan menjadi 9 (8 kolom sebelumnya + 1 Keterangan) --}}
                     <tr>
-                        <td colspan="9" style="text-align:center;">Data tidak ditemukan.</td>
+                        <td colspan="10" style="text-align:center;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

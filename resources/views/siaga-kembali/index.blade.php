@@ -33,10 +33,10 @@
                 <th>Nama Material & Nomor Meter</th>
                 <th>Nama Petugas</th>
                 <th>Stand Meter</th>
-                <th>Keterangan</th> {{-- <--- KOLOM BARU --}}
                 <th>Status</th>
                 <th>Tanggal (WITA)</th>
-                <th>Foto & Download</th>
+                <th>Foto Material</th>
+                <th>Foto Petugas</th> {{-- TAMBAHAN HEADER --}}
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -54,26 +54,39 @@
                     
                     <td>{{ $item->nama_petugas }}</td>
                     <td>{{ $item->stand_meter ?? '-' }}</td>
-                    <td>{{ $item->keterangan }}</td> {{-- <--- DATA KETERANGAN --}}
                     
                     <td>{{ $item->status ?? 'Kembali' }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                     
+                    {{-- Foto Material --}}
                     <td style="text-align: center; vertical-align: top;"> 
                         @if($item->foto_path)
                             <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
-                                    alt="Foto Siaga Kembali" 
-                                    class="table-foto" 
-                                    style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;" 
-                                    title="Klik untuk memperbesar">
-
+                                 class="table-foto" 
+                                 style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;">
                             <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
-                                <i class="fas fa-download"></i> Download Foto
+                                <i class="fas fa-download"></i> Download
                             </a>
                         @else
                             <span>-</span>
                         @endif
                     </td>
+
+                    {{-- TAMBAHAN: Foto Petugas --}}
+                    <td style="text-align: center; vertical-align: top;"> 
+                        @if($item->foto_petugas)
+                            <img src="{{ asset('storage/' . $item->foto_petugas) }}" 
+                                 class="table-foto" 
+                                 style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px;">
+                            {{-- Pastikan route ini didaftarkan di web.php --}}
+                            <a href="{{ route('siaga-kembali.download-foto-petugas', $item->id) }}" class="btn-foto-download" title="Download Foto Petugas">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        @else
+                            <span>-</span>
+                        @endif
+                    </td>
+
                     <td>
                         <div class="table-actions">
                             <a href="{{ route('siaga-kembali.edit', $item->id) }}" class="btn btn-edit">Edit</a>
@@ -85,8 +98,7 @@
                     </td>
                 </tr>
             @empty
-                {{-- COLSPAN Disesuaikan: Ada 9 Kolom sekarang (No, Mat&Meter, Petugas, Stand, Keterangan, Status, Tgl, Foto, Aksi) --}}
-                <tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr> 
+                <tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -108,7 +120,6 @@
         <button type="submit" name="submit_excel" value="1" class="btn btn-excel"><i class="fas fa-file-excel"></i> Unduh Excel</button>
     </form>
 </div>
-
 
 </div>
 @endsection

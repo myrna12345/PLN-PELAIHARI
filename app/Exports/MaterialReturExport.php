@@ -17,7 +17,6 @@ class MaterialReturExport implements FromQuery, WithHeadings, WithMapping, Shoul
     protected $tanggalAkhir;
     private $rowNumber = 0;
 
-    // Terima objek Carbon
     public function __construct($tanggalMulai, $tanggalAkhir)
     {
         $this->tanggalMulai = $tanggalMulai;
@@ -37,11 +36,9 @@ class MaterialReturExport implements FromQuery, WithHeadings, WithMapping, Shoul
             'No',
             'Nama Material',
             'Nama Petugas',
-            'Jumlah Retur (Satuan)', // 💡 PERBAIKAN: Menambahkan Satuan
-            // ❌ Dihapus: Jumlah Keluar
-            // ❌ Dihapus: Jumlah Kembali
+            'Jumlah Retur (Satuan)',
             'Status',
-            'Keterangan',
+            'Keterangan', // Kolom Keterangan sudah ada di sini
             'Tanggal (WITA)',
         ];
     }
@@ -56,18 +53,13 @@ class MaterialReturExport implements FromQuery, WithHeadings, WithMapping, Shoul
             $this->rowNumber,
             $item->material->nama_material ?? 'N/A',
             $item->nama_petugas,
-            $item->jumlah . ' ' . $item->satuan, // 💡 PERBAIKAN: Menampilkan Jumlah dan Satuan
-            
-            // 💡 PERBAIKAN KRUSIAL: Memanggil $item->status, yang sekarang menggunakan Accessor dari Model
-            // Accessor akan mengubah 'bekas_andal' menjadi 'Baik'.
-            $item->status, 
-            
-            $item->keterangan,
+            $item->jumlah . ' ' . $item->satuan,
+            $item->status,     // Pastikan model Anda memiliki Accessor jika ingin mengubah format teks status
+            $item->keterangan, // Data Keterangan dimasukkan di sini
             $tanggalWita,
         ];
     }
 
-    // Tambahan style: Header bold
     public function styles(Worksheet $sheet)
     {
         return [

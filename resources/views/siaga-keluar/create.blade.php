@@ -23,7 +23,7 @@
         <form action="{{ route('siaga-keluar.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
-            {{-- 1. Nama Material (Dropdown) --}}
+            {{-- 1. Nama Material --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
@@ -42,16 +42,7 @@
             {{-- 2. Nomor Meter --}}
             <div class="form-group-new">
                 <label for="nomor_meter">Nomor Meter</label> 
-                <input type="text" 
-                        name="nomor_meter" 
-                        id="nomor_meter" 
-                        class="form-control-new @error('nomor_meter') is-invalid @enderror" 
-                        value="{{ old('nomor_meter') }}" 
-                        placeholder="Masukkan Nomor Meter"
-                        required>
-                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    Pastikan nomor meter yang dimasukkan sesuai dengan data.
-                </small>
+                <input type="text" name="nomor_meter" id="nomor_meter" class="form-control-new @error('nomor_meter') is-invalid @enderror" value="{{ old('nomor_meter') }}" placeholder="Masukkan Nomor Meter" required>
                 @error('nomor_meter')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -60,12 +51,7 @@
             {{-- 3. Nama Petugas --}}
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
-                <input type="text" 
-                        name="nama_petugas" 
-                        id="nama_petugas" 
-                        class="form-control-new @error('nama_petugas') is-invalid @enderror" 
-                        value="{{ old('nama_petugas') }}" 
-                        required>
+                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new @error('nama_petugas') is-invalid @enderror" value="{{ old('nama_petugas') }}" required>
                 @error('nama_petugas')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -74,75 +60,61 @@
             {{-- 4. Stand Meter --}}
             <div class="form-group-new">
                 <label for="stand_meter">Stand Meter</label>
-                <input type="text" 
-                        name="stand_meter" 
-                        id="stand_meter" 
-                        class="form-control-new @error('stand_meter') is-invalid @enderror" 
-                        value="{{ old('stand_meter') }}" 
-                        required>
+                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new @error('stand_meter') is-invalid @enderror" value="{{ old('stand_meter') }}" required>
                 @error('stand_meter')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
             
-            {{-- 5. KETERANGAN (WAJIB) --}}
+            {{-- 5. KETERANGAN --}}
             <div class="form-group-new">
                 <label for="keterangan">Keterangan</label>
-                <textarea name="keterangan" 
-                          id="keterangan" 
-                          class="form-control-new @error('keterangan') is-invalid @enderror" 
-                          placeholder="Masukkan keterangan material keluar"
-                          required>{{ old('keterangan') }}</textarea>
+                <textarea name="keterangan" id="keterangan" class="form-control-new @error('keterangan') is-invalid @enderror" placeholder="Masukkan keterangan material keluar" required>{{ old('keterangan') }}</textarea>
                 @error('keterangan')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+                {{-- Teks Peringatan --}}
+                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi</small>
             </div>
 
-            {{-- 6. UNGGAH FOTO --}}
+            {{-- 6. UNGGAH FOTO MATERIAL --}}
             <div class="form-group-new">
-                <label for="foto">Unggah Foto</label> 
-                <input type="file" 
-                        name="foto" 
-                        id="foto" 
-                        class="form-control-new-file @error('foto') is-invalid @enderror" 
-                        accept="image/*"
-                        required> 
+                <label for="foto">Unggah Foto Material</label> 
+                <input type="file" name="foto" id="foto" class="form-control-new-file @error('foto') is-invalid @enderror" accept="image/*" required> 
                 @error('foto')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                <small class="text-danger" style="display: block; margin-top: 5px;">
-                    *Unggah foto material adalah wajib.
-                </small>
-            </div>
-            
-            {{-- 7. Status (Readonly - Keluar) --}}
-            <div class="form-group-new">
-                <label for="status">Status</label>
-                <input type="text" 
-                        name="status" 
-                        id="status" 
-                        class="form-control-new" 
-                        value="{{ old('status', 'Keluar') }}" 
-                        readonly 
-                        style="background-color: #e9ecef; cursor: not-allowed;">
-            </div>
-            
-            {{-- 8. TANGGAL DAN JAM (READONLY) --}}
-            <div class="form-group-new">
-                <label>Tanggal dan Jam</label>
-                <input type="text" 
-                        class="form-control-new" 
-                        style="background-color: #e9ecef; cursor: not-allowed;"
-                        value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}"
-                        readonly>
-                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    Waktu akan otomatis terisi saat data disimpan.
-                </small>
+                {{-- Teks Peringatan --}}
+                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto material wajib diisi.</small>
             </div>
 
+            {{-- 7. UNGGAH FOTO PETUGAS --}}
+            <div class="form-group-new">
+                <label for="foto_petugas">Unggah Foto Petugas</label> 
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file @error('foto_petugas') is-invalid @enderror" accept="image/*" required> 
+                @error('foto_petugas')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                {{-- Teks Peringatan --}}
+                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto petugas wajib diisi.</small>
+            </div>
+            
+            {{-- 8. Status --}}
+            <div class="form-group-new">
+                <label for="status">Status</label>
+                <input type="text" name="status" id="status" class="form-control-new" value="{{ old('status', 'Keluar') }}" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+            </div>
+            
+            {{-- 9. TANGGAL --}}
+            <div class="form-group-new">
+                <label>Tanggal dan Jam</label>
+                <input type="text" class="form-control-new" style="background-color: #e9ecef; cursor: not-allowed;" value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}" readonly>
+            </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>
+                {{-- Tombol Batal --}}
+                <a href="{{ route('siaga-keluar.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
             </div>
         </form>
     </div>

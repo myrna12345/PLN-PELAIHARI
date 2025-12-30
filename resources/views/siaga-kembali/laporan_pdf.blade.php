@@ -11,6 +11,7 @@
         th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
         td { vertical-align: top; }
         .text-center { text-align: center; }
+        .img-report { width: 60px; height: auto; display: block; margin: 0 auto; }
         </style>
     </head>
     <body>
@@ -20,12 +21,14 @@
 <thead>
     <tr>
         <th style="width: 5%;">No</th>
-        <th style="width: 20%;">Nama Material & Nomor Meter</th> 
-        <th style="width: 15%;">Nama Petugas</th>
-        <th style="width: 10%;">Stand Meter</th>
-        <th style="width: 25%;">Keterangan</th> {{-- <--- KOLOM HEADER KETERANGAN BARU --}}
+        <th>Nama Material & Nomor Meter</th> 
+        <th>Nama Petugas</th>
+        <th>Stand Meter</th>
+        <th>Keterangan</th>
         <th>Status</th>
-        <th style="width: 15%;">Tanggal (WITA)</th>
+        <th>Tanggal (WITA)</th>
+        <th>Foto Material</th> {{-- TAMBAHAN: Foto Material --}}
+        <th>Foto Petugas</th> 
     </tr>
 </thead>
     <tbody>
@@ -34,21 +37,38 @@
         <td class="text-center">{{ $index + 1 }}</td>
         <td>
             {{ $item->material->nama_material ?? 'N/A' }} 
-            @if ($item->nomor_meter) {{-- MENGGUNAKAN nomor_meter SESUAI PERBAIKAN --}}
+            @if ($item->nomor_meter)
                 - {{ $item->nomor_meter }}
             @endif
         </td>
         <td>{{ $item->nama_petugas }}</td>
         <td>{{ $item->stand_meter ?? '-' }}</td>
-        <td>{{ $item->keterangan }}</td> {{-- <--- DATA KETERANGAN BARU --}}
-        
+        <td>{{ $item->keterangan }}</td>
         <td>{{ $item->status ?? 'Kembali' }}</td>
         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
+        
+        {{-- Foto Material --}}
+        <td>
+            @if($item->foto_path && file_exists(public_path('storage/' . $item->foto_path)))
+                <img src="{{ public_path('storage/' . $item->foto_path) }}" class="img-report">
+            @else
+                <div class="text-center">-</div>
+            @endif
+        </td>
+
+        {{-- Foto Petugas --}}
+        <td>
+            @if($item->foto_petugas && file_exists(public_path('storage/' . $item->foto_petugas)))
+                <img src="{{ public_path('storage/' . $item->foto_petugas) }}" class="img-report">
+            @else
+                <div class="text-center">-</div>
+            @endif
+        </td>
     </tr>
 @empty
     <tr>
-        {{-- COLSPAN diubah dari 6 menjadi 7: (No, Mat&Meter, Petugas, Stand, Keterangan, Status, Tgl) --}}
-        <td colspan="7" class="text-center">Data tidak ditemukan pada periode ini.</td>
+        {{-- Colspan disesuaikan jadi 9 karena kolom bertambah --}}
+        <td colspan="9" class="text-center">Data tidak ditemukan pada periode ini.</td>
     </tr>
 @endforelse
 </tbody>

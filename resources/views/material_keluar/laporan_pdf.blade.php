@@ -11,7 +11,6 @@
         th { background-color: #f2f2f2; font-weight: bold; }
         td { vertical-align: top; }
         .text-center { text-align: center; }
-        .text-right { text-align: right; }
     </style>
 </head>
 <body>
@@ -24,9 +23,7 @@
                 <th>No</th>
                 <th>Nama Material</th>
                 <th>Nama Petugas</th>
-                <th>Jumlah</th>
-                <th>Stok</th> 
-                <th>Keterangan</th> 
+                <th>Jumlah/Unit</th>
                 <th>Tanggal (WITA)</th>
             </tr>
         </thead>
@@ -34,21 +31,14 @@
             @forelse ($items as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item->material->nama_material ?? '-' }}</td>
+                    <td>{{ $item->nama_material }}</td>
                     <td>{{ $item->nama_petugas }}</td>
-                    
-                    {{-- Gabungkan jumlah_material dan satuan_material --}}
-                    <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan_material }}</td>
-                    
-                    {{-- 🟢 TAMPILKAN DATA STOK 🟢 --}}
-                    <td class="text-center">{{ $item->stok_saat_ini }}</td>
-                    <td>{{ $item->keterangan }}</td>
+                    <td class="text-center">{{ $item->jumlah_material }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                 </tr>
             @empty
                 <tr>
-                    {{-- colspan disesuaikan menjadi 6 --}}
-                    <td colspan="6" class="text-center">Tidak ada data pada periode ini.</td>
+                    <td colspan="5" class="text-center">Tidak ada data pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>
