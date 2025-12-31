@@ -14,7 +14,6 @@ return new class extends Migration
             
             $table->string('nomor_meter')->nullable(); 
             $table->string('nama_material_lengkap')->nullable(); 
-
             $table->string('nama_petugas');
             $table->string('stand_meter')->nullable();
             
@@ -24,7 +23,7 @@ return new class extends Migration
             $table->dateTime('tanggal');
             
             $table->string('foto_path')->nullable(); // Foto Material
-            $table->string('foto_petugas')->nullable(); // TAMBAHAN: Foto Petugas
+            $table->string('foto_petugas')->nullable(); // Foto Petugas (DITAMBAHKAN KEMBALI)
             
             $table->timestamps();
         });

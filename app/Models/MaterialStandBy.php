@@ -9,15 +9,14 @@ class MaterialStandBy extends Model
 {
     use HasFactory;
 
-    // Paksa Laravel menggunakan nama tabel tunggal sesuai database Anda
     protected $table = 'material_stand_by';
 
     protected $fillable = [
         'material_id',
         'jumlah',
         'satuan',
-        'foto_path',
-        'foto_petugas',
+        'foto_path', // Wajib ada
+        // 'foto_petugas' DIHAPUS
         'tanggal',
     ];
 

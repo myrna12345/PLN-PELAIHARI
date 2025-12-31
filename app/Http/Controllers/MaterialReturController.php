@@ -5,12 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\MaterialRetur;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File; // Gunakan File Facade
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MaterialReturExport;
 
 class MaterialReturController extends Controller
 {
+    // Folder tujuan penyimpanan di Public
+    private $uploadFolder = 'uploads/material_retur';
+
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -53,8 +58,19 @@ class MaterialReturController extends Controller
             'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
-        $pathMaterial = $request->file('foto')->store('fotos_material_retur', 'public');
-        $pathPetugas = $request->file('foto_petugas')->store('foto_petugas', 'public');
+        // Buat folder jika belum ada
+        $path = public_path($this->uploadFolder);
+        if(!File::isDirectory($path)){
+            File::makeDirectory($path, 0777, true, true);
+        }
+
+        // Upload Foto Material ke Public
+        $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
+        $request->file('foto')->move($path, $fotoName);
+
+        // Upload Foto Petugas ke Public
+        $fotoPetugasName = time() . '_ptg_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
+        $request->file('foto_petugas')->move($path, $fotoPetugasName);
 
         MaterialRetur::create([
             'material_id' => $validated['material_id'],
@@ -63,8 +79,8 @@ class MaterialReturController extends Controller
             'satuan' => $validated['satuan'],
             'status' => $validated['status'],
             'keterangan' => $validated['keterangan'],
-            'foto_path' => $pathMaterial,
-            'foto_petugas' => $pathPetugas,
+            'foto_path' => $fotoName,
+            'foto_petugas' => $fotoPetugasName,
             'tanggal' => Carbon::now('Asia/Makassar')
         ]);
 
@@ -92,21 +108,64 @@ class MaterialReturController extends Controller
             'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
-        $data = $validated;
+        $data = [
+            'material_id' => $validated['material_id'],
+            'nama_petugas' => $validated['nama_petugas'],
+            'jumlah' => $validated['jumlah'],
+            'satuan' => $validated['satuan'],
+            'status' => $validated['status'],
+            'keterangan' => $validated['keterangan'],
+        ];
+
+        $destinationPath = public_path($this->uploadFolder);
+
+        // Update Foto Material
         if ($request->hasFile('foto')) {
-            if ($materialRetur->foto_path) Storage::disk('public')->delete($materialRetur->foto_path);
-            $data['foto_path'] = $request->file('foto')->store('fotos_material_retur', 'public');
+            // Hapus lama
+            $oldFile = public_path($this->uploadFolder . '/' . $materialRetur->foto_path);
+            if (File::exists($oldFile)) { File::delete($oldFile); }
+            
+            // Upload baru
+            $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
+            $request->file('foto')->move($destinationPath, $fotoName);
+            $data['foto_path'] = $fotoName;
         }
+
+        // Update Foto Petugas
         if ($request->hasFile('foto_petugas')) {
-            if ($materialRetur->foto_petugas) Storage::disk('public')->delete($materialRetur->foto_petugas);
-            $data['foto_petugas'] = $request->file('foto_petugas')->store('foto_petugas', 'public');
+            // Hapus lama
+            $oldFile = public_path($this->uploadFolder . '/' . $materialRetur->foto_petugas);
+            if (File::exists($oldFile)) { File::delete($oldFile); }
+            
+            // Upload baru
+            $fotoPetugasName = time() . '_ptg_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
+            $request->file('foto_petugas')->move($destinationPath, $fotoPetugasName);
+            $data['foto_petugas'] = $fotoPetugasName;
         }
 
         $materialRetur->update($data); 
         return redirect()->route('material-retur.index')->with('success', 'Data berhasil diperbarui.');
     }
 
-    // --- FITUR DOWNLOAD REPORT (PERBAIKAN ERROR) ---
+    public function destroy($id)
+    {
+        $item = MaterialRetur::findOrFail($id);
+        
+        // Hapus fisik file di public
+        if ($item->foto_path) {
+            $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+            if (File::exists($path)) { File::delete($path); }
+        }
+        if ($item->foto_petugas) {
+            $path = public_path($this->uploadFolder . '/' . $item->foto_petugas);
+            if (File::exists($path)) { File::delete($path); }
+        }
+        
+        $item->delete();
+        return redirect()->route('material-retur.index')->with('success', 'Data berhasil dihapus.');
+    }
+
+    // --- FITUR DOWNLOAD REPORT ---
     public function downloadReport(Request $request)
     {
         $request->validate([
@@ -128,37 +187,43 @@ class MaterialReturController extends Controller
         }
         
         if ($request->has('submit_excel')) {
-            return \Maatwebsite\Excel\Facades\Excel::download(
-                new \App\Exports\MaterialReturExport($tanggal_mulai, $tanggal_akhir), 
+            return Excel::download(
+                new MaterialReturExport($tanggal_mulai, $tanggal_akhir), 
                 'laporan_material_retur.xlsx'
             );
         }
     }
 
-    public function showFoto($id)
-    {
-        $item = MaterialRetur::findOrFail($id);
-        return Storage::disk('public')->response($item->foto_path);
-    }
-
     public function downloadFoto($id)
     {
         $item = MaterialRetur::findOrFail($id);
-        return Storage::disk('public')->download($item->foto_path);
+        $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+        
+        if (File::exists($path)) {
+            return response()->download($path);
+        }
+        return back()->with('error', 'File tidak ditemukan.');
     }
 
     public function downloadFotoPetugas($id)
     {
         $item = MaterialRetur::findOrFail($id);
-        return Storage::disk('public')->download($item->foto_petugas);
+        $path = public_path($this->uploadFolder . '/' . $item->foto_petugas);
+        
+        if (File::exists($path)) {
+            return response()->download($path);
+        }
+        return back()->with('error', 'File tidak ditemukan.');
     }
 
-    public function destroy($id)
+    // Opsional: Untuk kompatibilitas route, tapi di view sebaiknya pakai asset()
+    public function showFoto($id)
     {
         $item = MaterialRetur::findOrFail($id);
-        if ($item->foto_path) Storage::disk('public')->delete($item->foto_path);
-        if ($item->foto_petugas) Storage::disk('public')->delete($item->foto_petugas);
-        $item->delete();
-        return redirect()->route('material-retur.index')->with('success', 'Data berhasil dihapus.');
+        $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+        if (File::exists($path)) {
+            return response()->file($path);
+        }
+        return abort(404);
     }
 }

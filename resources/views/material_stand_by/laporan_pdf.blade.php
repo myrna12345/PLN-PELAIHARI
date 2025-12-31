@@ -26,7 +26,7 @@
                 <th>Jumlah & Satuan</th>
                 <th>Tanggal (WITA)</th>
                 <th>Foto Material</th>
-                <th>Foto Petugas</th>
+                {{-- Kolom Foto Petugas DIHAPUS --}}
             </tr>
         </thead>
         <tbody>
@@ -39,26 +39,18 @@
                 
                 {{-- Foto Material --}}
                 <td class="text-center">
-                    @if($item->foto_path && file_exists(public_path('storage/' . $item->foto_path)))
-                        <img src="{{ public_path('storage/' . $item->foto_path) }}" class="img-report">
+                    @if($item->foto_path && file_exists(public_path('uploads/material_stand_by/' . $item->foto_path)))
+                        <img src="{{ public_path('uploads/material_stand_by/' . $item->foto_path) }}" class="img-report">
                     @else
                         <span>-</span>
                     @endif
                 </td>
 
-                {{-- Foto Petugas --}}
-                <td class="text-center">
-                    @if($item->foto_petugas && file_exists(public_path('storage/' . $item->foto_petugas)))
-                        <img src="{{ public_path('storage/' . $item->foto_petugas) }}" class="img-report">
-                    @else
-                        <span>-</span>
-                    @endif
-                </td>
+                {{-- Data Foto Petugas DIHAPUS --}}
             </tr>
             @empty
             <tr>
-                {{-- Colspan disesuaikan jadi 6 karena tidak ada status --}}
-                <td colspan="6" class="text-center">Data tidak ditemukan pada periode ini.</td>
+                <td colspan="5" class="text-center">Data tidak ditemukan pada periode ini.</td>
             </tr>
             @endforelse
         </tbody>

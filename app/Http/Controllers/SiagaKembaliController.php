@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\SiagaKembali; 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File; // Ganti Storage jadi File
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel; 
@@ -13,6 +13,9 @@ use App\Exports\SiagaKembaliExport;
 
 class SiagaKembaliController extends Controller
 {
+    // Folder tujuan penyimpanan (agar sama seperti Siaga Keluar)
+    private $uploadFolder = 'uploads/siaga_kembali';
+
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -43,7 +46,6 @@ class SiagaKembaliController extends Controller
     public function create()
     {
         $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P'];
-
         $materials = Material::where('kategori', 'siaga')
                              ->whereIn('nama_material', $allowedMaterials)
                              ->get()
@@ -62,15 +64,23 @@ class SiagaKembaliController extends Controller
             'status' => 'nullable|string',
             'keterangan' => 'nullable|string',
             'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // TAMBAHAN VALIDASI
+            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        // Upload Foto Material
-        $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
+        // Buat folder public/uploads/siaga_kembali jika belum ada
+        $path = public_path($this->uploadFolder);
+        if(!File::isDirectory($path)){
+            File::makeDirectory($path, 0777, true, true);
+        }
 
-        // TAMBAHAN: Upload Foto Petugas
-        $pathPetugas = $request->file('foto_petugas')->store('fotos_siaga_kembali', 'public');
+        // 1. Upload Foto Material
+        $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
+        $request->file('foto')->move($path, $fotoName);
         
+        // 2. Upload Foto Petugas
+        $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
+        $request->file('foto_petugas')->move($path, $fotoPetugasName);
+
         $material = Material::findOrFail($validated['material_id']);
 
         $dataToSave = [
@@ -81,8 +91,8 @@ class SiagaKembaliController extends Controller
             'stand_meter' => $validated['stand_meter'],
             'status' => $validated['status'],
             'keterangan' => $validated['keterangan'] ?? null,
-            'foto_path' => $path,
-            'foto_petugas' => $pathPetugas, // TAMBAHAN SIMPAN PATH
+            'foto_path' => $fotoName,           // Simpan nama file saja
+            'foto_petugas' => $fotoPetugasName, // Simpan nama file saja
             'tanggal' => Carbon::now('Asia/Makassar'),
         ];
         
@@ -92,7 +102,7 @@ class SiagaKembaliController extends Controller
         \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
             ->update(['status' => 'Ready']);
 
-        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan dan status Standby kini Ready!');
+        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil disimpan!');
     }
 
     public function edit(SiagaKembali $siagaKembali)
@@ -116,31 +126,46 @@ class SiagaKembaliController extends Controller
             'status' => 'nullable|string',
             'keterangan' => 'nullable|string', 
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // TAMBAHAN VALIDASI
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
+        $destinationPath = public_path($this->uploadFolder);
+
         // Update Foto Material
-        $path = $siagaKembali->foto_path;
         if ($request->hasFile('foto')) {
-            if ($path) { Storage::disk('public')->delete($path); }
-            $path = $request->file('foto')->store('fotos_siaga_kembali', 'public');
+            // Hapus file lama
+            $oldFile = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
+            if (File::exists($oldFile)) { File::delete($oldFile); }
+
+            // Upload baru
+            $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
+            $request->file('foto')->move($destinationPath, $fotoName);
+            $siagaKembali->foto_path = $fotoName;
         }
 
-        // TAMBAHAN: Update Foto Petugas
-        $pathPetugas = $siagaKembali->foto_petugas;
+        // Update Foto Petugas
         if ($request->hasFile('foto_petugas')) {
-            if ($pathPetugas) { Storage::disk('public')->delete($pathPetugas); }
-            $pathPetugas = $request->file('foto_petugas')->store('fotos_siaga_kembali', 'public');
+            // Hapus file lama
+            $oldFilePetugas = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
+            if (File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
+
+            // Upload baru
+            $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
+            $request->file('foto_petugas')->move($destinationPath, $fotoPetugasName);
+            $siagaKembali->foto_petugas = $fotoPetugasName;
         }
 
         $material = Material::findOrFail($validated['material_id']);
         
-        $dataToUpdate = $validated;
-        $dataToUpdate['foto_path'] = $path;
-        $dataToUpdate['foto_petugas'] = $pathPetugas; // TAMBAHAN UPDATE PATH
-        $dataToUpdate['nama_material_lengkap'] = $material->nama_material;
+        $siagaKembali->material_id = $validated['material_id'];
+        $siagaKembali->nomor_meter = $validated['nomor_meter'];
+        $siagaKembali->nama_petugas = $validated['nama_petugas'];
+        $siagaKembali->stand_meter = $validated['stand_meter'];
+        $siagaKembali->status = $validated['status'];
+        $siagaKembali->keterangan = $validated['keterangan'];
+        $siagaKembali->nama_material_lengkap = $material->nama_material;
         
-        $siagaKembali->update($dataToUpdate);
+        $siagaKembali->save();
 
         return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil diperbarui!');
     }
@@ -149,11 +174,14 @@ class SiagaKembaliController extends Controller
     {
         // Hapus Foto Material
         if ($siagaKembali->foto_path) {
-            Storage::disk('public')->delete($siagaKembali->foto_path);
+            $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
+            if (File::exists($path)) { File::delete($path); }
         }
-        // TAMBAHAN: Hapus Foto Petugas
+        
+        // Hapus Foto Petugas
         if ($siagaKembali->foto_petugas) {
-            Storage::disk('public')->delete($siagaKembali->foto_petugas);
+            $pathPetugas = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
+            if (File::exists($pathPetugas)) { File::delete($pathPetugas); }
         }
 
         $siagaKembali->delete();
@@ -161,32 +189,25 @@ class SiagaKembaliController extends Controller
         return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus!');
     }
 
-    // --- FOTO MATERIAL ---
-    public function showFoto(SiagaKembali $siagaKembali) 
-    {
-        if (!$siagaKembali->foto_path || !Storage::disk('public')->exists($siagaKembali->foto_path)) {
-            return abort(404, 'File foto tidak ditemukan.');
-        }
-        return Storage::disk('public')->response($siagaKembali->foto_path);
-    }
-    
+    // --- FUNGSI DOWNLOAD (Direct File) ---
     public function downloadFoto(SiagaKembali $siagaKembali)
     {
-        if ($siagaKembali->foto_path && Storage::disk('public')->exists($siagaKembali->foto_path)) {
-            return Storage::disk('public')->download($siagaKembali->foto_path);
+        $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
+        if (File::exists($path)) {
+            return response()->download($path);
         }
         return redirect()->back()->with('error', 'File foto tidak ditemukan.');
     }
-
-    // --- TAMBAHAN: FOTO PETUGAS ---
+    
     public function downloadFotoPetugas(SiagaKembali $siagaKembali)
     {
-        if ($siagaKembali->foto_petugas && Storage::disk('public')->exists($siagaKembali->foto_petugas)) {
-            return Storage::disk('public')->download($siagaKembali->foto_petugas);
+        $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
+        if (File::exists($path)) {
+            return response()->download($path);
         }
         return redirect()->back()->with('error', 'File foto petugas tidak ditemukan.');
     }
-    
+
     public function downloadReport(Request $request)
     {
         $request->validate([

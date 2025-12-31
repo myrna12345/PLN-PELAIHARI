@@ -87,7 +87,7 @@
                  <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto material wajib diisi.</small>
             </div>
 
-            {{-- 7. FOTO PETUGAS --}}
+            {{-- 7. FOTO PETUGAS (KEMBALI) --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label>
                 <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file @error('foto_petugas') is-invalid @enderror" accept="image/*" required>

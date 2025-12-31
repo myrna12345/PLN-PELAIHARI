@@ -23,9 +23,7 @@
                 <label for="jumlah">Jumlah dan Satuan</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="number" name="jumlah" class="form-control-new" style="flex: 2;" required min="1" placeholder="Jumlah">
-                    
                     <select name="satuan" class="form-control-new" style="flex: 1;" required>
-                        {{-- 'Satuan' di paling atas, muncul di daftar (abu-abu), tapi tidak bisa diklik --}}
                         <option value="" disabled selected>Satuan</option>
                         <option value="Buah">Buah</option>
                         <option value="Meter">Meter</option>
@@ -51,13 +49,7 @@
                 </small>
             </div>
 
-            <div class="form-group-new">
-                <label for="foto_petugas">Unggah Foto Petugas</label> 
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" required>
-                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">
-                    *foto petugas wajib diisi
-                </small>
-            </div>
+            {{-- Input Foto Petugas DIHAPUS --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>

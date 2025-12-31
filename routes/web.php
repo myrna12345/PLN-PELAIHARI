@@ -23,8 +23,9 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // --- RUTE MATERIAL STAND BY ---
+// [FIX] Mengganti nama route agar sesuai dengan pemanggilan di blade (downloadReport vs download-report)
 Route::get('material-stand-by/download-report', [MaterialStandByController::class, 'downloadReport'])
-     ->name('material-stand-by.download-report');
+     ->name('material-stand-by.downloadReport'); // PERBAIKAN DI SINI
 
 Route::get('material-stand-by/foto/{id}', [MaterialStandByController::class, 'showFoto'])
      ->name('material-stand-by.show-foto');
@@ -56,16 +57,11 @@ Route::get('material-keluar/{materialKeluar}/lihat', [MaterialKeluarController::
 Route::resource('material_keluar', MaterialKeluarController::class);
 
 
-
 // --- RUTE MATERIAL KEMBALI ---
-// RUTE BARU UNTUK MENAMPILKAN FOTO SECARA LANGSUNG (SOLUSI ANTI-SYMLINK)
-// PERBAIKAN: Mengganti {id} dengan {materialKembali} untuk Route Model Binding
 Route::get('material-kembali/foto/{materialKembali}', [MaterialKembaliController::class, 'showFoto'])->name('material_kembali.show-foto'); 
 
-// PERBAIKAN: Mengganti {id} dengan {materialKembali}
 Route::get('/material_kembali/{materialKembali}/lihat', [MaterialKembaliController::class, 'lihat'])->name('material_kembali.lihat');
 
-// PERBAIKAN: Menambahkan rute download foto yang hilang (Mengganti {id} menjadi {materialKembali})
 Route::get('/material_kembali/{materialKembali}/download-foto', [MaterialKembaliController::class, 'downloadFoto'])->name('material_kembali.download-foto'); 
 
 Route::post('/material_kembali/download', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
@@ -130,7 +126,6 @@ Route::get('siaga-kembali/foto/{siagaKembali}', [SiagaKembaliController::class, 
 Route::get('siaga-kembali/{siagaKembali}/download-foto', [SiagaKembaliController::class, 'downloadFoto'])
      ->name('siaga-kembali.download-foto'); 
 
-// [BARU] Tambahan Route Download Foto Petugas Siaga Kembali
 Route::get('siaga-kembali/{siagaKembali}/download-foto-petugas', [SiagaKembaliController::class, 'downloadFotoPetugas'])
      ->name('siaga-kembali.download-foto-petugas');
 

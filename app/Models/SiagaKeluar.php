@@ -20,8 +20,8 @@ class SiagaKeluar extends Model
         'keterangan',
         'status',
         'tanggal',
-        'foto_path',
-        'foto_petugas', // TAMBAHAN
+        'foto_path',    // Foto Material
+        'foto_petugas', // Foto Petugas (DITAMBAHKAN KEMBALI)
     ];
 
     public function material()

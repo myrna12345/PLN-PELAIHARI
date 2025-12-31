@@ -36,7 +36,7 @@
                 <th>Status</th>
                 <th>Tanggal (WITA)</th>
                 <th>Foto Material</th>
-                <th>Foto Petugas</th> {{-- TAMBAHAN HEADER --}}
+                <th>Foto Petugas</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -61,7 +61,8 @@
                     {{-- Foto Material --}}
                     <td style="text-align: center; vertical-align: top;"> 
                         @if($item->foto_path)
-                            <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" 
+                            {{-- Akses langsung ke public/uploads --}}
+                            <img src="{{ asset('uploads/siaga_kembali/' . $item->foto_path) }}" 
                                  class="table-foto" 
                                  style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;">
                             <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
@@ -72,13 +73,13 @@
                         @endif
                     </td>
 
-                    {{-- TAMBAHAN: Foto Petugas --}}
+                    {{-- Foto Petugas --}}
                     <td style="text-align: center; vertical-align: top;"> 
                         @if($item->foto_petugas)
-                            <img src="{{ asset('storage/' . $item->foto_petugas) }}" 
+                            {{-- Akses langsung ke public/uploads --}}
+                            <img src="{{ asset('uploads/siaga_kembali/' . $item->foto_petugas) }}" 
                                  class="table-foto" 
                                  style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px;">
-                            {{-- Pastikan route ini didaftarkan di web.php --}}
                             <a href="{{ route('siaga-kembali.download-foto-petugas', $item->id) }}" class="btn-foto-download" title="Download Foto Petugas">
                                 <i class="fas fa-download"></i> Download
                             </a>

@@ -29,7 +29,7 @@
                     <th>Nama Petugas</th>
                     <th>Jumlah Retur</th>
                     <th>Status</th>
-                    <th>Keterangan</th> {{-- Kolom Baru Ditambahkan --}}
+                    <th>Keterangan</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
@@ -44,24 +44,37 @@
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->jumlah }} {{ $item->satuan }}</td>
                         <td>{{ $item->status }}</td>
-                        <td>{{ $item->keterangan }}</td> {{-- Data Keterangan Ditampilkan Disini --}}
+                        <td>{{ $item->keterangan }}</td>
                         <td>{{ $item->tanggal->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
+                        
+                        {{-- Foto Material --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_path)
-                                <img src="{{ route('material-retur.show-foto', $item->id) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                <img src="{{ asset('uploads/material_retur/' . $item->foto_path) }}" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; display: block; margin: 0 auto 5px;">
                                 <a href="{{ route('material-retur.download-foto', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
+                            @else
+                                -
                             @endif
                         </td>
+
+                        {{-- Foto Petugas --}}
                         <td style="text-align: center;">
                             @if($item->foto_petugas)
-                                <img src="{{ asset('storage/' . $item->foto_petugas) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                <img src="{{ asset('uploads/material_retur/' . $item->foto_petugas) }}" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; display: block; margin: 0 auto 5px;">
                                 <a href="{{ route('material-retur.download-foto-petugas', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
+                            @else
+                                -
                             @endif
                         </td>
+
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('material-retur.edit', $item->id) }}" class="btn btn-edit">Edit</a>
-                                <form action="{{ route('material-retur.destroy', $item->id) }}" method="POST">
+                                <form action="{{ route('material-retur.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-hapus">Hapus</button>
                                 </form>
@@ -69,7 +82,6 @@
                         </td>
                     </tr>
                 @empty
-                    {{-- Colspan diubah jadi 10 karena kolom bertambah 1 --}}
                     <tr><td colspan="10" style="text-align:center;">Data tidak ditemukan.</td></tr>
                 @endforelse
             </tbody>

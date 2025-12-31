@@ -13,7 +13,8 @@ td { text-align: center; }
 td:nth-child(2), td:nth-child(3), td:nth-child(5) { text-align: left; }
 h2 { text-align: center; margin-bottom: 5px; }
 p { text-align: center; margin-top: 0; font-size: 12px; }
-.img-report { width: 60px; height: auto; display: block; margin: 0 auto; }
+/* Style gambar tanpa border/frame */
+.img-report { width: 60px; height: auto; display: block; margin: 0 auto; border: none; }
 </style>
 </head>
 <body>
@@ -30,7 +31,7 @@ p { text-align: center; margin-top: 0; font-size: 12px; }
             <th>Keterangan</th>
             <th>Status</th>
             <th>Tanggal (WITA)</th>
-            <th>Foto Material</th> {{-- TAMBAHAN: Foto Material --}}
+            <th>Foto Material</th>
             <th>Foto Petugas</th>
         </tr>
     </thead>
@@ -40,9 +41,7 @@ p { text-align: center; margin-top: 0; font-size: 12px; }
             <td>{{ $index + 1 }}</td>
             <td>
                 {{ $item->material->nama_material ?? 'N/A' }} 
-                @if ($item->nomor_meter) 
-                    - {{ $item->nomor_meter }} 
-                @endif
+                @if ($item->nomor_meter) - {{ $item->nomor_meter }} @endif
             </td>
             <td>{{ $item->nama_petugas }}</td>
             <td>{{ $item->stand_meter ?? '-' }}</td> 
@@ -52,25 +51,25 @@ p { text-align: center; margin-top: 0; font-size: 12px; }
             
             {{-- Foto Material --}}
             <td>
-                @if($item->foto_path && file_exists(public_path('storage/' . $item->foto_path)))
-                    <img src="{{ public_path('storage/' . $item->foto_path) }}" class="img-report">
+                @if($item->foto_path && file_exists(public_path('uploads/siaga_keluar/' . $item->foto_path)))
+                    <img src="{{ public_path('uploads/siaga_keluar/' . $item->foto_path) }}" class="img-report">
                 @else
-                    <span>-</span>
+                    -
                 @endif
             </td>
 
             {{-- Foto Petugas --}}
             <td>
-                @if($item->foto_petugas && file_exists(public_path('storage/' . $item->foto_petugas)))
-                    <img src="{{ public_path('storage/' . $item->foto_petugas) }}" class="img-report">
+                @if($item->foto_petugas && file_exists(public_path('uploads/siaga_keluar/' . $item->foto_petugas)))
+                    <img src="{{ public_path('uploads/siaga_keluar/' . $item->foto_petugas) }}" class="img-report">
                 @else
-                    <span>-</span>
+                    -
                 @endif
             </td>
+            
         </tr>
         @empty
             <tr>
-                {{-- Colspan disesuaikan jadi 9 karena ada tambahan kolom foto material --}}
                 <td colspan="9" style="text-align:center;">Data tidak ditemukan pada periode ini.</td>
             </tr>
         @endforelse

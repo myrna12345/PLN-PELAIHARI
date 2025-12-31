@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('status')->default('Keluar');
             $table->dateTime('tanggal');
             
-            $table->string('foto_path')->nullable(); // Foto Material
-            $table->string('foto_petugas')->nullable(); // TAMBAHAN: Foto Petugas
+            $table->string('foto_path')->nullable();   // Foto Material
+            $table->string('foto_petugas')->nullable(); // Foto Petugas (DITAMBAHKAN KEMBALI)
             
             $table->timestamps();
         });

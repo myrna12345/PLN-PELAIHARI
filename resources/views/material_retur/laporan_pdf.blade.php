@@ -9,7 +9,7 @@
 </head>
 <body>
     <h2 style="text-align: center;">LAPORAN MATERIAL RETUR</h2>
-    <p style="text-align: center;">Periode: {{ $tanggal_mulai }} s/d {{ $tanggal_akhir }}</p>
+    <p style="text-align: center;">Periode: {{ $tanggal_mulai->format('d M Y') }} s/d {{ $tanggal_akhir->format('d M Y') }}</p>
     <table>
         <thead>
             <tr>
@@ -18,7 +18,7 @@
                 <th>Petugas</th>
                 <th>Jumlah</th>
                 <th>Status</th>
-                <th>Keterangan</th> {{-- Kolom Baru --}}
+                <th>Keterangan</th>
                 <th>Foto Material</th>
                 <th>Foto Petugas</th>
             </tr>
@@ -31,19 +31,21 @@
                 <td>{{ $item->nama_petugas }}</td>
                 <td>{{ $item->jumlah }} {{ $item->satuan }}</td>
                 <td>{{ $item->status }}</td>
-                <td>{{ $item->keterangan }}</td> {{-- Data Keterangan --}}
+                <td>{{ $item->keterangan }}</td>
                 
-                {{-- Cek apakah foto ada sebelum ditampilkan agar tidak error --}}
+                {{-- Foto Material --}}
                 <td>
-                    @if($item->foto_path)
-                        <img src="{{ public_path('storage/' . $item->foto_path) }}" width="50" style="display:block; margin:auto;">
+                    @if($item->foto_path && file_exists(public_path('uploads/material_retur/' . $item->foto_path)))
+                        <img src="{{ public_path('uploads/material_retur/' . $item->foto_path) }}" width="50" style="display:block; margin:auto;">
                     @else
                         -
                     @endif
                 </td>
+
+                {{-- Foto Petugas --}}
                 <td>
-                    @if($item->foto_petugas)
-                        <img src="{{ public_path('storage/' . $item->foto_petugas) }}" width="50" style="display:block; margin:auto;">
+                    @if($item->foto_petugas && file_exists(public_path('uploads/material_retur/' . $item->foto_petugas)))
+                        <img src="{{ public_path('uploads/material_retur/' . $item->foto_petugas) }}" width="50" style="display:block; margin:auto;">
                     @else
                         -
                     @endif

@@ -32,7 +32,6 @@
                 </div>
             </div>
 
-            {{-- Menampilkan Tanggal Pembuatan (Readonly) --}}
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Jam Pembuatan</label>
                 <input type="text" id="tanggal_display" class="form-control-new" 
@@ -45,20 +44,14 @@
 
             <div class="form-group-new">
                 <label>Foto Material Saat Ini</label>
-                <img src="{{ route('material-stand-by.show-foto', $item->id) }}" style="max-width: 150px; display: block; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
+                @if($item->foto_path)
+                    <img src="{{ asset('uploads/material_stand_by/' . $item->foto_path) }}" style="max-width: 150px; display: block; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
+                @endif
                 <label for="foto">Unggah Foto Material Baru (Opsional)</label>
                 <input type="file" name="foto" id="foto" class="form-control-new-file">
             </div>
 
-            <div class="form-group-new">
-                <label>Foto Petugas Saat Ini</label>
-                @if($item->foto_petugas)
-                    {{-- Pastikan kamu ada route show-foto-petugas jika menggunakan symlink protection, atau gunakan asset() jika publik --}}
-                    <img src="{{ asset('storage/' . $item->foto_petugas) }}" style="max-width: 150px; display: block; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
-                @endif
-                <label for="foto_petugas">Unggah Foto Petugas Baru (Opsional)</label>
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file">
-            </div>
+            {{-- Input Foto Petugas DIHAPUS --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>

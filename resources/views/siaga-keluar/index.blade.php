@@ -37,7 +37,7 @@
                     <th>Status</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
-                    <th>Foto Petugas</th> {{-- TAMBAHAN HEADER --}}
+                    <th>Foto Petugas</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -54,31 +54,32 @@
                         </td>
                         
                         <td>{{ $item->nama_petugas }}</td>
-                        
                         <td>{{ $item->stand_meter ?? '-' }}</td>
-                        
                         <td>{{ $item->keterangan }}</td>
-
                         <td>{{ $item->status }}</td>
-                        
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
                         {{-- Foto Material --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_path)
-                                <img src="{{ route('siaga-keluar.show-foto', $item->id) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                {{-- Border dan Padding dihapus --}}
+                                <img src="{{ asset('uploads/siaga_keluar/' . $item->foto_path) }}" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; display: block; margin: 0 auto 5px;">
                                 <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
                             @else
                                 <span>-</span>
                             @endif
                         </td>
 
-                        {{-- TAMBAHAN: Foto Petugas --}}
+                        {{-- Foto Petugas --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_petugas)
-                                <img src="{{ asset('storage/' . $item->foto_petugas) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
-                                {{-- Pastikan route ini didaftarkan di web.php jika ingin fitur download berfungsi, atau hapus tombol ini jika cukup preview --}}
-                                <a href="{{ route('siaga-keluar.download-foto-petugas', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
+                                {{-- Border dan Padding dihapus --}}
+                                <img src="{{ asset('uploads/siaga_keluar/' . $item->foto_petugas) }}" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                <a href="{{ asset('uploads/siaga_keluar/' . $item->foto_petugas) }}" download class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
                             @else
                                 <span>-</span>
                             @endif

@@ -64,6 +64,14 @@
             </div>
 
             <div class="form-group-new">
+                <label for="keterangan">Keterangan</label>
+                <textarea name="keterangan" id="keterangan" class="form-control-new @error('keterangan') is-invalid @enderror" required>{{ old('keterangan', $item->keterangan) }}</textarea>
+                @error('keterangan')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group-new">
                 <label for="status">Status</label>
                 <input type="text" name="status" id="status" class="form-control-new" value="{{ old('status', $item->status ?? 'Kembali') }}" readonly style="background-color: #e9ecef; cursor: not-allowed;">
             </div>
@@ -73,19 +81,21 @@
                 <label for="foto">Foto Material</label>
                 @if ($item->foto_path)
                     <div style="margin-bottom: 10px;">
-                        <img src="{{ route('siaga-kembali.show-foto', $item->id) }}" alt="Foto Saat Ini" style="max-width: 250px; height: auto; display: block; border-radius: 4px;">
+                        {{-- Menggunakan asset langsung (Public Uploads) --}}
+                        <img src="{{ asset('uploads/siaga_kembali/' . $item->foto_path) }}" alt="Foto Saat Ini" style="max-width: 250px; height: auto; display: block; border-radius: 4px;">
                     </div>
                 @endif
                 <label for="foto" style="display: block; margin-top: 10px; font-weight: 500;">Unggah Foto Baru (Opsional)</label>
                 <input type="file" name="foto" id="foto" class="form-control-new-file @error('foto') is-invalid @enderror" accept="image/*">
             </div>
 
-            {{-- TAMBAHAN: UPDATE FOTO PETUGAS --}}
+            {{-- UPDATE FOTO PETUGAS --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Foto Petugas</label>
                 @if ($item->foto_petugas)
                     <div style="margin-bottom: 10px;">
-                        <img src="{{ asset('storage/' . $item->foto_petugas) }}" alt="Foto Petugas Saat Ini" style="max-width: 250px; height: auto; display: block; border-radius: 4px;">
+                        {{-- Menggunakan asset langsung (Public Uploads) --}}
+                        <img src="{{ asset('uploads/siaga_kembali/' . $item->foto_petugas) }}" alt="Foto Petugas Saat Ini" style="max-width: 250px; height: auto; display: block; border-radius: 4px;">
                     </div>
                 @endif
                 <label for="foto_petugas" style="display: block; margin-top: 10px; font-weight: 500;">Unggah Foto Petugas Baru (Opsional)</label>
@@ -94,6 +104,8 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>
+                {{-- Tombol Batal Ditambahkan --}}
+                <a href="{{ route('siaga-kembali.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
             </div>
         </form>
     </div>

@@ -13,12 +13,12 @@ return new class extends Migration
             $table->foreignId('material_id')->constrained('materials'); 
             $table->string('nama_petugas'); 
             $table->integer('jumlah');
-            $table->string('satuan'); // Kolom satuan
+            $table->string('satuan'); 
             $table->datetime('tanggal');
             $table->enum('status', ['bekas_andal', 'rusak', 'baik']); 
-            $table->text('keterangan'); // Keterangan wajib
+            $table->text('keterangan'); 
             $table->string('foto_path')->nullable(); 
-            $table->string('foto_petugas')->nullable(); // Foto petugas
+            $table->string('foto_petugas')->nullable(); 
             $table->timestamps();
         });
     }

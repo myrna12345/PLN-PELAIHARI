@@ -2,14 +2,12 @@
 
 @section('content')
 <div class="card-new">
-    {{-- Notifikasi Sukses (Sudah dihapus sebelumnya) --}}
-
     <div class="index-header">
         <h2>LAPORAN MATERIAL STAND BY</h2>
         <form action="{{ route('material-stand-by.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Cari Nama Material/Petugas" value="{{ request('search') }}">
+                <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             <div class="form-group-tanggal-filter">
                 <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}">
@@ -29,10 +27,9 @@
                     <th>No</th>
                     <th>Nama Material</th>
                     <th>Jumlah</th>
-                    {{-- <th>Status</th>  <-- DIHAPUS --}}
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
-                    <th>Foto Petugas</th>
+                    {{-- Kolom Foto Petugas DIHAPUS --}}
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -42,24 +39,21 @@
                         <td>{{ $items->firstItem() + $loop->index }}</td>
                         <td>{{ $item->material->nama_material ?? 'N/A' }}</td>
                         <td>{{ $item->jumlah }} {{ $item->satuan }}</td>
-                        {{-- <td><span class="badge">Stand By</span></td> <-- DIHAPUS --}}
                         <td>{{ $item->tanggal->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
                         {{-- Foto Material --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_path)
-                                <img src="{{ route('material-stand-by.show-foto', $item->id) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
+                                <img src="{{ asset('uploads/material_stand_by/' . $item->foto_path) }}" 
+                                     class="table-foto" 
+                                     style="max-width: 80px; display: block; margin: 0 auto 5px;">
                                 <a href="{{ route('material-stand-by.download-foto', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
+                            @else
+                                -
                             @endif
                         </td>
 
-                        {{-- Foto Petugas --}}
-                        <td style="text-align: center;">
-                            @if($item->foto_petugas)
-                                <img src="{{ asset('storage/' . $item->foto_petugas) }}" class="table-foto" style="max-width: 80px; display: block; margin: 0 auto 5px;">
-                                <a href="{{ route('material-stand-by.download-foto-petugas', $item->id) }}" class="btn-foto-download"><i class="fas fa-download"></i> Download</a>
-                            @endif
-                        </td>
+                        {{-- Data Foto Petugas DIHAPUS --}}
 
                         <td>
                             <div class="table-actions">
@@ -72,15 +66,14 @@
                         </td>
                     </tr>
                 @empty
-                    {{-- Colspan disesuaikan jadi 7 karena kolom berkurang 1 --}}
-                    <tr><td colspan="7" style="text-align:center;">Data tidak ditemukan.</td></tr>
+                    <tr><td colspan="6" style="text-align:center;">Data tidak ditemukan.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
     <div class="index-footer-form">
-        <form action="{{ route('material-stand-by.download-report') }}" method="GET" class="form-download">
+        <form action="{{ route('material-stand-by.downloadReport') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
                 <label>Dari Tanggal:</label>
                 <input type="date" name="tanggal_mulai" class="form-control-tanggal" required>

@@ -14,8 +14,12 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->string('satuan'); 
             $table->datetime('tanggal');
+            
+            // Pastikan kolom ini ada untuk Foto Material
             $table->string('foto_path')->nullable();
-            $table->string('foto_petugas')->nullable(); // Ditambahkan sebagai pengganti nama_petugas
+            
+            // Kolom foto_petugas SUDAH DIHAPUS
+            
             $table->timestamps();
         });
     }

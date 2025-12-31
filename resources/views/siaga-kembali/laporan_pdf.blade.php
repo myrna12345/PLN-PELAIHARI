@@ -27,8 +27,8 @@
         <th>Keterangan</th>
         <th>Status</th>
         <th>Tanggal (WITA)</th>
-        <th>Foto Material</th> {{-- TAMBAHAN: Foto Material --}}
-        <th>Foto Petugas</th> 
+        <th>Foto Material</th>
+        <th>Foto Petugas</th>
     </tr>
 </thead>
     <tbody>
@@ -49,8 +49,8 @@
         
         {{-- Foto Material --}}
         <td>
-            @if($item->foto_path && file_exists(public_path('storage/' . $item->foto_path)))
-                <img src="{{ public_path('storage/' . $item->foto_path) }}" class="img-report">
+            @if($item->foto_path && file_exists(public_path('uploads/siaga_kembali/' . $item->foto_path)))
+                <img src="{{ public_path('uploads/siaga_kembali/' . $item->foto_path) }}" class="img-report">
             @else
                 <div class="text-center">-</div>
             @endif
@@ -58,8 +58,8 @@
 
         {{-- Foto Petugas --}}
         <td>
-            @if($item->foto_petugas && file_exists(public_path('storage/' . $item->foto_petugas)))
-                <img src="{{ public_path('storage/' . $item->foto_petugas) }}" class="img-report">
+            @if($item->foto_petugas && file_exists(public_path('uploads/siaga_kembali/' . $item->foto_petugas)))
+                <img src="{{ public_path('uploads/siaga_kembali/' . $item->foto_petugas) }}" class="img-report">
             @else
                 <div class="text-center">-</div>
             @endif
@@ -67,7 +67,6 @@
     </tr>
 @empty
     <tr>
-        {{-- Colspan disesuaikan jadi 9 karena kolom bertambah --}}
         <td colspan="9" class="text-center">Data tidak ditemukan pada periode ini.</td>
     </tr>
 @endforelse
