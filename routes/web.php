@@ -58,13 +58,21 @@ Route::resource('material_keluar', MaterialKeluarController::class);
 
 
 // --- RUTE MATERIAL KEMBALI ---
-Route::get('material-kembali/foto/{materialKembali}', [MaterialKembaliController::class, 'showFoto'])->name('material_kembali.show-foto'); 
+// Download laporan (PDF / Excel)
+Route::post('material-kembali/download-report', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
 
-Route::get('/material_kembali/{materialKembali}/lihat', [MaterialKembaliController::class, 'lihat'])->name('material_kembali.lihat');
+// Foto Material
+Route::get('material-kembali/{materialKembali}/foto', [MaterialKembaliController::class, 'showFoto'])->name('material_kembali.show-foto');
+Route::get('material-kembali/{materialKembali}/download-foto', [MaterialKembaliController::class, 'downloadFoto'])->name('material_kembali.download-foto');
 
-Route::get('/material_kembali/{materialKembali}/download-foto', [MaterialKembaliController::class, 'downloadFoto'])->name('material_kembali.download-foto'); 
+// Foto Petugas
+Route::get('material-kembali/{materialKembali}/foto-petugas', [MaterialKembaliController::class, 'showFotoPetugas'])->name('material_kembali.show-foto-petugas');
+Route::get('material-kembali/{materialKembali}/download-foto-petugas', [MaterialKembaliController::class, 'downloadFotoPetugas'])->name('material_kembali.download-foto-petugas');
 
-Route::post('/material_kembali/download', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
+// Lihat detail
+Route::get('material-kembali/{materialKembali}/lihat', [MaterialKembaliController::class, 'lihat'])->name('material_kembali.lihat');
+
+// Resource utama
 Route::resource('material_kembali', MaterialKembaliController::class);
 
 

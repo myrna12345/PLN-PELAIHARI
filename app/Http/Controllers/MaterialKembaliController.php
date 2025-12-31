@@ -26,21 +26,32 @@ class MaterialKembaliController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
-        $query = MaterialKembali::query();
+    $tanggalMulai = $request->query('tanggal_mulai');
+    $tanggalAkhir = $request->query('tanggal_akhir');
 
-        // 📝 Perbaikan: Filter sekarang mencari berdasarkan ID (jika input adalah angka) atau nama petugas
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                // Asumsi: jika search adalah angka, cari di material_id, jika string, cari di nama_petugas
-                if (is_numeric($search)) {
-                    $q->where('material_id', $search);
-                } else {
-                    $q->where('nama_petugas', 'like', "%{$search}%");
-                }
-            });
-        }
+    $query = MaterialKembali::with('material');
 
-        $materialKembali = $query->orderByDesc('tanggal')->paginate(10);
+    // 🔍 SEARCH: Nama Petugas ATAU Nama Material
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('nama_petugas', 'like', "%{$search}%")
+              ->orWhereHas('material', function ($m) use ($search) {
+                  $m->where('nama_material', 'like', "%{$search}%");
+              });
+        });
+    }
+
+    // 📅 FILTER TANGGAL
+    if ($tanggalMulai && $tanggalAkhir) {
+        $query->whereBetween('tanggal', [
+            $tanggalMulai . ' 00:00:00',
+            $tanggalAkhir . ' 23:59:59'
+        ]);
+    }
+
+    $materialKembali = $query
+        ->orderByDesc('tanggal')
+        ->paginate(10);
 
         // 🟢 PENAMBAHAN: Sisipkan data Stok Material Stand By saat ini 🟢
         $materialKembali->each(function ($item) {
@@ -72,17 +83,22 @@ class MaterialKembaliController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'material_id' => 'required|exists:materials,id', // 📝 Perbaikan: Menggunakan material_id
+            'material_id' => 'required|exists:materials,id', 
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'satuan' => 'required|string|in:Buah,Meter', // 🟢 PERBAIKAN: Tambahkan validasi Satuan
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+            'satuan' => 'required|string|in:Buah,Meter', 
+            'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:5120',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
 
         if ($request->hasFile('foto')) {
             $validated['foto'] = $request->file('foto')->store('material_kembali', 'public');
+        }
+
+        if ($request->hasFile('foto_petugas')) {
+            $validated['foto_petugas'] = $request->file('foto_petugas')->store('material_kembali', 'public');
         }
 
         $materialId = $validated['material_id'];
@@ -140,11 +156,12 @@ class MaterialKembaliController extends Controller
         $materialIdLama = $materialKembali->material_id; 
 
         $validated = $request->validate([
-            'material_id' => 'required|exists:materials,id', // 📝 Perbaikan: Menggunakan material_id
+            'material_id' => 'required|exists:materials,id', 
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
-            'satuan' => 'required|string|in:Buah,Meter', // 🟢 PERBAIKAN: Tambahkan validasi Satuan
+            'satuan' => 'required|string|in:Buah,Meter', 
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         $materialIdBaru = $validated['material_id'];
@@ -198,6 +215,13 @@ class MaterialKembaliController extends Controller
             }
             $validated['foto'] = $request->file('foto')->store('material_kembali', 'public');
         }
+
+        if ($request->hasFile('foto_petugas')) {
+            if ($materialKembali->foto_petugas) {
+                Storage::disk('public')->delete($materialKembali->foto_petugas);
+            }
+            $validated['foto_petugas'] = $request->file('foto_petugas')->store('material_kembali', 'public');
+        }
         
         // 📝 PERUBAHAN: $validated sekarang mencakup 'satuan'
         $materialKembali->update($validated);
@@ -223,6 +247,10 @@ class MaterialKembaliController extends Controller
             Storage::disk('public')->delete($data->foto);
         }
 
+        if ($data->foto_petugas) {
+            Storage::disk('public')->delete($data->foto_petugas);
+        }
+
         $data->delete();
 
         return redirect()->route('material_kembali.index')->with('success', 'Data berhasil dihapus! Stok Stand By dikurangi kembali.');
@@ -240,6 +268,17 @@ class MaterialKembaliController extends Controller
         return Storage::disk('public')->response($item->foto);
     }
 
+    public function showFotoPetugas($id)
+    {
+        $item = MaterialKembali::findOrFail($id);
+
+        if (!$item->foto_petugas || !Storage::disk('public')->exists($item->foto_petugas)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($item->foto_petugas);
+    }
+
     public function downloadFoto($id)
     {
         $item = MaterialKembali::findOrFail($id);
@@ -250,6 +289,17 @@ class MaterialKembaliController extends Controller
         
         // Pastikan Anda menangani kasus ID yang tidak valid atau foto yang tidak ada.
         return redirect()->back()->with('error', 'File foto tidak ditemukan.');
+    }
+
+    public function downloadFotoPetugas($id)
+    {
+        $item = MaterialKembali::findOrFail($id);
+
+        if ($item->foto_petugas && Storage::disk('public')->exists($item->foto_petugas)) {
+            return Storage::disk('public')->download($item->foto_petugas);
+        }
+
+        return redirect()->back()->with('error', 'Foto petugas tidak ditemukan.');
     }
 
     public function downloadReport(Request $request)

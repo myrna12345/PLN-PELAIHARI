@@ -106,7 +106,8 @@
                     class="form-control-new"
                     value="{{ \Carbon\Carbon::parse($data->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }} WITA"
                     disabled>
-                <small>Waktu dikeluarkan tidak bisa diubah.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Tanggal pembuatan data tidak dapat diubah.
             </div>
 
             <input type="hidden" name="tanggal"
@@ -127,7 +128,7 @@
                 @endif
 
                 <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
-                <small style="color: #777;">*Kosongkan jika tidak ingin mengganti foto.</small>
+                <small style="color: #777;">*Upload ulang jika ingin mengganti foto material.</small>
 
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
@@ -152,7 +153,7 @@
                     class="form-control-new-file" 
                     accept="image/*">
 
-                <small style="color: #777;">*Kosongkan jika tidak ingin mengganti foto petugas.</small>
+                <small style="color: #777;">*Upload ulang jika ingin mengganti foto petugas.</small>
 
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>

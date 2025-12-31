@@ -96,6 +96,7 @@
                 @error('keterangan')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
+                    <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi.</small>
             </div>
 
             {{-- Tanggal dan Waktu (hanya tampil, tidak bisa diubah) --}}
@@ -108,7 +109,9 @@
                     class="form-control-new"
                     value="{{ now('Asia/Makassar')->format('d M Y, H:i') }} WITA"
                     disabled>
-                <small>Waktu akan otomatis terisi saat disimpan.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Waktu otomatis terisi saat data disimpan.
+                </small>
             </div>
 
             {{-- Upload Foto Material--}}
@@ -123,7 +126,7 @@
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                <small style="color: red;">Foto material wajib diisi.</small>
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
             </div>
 
             {{-- Upload Foto Petugas --}}
@@ -140,7 +143,7 @@
                     <small style="color: red;">{{ $message }}</small>
                 @enderror
 
-                <small style="color: red;">Foto petugas wajib diisi.</small>
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
             </div>
 
 

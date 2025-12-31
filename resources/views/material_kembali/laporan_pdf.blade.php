@@ -9,50 +9,89 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #000; padding: 6px; text-align: left; }
         th { background-color: #f2f2f2; font-weight: bold; }
-        td { vertical-align: top; }
+        td { vertical-align: middle; }
         .text-center { text-align: center; }
+
+        img {
+            object-fit: cover;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <h2>LAPORAN MATERIAL KEMBALI</h2>
-    <p>Periode: {{ \Carbon\Carbon::parse($tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($tanggal_akhir)->format('d M Y') }}</p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Material</th>
-                <th>Nama Petugas</th>
-                <th>Jumlah</th>
-                <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
-                <th>Tanggal (WITA)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($items as $index => $item)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    
-                    {{-- Mengambil nama material dari relasi --}}
-                    <td>{{ $item->material->nama_material ?? 'Material Dihapus' }}</td> 
-                    
-                    <td>{{ $item->nama_petugas }}</td>
-                    
-                    {{-- Jumlah Kembali + Satuan --}}
-                    <td class="text-center">{{ $item->jumlah_material }} {{ $item->satuan }}</td>
-                    
-                    {{-- 🟢 TAMPILKAN DATA STOK SAAT INI 🟢 --}}
-                    <td class="text-center">{{ $item->stok_saat_ini }}</td>
-                    
-                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    {{-- 🛠️ PERBAIKAN: Colspan menjadi 6 (No, Nama Material, Nama Petugas, Jumlah, Stok, Tanggal) --}}
-                    <td colspan="6" class="text-center">Tidak ada data pada periode ini.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+<h2>LAPORAN MATERIAL KEMBALI</h2>
+<p>
+    Periode:
+    {{ \Carbon\Carbon::parse($tanggal_mulai)->format('d M Y') }}
+    s/d
+    {{ \Carbon\Carbon::parse($tanggal_akhir)->format('d M Y') }}
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Nama Material</th>
+            <th>Nama Petugas</th>
+            <th>Jumlah</th>
+            <th>Stok</th>
+            <th>Tanggal (WITA)</th>
+            <th>Foto Material</th>
+            <th>Foto Petugas</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    @forelse ($items as $index => $item)
+        <tr>
+            <td class="text-center">{{ $index + 1 }}</td>
+
+            <td>{{ $item->material->nama_material ?? '-' }}</td>
+
+            <td>{{ $item->nama_petugas }}</td>
+
+            <td class="text-center">
+                {{ $item->jumlah_material }} {{ $item->satuan }}
+            </td>
+
+            <td class="text-center">{{ $item->stok_saat_ini }}</td>
+
+            <td class="text-center">
+                {{ \Carbon\Carbon::parse($item->tanggal)
+                    ->setTimezone('Asia/Makassar')
+                    ->format('d M Y, H:i') }}
+            </td>
+
+            {{-- FOTO MATERIAL --}}
+            <td class="text-center">
+                @if($item->foto && file_exists(storage_path('app/public/' . $item->foto)))
+                    <img src="{{ storage_path('app/public/' . $item->foto) }}"
+                         width="60" height="60">
+                @else
+                    -
+                @endif
+            </td>
+
+            {{-- FOTO PETUGAS --}}
+            <td class="text-center">
+                @if($item->foto_petugas && file_exists(storage_path('app/public/' . $item->foto_petugas)))
+                    <img src="{{ storage_path('app/public/' . $item->foto_petugas) }}"
+                         width="60" height="60">
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="8" class="text-center">
+                Tidak ada data pada periode ini.
+            </td>
+        </tr>
+    @endforelse
+    </tbody>
+</table>
+
 </body>
 </html>

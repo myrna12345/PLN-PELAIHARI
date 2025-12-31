@@ -109,8 +109,6 @@
                             @endif
                         </td>
 
-
-
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('material_keluar.edit', $item->id) }}" class="btn btn-edit">Edit</a>

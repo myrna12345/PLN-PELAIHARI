@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('jumlah_material');
             $table->dateTime('tanggal');
             $table->string('foto')->nullable();
+            $table->string('foto_petugas')->nullable();
             $table->timestamps();
         });
     }

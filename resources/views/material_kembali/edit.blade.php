@@ -91,29 +91,63 @@
                     class="form-control-new"
                     value="{{ \Carbon\Carbon::parse($materialKembali->tanggal)->format('d M Y, H:i') }} WITA"
                     disabled>
-                <small>Hanya tanggal ini yang tidak dapat diubah.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Tanggal pembuatan data tidak dapat diubah.
+                </small>
             </div>
 
             <input type="hidden" name="tanggal"
                 value="{{ \Carbon\Carbon::parse($materialKembali->tanggal)->format('Y-m-d H:i:s') }}">
 
-            {{-- Foto Lama & Baru --}}
+            {{-- FOTO MATERIAL --}}
             <div class="form-group-new">
-                <label for="foto">Foto</label>
+                <label for="foto">Foto Material</label>
+
                 @if($materialKembali->foto)
                     <div style="margin-bottom: 10px;">
-                        <img src="{{ route('material_kembali.show-foto', $materialKembali->id) }}" 
-                            alt="Foto Material" 
-                            class="table-foto" 
-                            style="max-width: 150px; height: auto; border: 1px solid #ddd; padding: 5px;">
+                        <img src="{{ route('material_kembali.show-foto', $materialKembali->id) }}"
+                            alt="Foto Material"
+                            style="max-width:150px; border:1px solid #ddd; padding:5px;">
                     </div>
                 @endif
+
                 <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
-                <small style="color: #777;">*Upload jika ingin mengganti foto</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Upload ulang jika ingin mengganti foto material
+                </small>
+
                 @error('foto')
-                    <small style="color:red;">{{ $message }}</small>
+                    <small class="text-danger">{{ $message }}</small>
                 @enderror
             </div>
+
+            {{-- FOTO PETUGAS --}}
+            <div class="form-group-new">
+                <label for="foto_petugas">Foto Petugas</label>
+
+                @if($materialKembali->foto_petugas)
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ route('material_kembali.show-foto-petugas', $materialKembali->id) }}"
+                            alt="Foto Petugas"
+                            style="max-width:150px; border:1px solid #ddd; padding:5px;">
+                    </div>
+                @endif
+
+                <input type="file"
+                    name="foto_petugas"
+                    id="foto_petugas"
+                    class="form-control-new-file"
+                    accept="image/*">
+
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Upload ulang jika ingin mengganti foto petugas
+                </small>
+
+                @error('foto_petugas')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+
 
             {{-- Tombol --}}
             <div class="form-actions">

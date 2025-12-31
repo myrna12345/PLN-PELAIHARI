@@ -95,23 +95,41 @@
                     class="form-control-new"
                     value="{{ now('Asia/Makassar')->format('d M Y, H:i') }} WITA"
                     disabled>
-                <small>Waktu akan otomatis terisi saat disimpan.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Waktu otomatis terisi saat data disimpan.
+                </small>
             </div>
 
-            {{-- Upload Foto --}}
+            {{-- Upload Foto Material (WAJIB) --}}
             <div class="form-group-new">
-                <label for="foto">Unggah Foto</label>
+                <label for="foto">Unggah Foto Material</label>
                 <input type="file" 
                     name="foto" 
                     id="foto" 
                     class="form-control-new-file @error('foto') is-invalid @enderror" 
                     accept="image/*"
-                    required> {{-- Foto wajib diisi --}}
+                    required>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                <small class="text-danger">Unggah foto material wajib diisi.</small>
+                    <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
             </div>
+
+            {{-- Upload Foto Petugas (WAJIB) --}}
+            <div class="form-group-new">
+                <label for="foto_petugas">Unggah Foto Petugas</label>
+                <input type="file" 
+                    name="foto_petugas" 
+                    id="foto_petugas" 
+                    class="form-control-new-file @error('foto_petugas') is-invalid @enderror" 
+                    accept="image/*"
+                    required>
+                @error('foto_petugas')
+                    <small style="color:red;">{{ $message }}</small>
+                @enderror
+                    <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
+            </div>
+
 
             {{-- Tombol Aksi --}}
             <div class="form-actions">

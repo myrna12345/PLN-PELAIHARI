@@ -17,7 +17,8 @@ class MaterialKembali extends Model
         'jumlah_material',
         'satuan',
         'tanggal',
-        'foto'
+        'foto',
+        'foto_petugas'
     ];
 
     public function material()

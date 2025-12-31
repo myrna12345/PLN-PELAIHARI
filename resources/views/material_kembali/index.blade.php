@@ -51,9 +51,10 @@
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Jumlah</th>
-                    <th>Stok</th> {{-- 🟢 TAMBAH KOLOM STOK 🟢 --}}
+                    <th>Stok</th> 
                     <th>Tanggal (WITA)</th>
-                    <th>Foto & Download</th>
+                    <th>Foto Material</th>
+                    <th>Foto Petugas</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -68,33 +69,46 @@
                         <td>{{ $item->nama_petugas }}</td>
                         
                         {{-- Menggabungkan jumlah dan satuan --}}
-                        <td>{{ $item->jumlah_material }} {{ $item->satuan }}</td> 
-                        
+                        <td class="text-nowrap">{{ $item->jumlah_material }} {{ $item->satuan }}</td>                        
                         {{-- 🟢 TAMPILKAN DATA STOK 🟢 --}}
-                        <td>{{ $item->stok_saat_ini }}</td>
+                        <td class="text-nowrap">{{ $item->stok_saat_ini }}</td>
 
+                        <td class="text-nowrap">{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
 
-                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
-
-                        <td style="text-align: center; vertical-align: top;">
+                        {{-- TAMPILKAN DATA FOTO --}}
+                        <td style="text-align:center; vertical-align:top;">
                             @if($item->foto)
-                                {{-- Menggunakan route showFoto --}}
-                                <img src="{{ route('material_kembali.show-foto', $item->id) }}" 
-                                    alt="Foto Material" 
+                                <img src="{{ route('material_kembali.show-foto', $item->id) }}"
+                                    alt="Foto Material"
                                     class="table-foto zoomable"
-                                    style="max-width: 80px; height: auto; object-fit: cover; display: block; margin: 0 auto 5px; cursor: pointer;"
-                                    title="Klik untuk memperbesar">
+                                    style="max-width:80px; height:auto; object-fit:cover; display:block; margin:0 auto 5px; cursor:pointer;">
 
-                                {{-- Menggunakan route downloadFoto --}}
-                                <a href="{{ route('material_kembali.download-foto', $item->id) }}" 
-                                    class="btn-foto-download" 
-                                    title="Download Foto">
-                                    <i class="fas fa-download"></i> Download Foto
+                                <a href="{{ route('material_kembali.download-foto', $item->id) }}"
+                                    class="btn-foto-download">
+                                    <i class="fas fa-download"></i> Download
                                 </a>
                             @else
-                                <span>-</span>
+                                <span class="text-danger">Tidak ada</span>
                             @endif
                         </td>
+
+                        {{-- TAMPILKAN DATA FOTO PETUGAS --}}
+                        <td style="text-align:center; vertical-align:top;">
+                            @if($item->foto_petugas)
+                                <img src="{{ route('material_kembali.show-foto-petugas', $item->id) }}"
+                                    alt="Foto Petugas"
+                                    class="table-foto zoomable"
+                                    style="max-width:80px; height:auto; object-fit:cover; display:block; margin:0 auto 5px; cursor:pointer;">
+
+                                <a href="{{ route('material_kembali.download-foto-petugas', $item->id) }}"
+                                    class="btn-foto-download">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            @else
+                                <span class="text-danger">Tidak ada</span>
+                            @endif
+                        </td>
+
 
                         <td>
                             <div class="table-actions">
@@ -110,7 +124,7 @@
                 @empty
                     <tr>
                         {{-- Colspan 8 untuk 8 kolom --}}
-                        <td colspan="8" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
+                        <td colspan="9" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -168,5 +182,10 @@
         border-radius: 4px;
         width: 130px; /* Atur lebar agar tidak terlalu panjang */
     }
+
+    .text-nowrap {
+    white-space: nowrap;
+    text-align: center;
+}
 </style>
 @endsection
