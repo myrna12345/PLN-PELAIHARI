@@ -13,7 +13,6 @@ use App\Exports\SiagaKeluarExport;
 
 class SiagaKeluarController extends Controller
 {
-    // Folder tujuan
     private $uploadFolder = 'uploads/siaga_keluar';
 
     public function index(Request $request)
@@ -64,20 +63,17 @@ class SiagaKeluarController extends Controller
             'keterangan' => 'required|string|max:500', 
             'status' => 'required|string|max:255', 
             'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Validasi Foto Petugas
+            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        // Buat folder public jika belum ada
         $path = public_path($this->uploadFolder);
         if(!File::isDirectory($path)){
             File::makeDirectory($path, 0777, true, true);
         }
 
-        // 1. Upload Foto Material
         $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
         $request->file('foto')->move($path, $fotoName);
         
-        // 2. Upload Foto Petugas
         $fotoPetugasName = time() . '_petugas_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
         $request->file('foto_petugas')->move($path, $fotoPetugasName);
 
@@ -92,11 +88,10 @@ class SiagaKeluarController extends Controller
             'keterangan' => $validated['keterangan'], 
             'status' => $validated['status'],
             'foto_path' => $fotoName,
-            'foto_petugas' => $fotoPetugasName, // Simpan Foto Petugas
+            'foto_petugas' => $fotoPetugasName, 
             'tanggal' => Carbon::now('Asia/Makassar'),
         ]);
 
-        // Update status di tabel Standby
         \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
             ->update(['status' => 'Terpakai']);
 
@@ -124,11 +119,10 @@ class SiagaKeluarController extends Controller
             'keterangan' => 'required|string|max:500', 
             'status' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
-            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Validasi Foto Petugas
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
         ]);
 
         $destinationPath = public_path($this->uploadFolder);
-        
         $material = Material::findOrFail($validated['material_id']);
         
         $dataToUpdate = [
@@ -141,20 +135,18 @@ class SiagaKeluarController extends Controller
             'nomor_meter' => $validated['nomor_meter'], 
         ];
 
-        // Update Foto Material
         if ($request->hasFile('foto')) {
             $oldFile = public_path($this->uploadFolder . '/' . $siagaKeluar->foto_path);
-            if (File::exists($oldFile)) { File::delete($oldFile); }
+            if ($siagaKeluar->foto_path && File::exists($oldFile)) { File::delete($oldFile); }
             
             $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
             $request->file('foto')->move($destinationPath, $fotoName);
             $dataToUpdate['foto_path'] = $fotoName;
         }
 
-        // Update Foto Petugas
         if ($request->hasFile('foto_petugas')) {
             $oldFilePetugas = public_path($this->uploadFolder . '/' . $siagaKeluar->foto_petugas);
-            if (File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
+            if ($siagaKeluar->foto_petugas && File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
             
             $fotoPetugasName = time() . '_petugas_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
             $request->file('foto_petugas')->move($destinationPath, $fotoPetugasName);
@@ -191,17 +183,16 @@ class SiagaKeluarController extends Controller
         if (File::exists($path)) {
             return response()->download($path);
         }
-        return back()->with('error', 'File tidak ditemukan.');
+        return redirect()->back()->with('error', 'File foto tidak ditemukan.');
     }
     
-    // Fungsi baru untuk download foto petugas
     public function downloadFotoPetugas(SiagaKeluar $siagaKeluar)
     {
         $path = public_path($this->uploadFolder . '/' . $siagaKeluar->foto_petugas);
         if (File::exists($path)) {
             return response()->download($path);
         }
-        return back()->with('error', 'File tidak ditemukan.');
+        return redirect()->back()->with('error', 'File tidak ditemukan.');
     }
 
     public function downloadReport(Request $request)

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\SiagaKembali; 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File; // Ganti Storage jadi File
+use Illuminate\Support\Facades\File; 
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel; 
@@ -13,7 +13,6 @@ use App\Exports\SiagaKembaliExport;
 
 class SiagaKembaliController extends Controller
 {
-    // Folder tujuan penyimpanan (agar sama seperti Siaga Keluar)
     private $uploadFolder = 'uploads/siaga_kembali';
 
     public function index(Request $request)
@@ -67,17 +66,14 @@ class SiagaKembaliController extends Controller
             'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        // Buat folder public/uploads/siaga_kembali jika belum ada
         $path = public_path($this->uploadFolder);
         if(!File::isDirectory($path)){
             File::makeDirectory($path, 0777, true, true);
         }
 
-        // 1. Upload Foto Material
         $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
         $request->file('foto')->move($path, $fotoName);
         
-        // 2. Upload Foto Petugas
         $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
         $request->file('foto_petugas')->move($path, $fotoPetugasName);
 
@@ -91,14 +87,13 @@ class SiagaKembaliController extends Controller
             'stand_meter' => $validated['stand_meter'],
             'status' => $validated['status'],
             'keterangan' => $validated['keterangan'] ?? null,
-            'foto_path' => $fotoName,           // Simpan nama file saja
-            'foto_petugas' => $fotoPetugasName, // Simpan nama file saja
+            'foto_path' => $fotoName,
+            'foto_petugas' => $fotoPetugasName,
             'tanggal' => Carbon::now('Asia/Makassar'),
         ];
         
         SiagaKembali::create($dataToSave);
 
-        // Update status di tabel Standby kembali menjadi Ready
         \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
             ->update(['status' => 'Ready']);
 
@@ -131,25 +126,19 @@ class SiagaKembaliController extends Controller
 
         $destinationPath = public_path($this->uploadFolder);
 
-        // Update Foto Material
         if ($request->hasFile('foto')) {
-            // Hapus file lama
             $oldFile = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
-            if (File::exists($oldFile)) { File::delete($oldFile); }
-
-            // Upload baru
+            if ($siagaKembali->foto_path && File::exists($oldFile)) { File::delete($oldFile); }
+            
             $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
             $request->file('foto')->move($destinationPath, $fotoName);
             $siagaKembali->foto_path = $fotoName;
         }
 
-        // Update Foto Petugas
         if ($request->hasFile('foto_petugas')) {
-            // Hapus file lama
             $oldFilePetugas = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
-            if (File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
-
-            // Upload baru
+            if ($siagaKembali->foto_petugas && File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
+            
             $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
             $request->file('foto_petugas')->move($destinationPath, $fotoPetugasName);
             $siagaKembali->foto_petugas = $fotoPetugasName;
@@ -189,7 +178,6 @@ class SiagaKembaliController extends Controller
         return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus!');
     }
 
-    // --- FUNGSI DOWNLOAD (Direct File) ---
     public function downloadFoto(SiagaKembali $siagaKembali)
     {
         $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
