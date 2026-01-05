@@ -45,12 +45,12 @@ class MaterialStandByController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi: Foto Petugas DIHAPUS
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'jumlah' => 'required|integer|min:1',
             'satuan' => 'required|string', 
             'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            // Validasi foto_petugas DIHAPUS
         ]);
 
         $destinationPath = public_path($this->uploadFolder);
@@ -58,17 +58,19 @@ class MaterialStandByController extends Controller
             File::makeDirectory($destinationPath, 0777, true, true);
         }
 
-        // Upload Foto Material
+        // Upload Foto Material Saja
         $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
         $request->file('foto')->move($destinationPath, $fotoName);
         
-        // Simpan Data
+        $material = Material::findOrFail($validated['material_id']);
+
+        // Simpan Data (Tanpa Foto Petugas)
         MaterialStandBy::create([
             'material_id' => $validated['material_id'],
+            'nama_material_lengkap' => $material->nama_material, // Opsional
             'satuan' => $request->satuan, 
             'jumlah' => $validated['jumlah'],
             'foto_path' => $fotoName,
-            // 'foto_petugas' DIHAPUS
             'tanggal' => Carbon::now('Asia/Makassar'),
         ]);
 
@@ -83,12 +85,12 @@ class MaterialStandByController extends Controller
 
     public function update(Request $request, MaterialStandBy $materialStandBy)
     {
+        // Validasi Update: Foto Petugas DIHAPUS
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'jumlah' => 'required|integer|min:1',
             'satuan' => 'required|string', 
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            // Validasi foto_petugas DIHAPUS
         ]);
 
         $destinationPath = public_path($this->uploadFolder);
@@ -103,6 +105,10 @@ class MaterialStandByController extends Controller
             $materialStandBy->foto_path = $fotoName;
         }
 
+        // Logika Update Foto Petugas DIHAPUS
+
+        $material = Material::findOrFail($validated['material_id']);
+        
         $materialStandBy->material_id = $validated['material_id'];
         $materialStandBy->satuan = $request->satuan; 
         $materialStandBy->jumlah = $validated['jumlah'];
@@ -114,16 +120,18 @@ class MaterialStandByController extends Controller
 
     public function destroy(MaterialStandBy $materialStandBy) 
     {
+        // Hapus Foto Material Saja
         if ($materialStandBy->foto_path) {
             $path = public_path($this->uploadFolder . '/' . $materialStandBy->foto_path);
             if (File::exists($path)) { File::delete($path); }
         }
+        
+        // Logika Hapus Foto Petugas DIHAPUS
 
         $materialStandBy->delete();
         return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil dihapus!');
     }
 
-    // --- PERBAIKAN: Menggunakan $id manual agar aman dari error binding ---
     public function downloadFoto($id)
     {
         // Cari manual berdasarkan ID
@@ -141,6 +149,8 @@ class MaterialStandByController extends Controller
         
         return back()->with('error', 'File fisik tidak ditemukan di server.');
     }
+
+    // Fungsi downloadFotoPetugas DIHAPUS
     
     public function downloadReport(Request $request)
     {
