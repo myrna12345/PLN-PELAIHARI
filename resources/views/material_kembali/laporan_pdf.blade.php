@@ -65,9 +65,8 @@
 
             {{-- FOTO MATERIAL --}}
             <td class="text-center">
-                @if($item->foto && file_exists(storage_path('app/public/' . $item->foto)))
-                    <img src="{{ storage_path('app/public/' . $item->foto) }}"
-                         width="60" height="60">
+                @if($item->foto && file_exists(public_path($item->foto)))
+                    <img src="{{ public_path($item->foto) }}" width="60" height="60">
                 @else
                     -
                 @endif
@@ -75,9 +74,8 @@
 
             {{-- FOTO PETUGAS --}}
             <td class="text-center">
-                @if($item->foto_petugas && file_exists(storage_path('app/public/' . $item->foto_petugas)))
-                    <img src="{{ storage_path('app/public/' . $item->foto_petugas) }}"
-                         width="60" height="60">
+                @if($item->foto_petugas && file_exists(public_path($item->foto_petugas)))
+                    <img src="{{ public_path($item->foto_petugas) }}" width="60" height="60">
                 @else
                     -
                 @endif
