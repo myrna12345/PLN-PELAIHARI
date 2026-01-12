@@ -55,7 +55,7 @@ class MaterialSiagaStandByController extends Controller
             'tanggal'               => 'required|date',
             'nama_petugas'          => 'nullable|string|max:255',
             'jumlah_siaga_standby'  => 'nullable|integer|min:0', 
-            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Max 5MB
+            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:5120', 
         ]);
         
         $path = null;
@@ -191,12 +191,26 @@ class MaterialSiagaStandByController extends Controller
             return back()->with('error', 'Data kosong.');
         }
         
+        // --- PROSES EXPORT PDF ---
         if ($exportType === 'pdf') {
+            foreach ($data as $item) {
+                // Konversi foto ke Base64 agar muncul di PDF
+                if ($item->unggah_foto && Storage::disk('public')->exists($item->unggah_foto)) {
+                    $path = storage_path('app/public/' . $item->unggah_foto);
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $dataImg = file_get_contents($path);
+                    $item->foto_base64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+                } else {
+                    $item->foto_base64 = null;
+                }
+            }
+
             $pdf = Pdf::loadView('material-siaga.export_pdf', compact('data', 'start_date', 'end_date'))
                       ->setPaper('a4', 'portrait');
             return $pdf->download('material-siaga-' . now()->format('Ymd_His') . '.pdf');
         }
 
+        // --- PROSES EXPORT EXCEL ---
         if ($exportType === 'excel') {
             $exportData[] = ['No', 'Nama Material & Nomor Meter', 'Stand Meter', 'Tanggal Input', 'Status'];
             foreach ($data as $index => $item) {

@@ -43,28 +43,36 @@
     }
 
     button {
-    padding: 12px 32px;
-    background: #9BC3AE;      /* hijau pastel seperti gambar */
-    border: none;
-    color: #1f2d27;           /* teks gelap */
-    border-radius: 14px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 16px;
-}
+        padding: 12px 32px;
+        background: #9BC3AE;
+        border: none;
+        color: #1f2d27;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 16px;
+    }
 
-button:hover {
-    background: #86B29B;      /* lebih gelap saat hover */
-}
+    button:hover {
+        background: #86B29B;
+    }
 
     .image-preview {
         margin: 10px 0 20px 0;
     }
 
     .image-preview img {
-        width: 120px;
+        width: 150px; /* Ukuran sedikit diperbesar agar lebih jelas */
+        height: auto;
         border-radius: 8px;
-        border: 1px solid #ccc;
+        border: 1px solid #ddd;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .text-muted {
+        font-size: 12px;
+        color: #666;
     }
 
     .form-actions {
@@ -88,7 +96,7 @@ button:hover {
         @if ($errors->any())
             <div class="alert alert-danger"
                  style="color:red; margin-bottom:20px; border:1px solid red; padding:10px; border-radius:5px;">
-                <ul>
+                <ul style="margin:0;">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -110,9 +118,8 @@ button:hover {
 
         <label>Tanggal</label>
         <input type="datetime-local" name="tanggal"
-       value="{{ \Carbon\Carbon::parse($material->tanggal)->format('Y-m-d\TH:i') }}"
-       readonly>
-
+               value="{{ \Carbon\Carbon::parse($material->tanggal)->format('Y-m-d\TH:i') }}"
+               readonly>
 
         <label>Status</label>
         <select name="status" required>
@@ -120,13 +127,20 @@ button:hover {
             <option value="Terpakai" {{ old('status', $material->status) == 'Terpakai' ? 'selected' : '' }}>Terpakai</option>
         </select>
 
-        <label>Foto (opsional)</label>
-        @if($material->unggah_foto)
-            <div class="image-preview">
-                <img src="{{ asset('storage/' . $material->unggah_foto) }}" alt="Foto Lama">
-            </div>
-        @endif
-        <input type="file" name="unggah_foto">
+        <label>Foto Saat Ini</label>
+        <div class="image-preview">
+            @if($material->unggah_foto)
+                {{-- Menggunakan Storage::url untuk keamanan path --}}
+                <img src="{{ Storage::url($material->unggah_foto) }}" alt="Foto Lama">
+                <span class="text-muted">File: {{ basename($material->unggah_foto) }}</span>
+            @else
+                <p class="text-muted" style="font-style: italic;">Belum ada foto yang diunggah.</p>
+            @endif
+        </div>
+
+        <label>Ganti Foto</label>
+        <input type="file" name="unggah_foto" accept="image/*">
+        
 
         <div class="form-actions">
             <button type="submit">Update</button>

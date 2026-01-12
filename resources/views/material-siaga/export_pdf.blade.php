@@ -58,6 +58,13 @@
             text-transform: uppercase;
         }
 
+        .foto-pdf {
+            width: 80px; /* Ukuran sedikit diperbesar agar jelas */
+            height: auto;
+            max-height: 100px;
+            border: 0.5px solid #ccc;
+        }
+
         @page {
             margin: 30px;
         }
@@ -65,23 +72,24 @@
 </head>
 <body>
 
-    <h2>LAPORAN MATERIAL SIAGA STANDBY</h2>
+    <h2>LAPORAN MATERIAL SIAGA STANDBY</h2> 
 
     <p>
         Periode: 
         {{ \Carbon\Carbon::parse($start_date)->format('d-m-Y') }} 
         s/d 
-        {{ \Carbon\Carbon::parse($end_date)->format('d-m-Y') }}
+        {{ \Carbon\Carbon::parse($end_date)->format('d-m-Y') }} 
     </p>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 30px;">No</th>
-                <th style="width: 220px;">Nama Material & Nomor Meter</th>
-                <th style="width: 80px;">Stand Meter</th>
-                <th style="width: 110px;">Tanggal Input</th>
-                <th style="width: 80px;">Status</th> 
+                <th style="width: 30px;">NO</th>
+                <th style="width: 180px;">NAMA MATERIAL & NOMOR METER</th>
+                <th style="width: 70px;">STAND METER</th>
+                <th style="width: 110px;">TANGGAL(WITA)</th>
+                <th style="width: 90px;">FOTO</th>
+                <th style="width: 70px;">STATUS</th>
             </tr>
         </thead>
 
@@ -89,12 +97,29 @@
             @foreach($data as $index => $item)
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
+
                 <td class="left">
-                    <span class="uppercase">{{ $item->nama_material }}</span> - {{ $item->nomor_meter }}
+                    <span class="uppercase">{{ $item->nama_material }}</span>
+                    - {{ $item->nomor_meter }} 
                 </td>
-                <td class="center">{{ $item->stand_meter }}</td>
-                <td class="center">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y H:i') }}</td>
-                <td class="center uppercase">{{ $item->status }}</td>
+
+                <td class="center">{{ $item->stand_meter }} </td>
+
+                <td class="center">
+                    {{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y H:i') }} 
+                </td>
+
+                <td class="center">
+                    @if($item->foto_base64)
+                        <img src="{{ $item->foto_base64 }}" class="foto-pdf">
+                    @else
+                        <span style="color: #999;">Tidak Ada Foto</span>
+                    @endif
+                </td>
+
+                <td class="center uppercase">
+                    <strong>{{ $item->status }}</strong> 
+                </td>
             </tr>
             @endforeach
         </tbody>
