@@ -20,17 +20,24 @@
             {{-- Nama Material (Select) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                {{-- 🛠️ PERBAIKAN: name diubah menjadi material_id --}}
                 <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="">Pilih Material</option>
                     @foreach($materialList as $material)
-                        {{-- 🛠️ PERBAIKAN: value diubah menjadi $material->id --}}
-                        <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
+                        @php
+                            $namaMaterial = strtoupper($material->nama_material);
+                            $satuanOtomatis = 'Buah'; // Default untuk MCB, KWH, dll
+                            
+                            if (str_contains($namaMaterial, 'KABEL')) {
+                                $satuanOtomatis = 'Meter';
+                            }
+                        @endphp
+                        <option value="{{ $material->id }}" 
+                                data-satuan="{{ $satuanOtomatis }}"
+                                {{ old('material_id') == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                {{-- 🛠️ PERBAIKAN: Error message menggunakan material_id --}}
                 @error('material_id')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
@@ -53,16 +60,19 @@
                     @enderror
                 </div>
 
-                {{-- Satuan Material --}}
+                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
                 <div class="form-group-new half-width">
                     <label for="satuan_material">Satuan Material</label>
-                    <select name="satuan_material" id="satuan_material" class="form-control-new" required>
-                        <option value="" selected disabled>Pilih Satuan</option>
-                        {{-- Tambahkan opsi Satuan seperti pada Material Stand By --}}
-                        <option value="Buah" {{ old('satuan_material') == 'Buah' ? 'selected' : '' }}>Buah</option>
-                        <option value="Meter" {{ old('satuan_material') == 'Meter' ? 'selected' : '' }}>Meter</option>
-                        {{-- Anda bisa menambahkan opsi satuan lain jika diperlukan --}}
-                    </select>
+                    {{-- Menggunakan input readonly agar user tidak bisa mengubah, tapi data tetap terkirim ke server --}}
+                    <input type="text" 
+                        name="satuan_material" 
+                        id="satuan_material" 
+                        class="form-control-new" 
+                        style="background-color: #f8f9fa; cursor: not-allowed;"
+                        value="{{ old('satuan_material') }}" 
+                        placeholder="Satuan"
+                        readonly 
+                        required>
                     @error('satuan_material')
                         <small style="color:red;">{{ $message }}</small>
                     @enderror
@@ -96,14 +106,12 @@
                 @error('keterangan')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                    <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi.</small>
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi.</small>
             </div>
 
-            {{-- Tanggal dan Waktu (hanya tampil, tidak bisa diubah) --}}
+            {{-- Tanggal dan Waktu --}}
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
-
-                {{-- Menampilkan waktu lokal, tetapi disabled --}}
                 <input type="text" 
                     id="tanggal_display" 
                     class="form-control-new"
@@ -138,16 +146,11 @@
                     class="form-control-new-file" 
                     accept="image/*"
                     required>
-
                 @error('foto_petugas')
                     <small style="color: red;">{{ $message }}</small>
                 @enderror
-
                 <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
             </div>
-
-
-
 
             {{-- Tombol Aksi --}}
             <div class="form-actions">
@@ -173,14 +176,35 @@ Swal.fire({
 </script>
 @endif
 
-{{-- Optional: CSS untuk tata letak bersebelahan --}}
+{{-- Script untuk Otomatisasi Satuan --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const materialSelect = document.getElementById('material_id');
+    const satuanInput = document.getElementById('satuan_material');
+
+    materialSelect.addEventListener('change', function() {
+        // Ambil opsi yang dipilih
+        const selectedOption = this.options[this.selectedIndex];
+        
+        // Ambil atribut data-satuan
+        const satuanOtomatis = selectedOption.getAttribute('data-satuan');
+
+        if (satuanOtomatis) {
+            satuanInput.value = satuanOtomatis;
+        } else {
+            satuanInput.value = "";
+        }
+    });
+});
+</script>
+
 <style>
     .d-flex-group-form {
         display: flex;
-        gap: 20px; /* Jarak antar kolom */
+        gap: 20px;
     }
     .d-flex-group-form .half-width {
-        flex: 1; /* Agar kedua kolom memiliki lebar yang sama */
+        flex: 1;
     }
 </style>
 

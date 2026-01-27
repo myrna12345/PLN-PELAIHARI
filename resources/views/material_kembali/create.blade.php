@@ -7,7 +7,7 @@
     <div class="card-form-header">
         <h2>Tambah Material Kembali</h2>
         
-        {{-- Tampilkan error dari controller, misalnya unit tidak cocok --}}
+        {{-- Tampilkan error dari controller --}}
         @if(session('error'))
             <div class="alert alert-danger text-center mb-3 mt-3">{{ session('error') }}</div>
         @endif
@@ -23,7 +23,13 @@
                 <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
                     <option value="">Pilih Material</option>
                     @foreach($materialList as $material)
-                        <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
+                        @php
+                            $namaMaterial = strtoupper($material->nama_material);
+                            $satuanOtomatis = str_contains($namaMaterial, 'KABEL') ? 'Meter' : 'Buah';
+                        @endphp
+                        <option value="{{ $material->id }}" 
+                                data-satuan="{{ $satuanOtomatis }}"
+                                {{ old('material_id') == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
@@ -39,7 +45,6 @@
                 {{-- Jumlah Material Kembali --}}
                 <div class="form-group-new half-width">
                     <label for="jumlah_material">Jumlah Material Kembali</label>
-                    {{-- ✅ PERBAIKAN: name diubah dari 'jumlah' menjadi 'jumlah_material' --}}
                     <input type="number" 
                         name="jumlah_material" 
                         id="jumlah_material" 
@@ -53,19 +58,18 @@
                     @enderror
                 </div>
 
-                {{-- Satuan Material (Dropdown Dinamis) --}}
+                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
                 <div class="form-group-new half-width">
                     <label for="satuan">Satuan Material</label>
-                    {{-- ✅ PERBAIKAN: name diubah dari 'satuan_material' menjadi 'satuan' --}}
-                    <select name="satuan" id="satuan" class="form-control-new @error('satuan') is-invalid @enderror" required>
-                        <option value="" selected disabled>Pilih Satuan</option>
-                        {{-- $satuanList dikirim dari Controller --}}
-                        @foreach($satuanList as $satuan) 
-                            <option value="{{ $satuan }}" {{ old('satuan') == $satuan ? 'selected' : '' }}>
-                                {{ $satuan }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <input type="text" 
+                        name="satuan" 
+                        id="satuan" 
+                        class="form-control-new @error('satuan') is-invalid @enderror" 
+                        style="background-color: #f8f9fa; cursor: not-allowed;"
+                        value="{{ old('satuan') }}" 
+                        placeholder="Satuan"
+                        readonly 
+                        required>
                     @error('satuan')
                         <small style="color:red;">{{ $message }}</small>
                     @enderror
@@ -87,7 +91,7 @@
                 @enderror
             </div>
 
-            {{-- Tanggal dan Waktu (hanya tampil, tidak bisa diubah) --}}
+            {{-- Tanggal dan Waktu (hanya tampil) --}}
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
                 <input type="text" 
@@ -100,7 +104,7 @@
                 </small>
             </div>
 
-            {{-- Upload Foto Material (WAJIB) --}}
+            {{-- Upload Foto Material --}}
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label>
                 <input type="file" 
@@ -112,10 +116,10 @@
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                    <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
+                <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
             </div>
 
-            {{-- Upload Foto Petugas (WAJIB) --}}
+            {{-- Upload Foto Petugas --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label>
                 <input type="file" 
@@ -127,9 +131,8 @@
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                    <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
+                <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
             </div>
-
 
             {{-- Tombol Aksi --}}
             <div class="form-actions">
@@ -155,16 +158,34 @@ Swal.fire({
 </script>
 @endif
 
+{{-- Script untuk Otomatisasi Satuan --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const materialSelect = document.getElementById('material_id');
+    const satuanInput = document.getElementById('satuan');
+
+    materialSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const satuanOtomatis = selectedOption.getAttribute('data-satuan');
+
+        if (satuanOtomatis) {
+            satuanInput.value = satuanOtomatis;
+        } else {
+            satuanInput.value = "";
+        }
+    });
+});
+</script>
+
 {{-- CSS untuk tata letak bersebelahan --}}
 <style>
     .d-flex-group-form {
         display: flex;
-        gap: 20px; /* Jarak antar kolom */
+        gap: 20px;
     }
     .d-flex-group-form .half-width {
-        flex: 1; /* Agar kedua kolom memiliki lebar yang sama */
+        flex: 1;
     }
-    /* Tambahkan style is-invalid jika Anda belum memilikinya di CSS utama */
     .is-invalid {
         border-color: red !important;
     }

@@ -21,19 +21,20 @@
             {{-- Nama Material (Select) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                {{-- 🛠️ PERBAIKAN: name diubah menjadi material_id --}}
                 <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="">-- Pilih Material --</option>
                     @foreach($materialList as $material)
-                        {{-- 🛠️ PERBAIKAN: value diubah menjadi $material->id --}}
-                        {{-- Logika selected disesuaikan ke material_id --}}
+                        @php
+                            $namaMaterial = strtoupper($material->nama_material);
+                            $satuanOtomatis = str_contains($namaMaterial, 'KABEL') ? 'Meter' : 'Buah';
+                        @endphp
                         <option value="{{ $material->id }}" 
+                            data-satuan="{{ $satuanOtomatis }}"
                             {{ old('material_id', $data->material_id) == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
                 </select>
-                {{-- 🛠️ PERBAIKAN: Error message menggunakan material_id --}}
                 @error('material_id') 
                     <small style="color:red;">{{ $message }}</small> 
                 @enderror
@@ -56,18 +57,18 @@
                     @enderror
                 </div>
                 
-                {{-- Satuan Material Keluar --}}
+                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
                 <div class="form-group-new half-width">
                     <label for="satuan_material">Satuan Material</label>
-                    <select name="satuan_material" id="satuan_material" class="form-control-new" required>
-                        <option value="" disabled>Pilih Satuan</option>
-                        {{-- Menampilkan nilai lama atau nilai dari database --}}
-                        @php $current_satuan = old('satuan_material', $data->satuan_material); @endphp
-                        
-                        <option value="Buah" {{ $current_satuan == 'Buah' ? 'selected' : '' }}>Buah</option>
-                        <option value="Meter" {{ $current_satuan == 'Meter' ? 'selected' : '' }}>Meter</option>
-                        {{-- Tambahkan opsi lain di sini jika ada --}}
-                    </select>
+                    <input type="text" 
+                        name="satuan_material" 
+                        id="satuan_material" 
+                        class="form-control-new" 
+                        style="background-color: #f8f9fa; cursor: not-allowed;"
+                        value="{{ old('satuan_material', $data->satuan_material) }}" 
+                        placeholder="Satuan"
+                        readonly 
+                        required>
                     @error('satuan_material')
                         <small style="color:red;">{{ $message }}</small>
                     @enderror
@@ -84,7 +85,6 @@
                 @enderror
             </div>
 
-            {{-- 🟢 PENAMBAHAN INPUT KETERANGAN (Wajib diisi) 🟢 --}}
             <div class="form-group-new">
                 <label for="keterangan">Keterangan</label>
                 <textarea 
@@ -97,39 +97,35 @@
                 @error('keterangan')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi.</small>
             </div>
 
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
-
                 <input type="text" id="tanggal_display"
                     class="form-control-new"
                     value="{{ \Carbon\Carbon::parse($data->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }} WITA"
                     disabled>
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
                     *Tanggal pembuatan data tidak dapat diubah.
+                </small>
             </div>
 
             <input type="hidden" name="tanggal"
                 value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d H:i:s') }}">
 
-
             <div class="form-group-new">
-                <label for="foto">Foto</label>
-
+                <label for="foto">Foto Material</label>
                 @if($data->foto)
                     <div style="margin-bottom: 10px;">
-                        {{-- Menggunakan route show-foto untuk menampilkan gambar yang terlindungi --}}
                         <img src="{{ route('material_keluar.show-foto', $data->id) }}" 
                             alt="Foto Material Lama" 
                             class="table-foto"
-                            style="max-width: 150px; height: auto;">
+                            style="max-width: 150px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
                     </div>
                 @endif
-
                 <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
                 <small style="color: #777;">*Upload ulang jika ingin mengganti foto material.</small>
-
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
@@ -137,41 +133,30 @@
 
             <div class="form-group-new">
                 <label for="foto_petugas">Foto Petugas</label>
-
                 @if($data->foto_petugas)
                     <div style="margin-bottom: 10px;">
                         <img src="{{ route('material_keluar.show-foto-petugas', $data->id) }}"
                             alt="Foto Petugas Lama"
                             class="table-foto"
-                            style="max-width: 150px; height: auto;">
+                            style="max-width: 150px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
                     </div>
                 @endif
-
-                <input type="file" 
-                    name="foto_petugas" 
-                    id="foto_petugas" 
-                    class="form-control-new-file" 
-                    accept="image/*">
-
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*">
                 <small style="color: #777;">*Upload ulang jika ingin mengganti foto petugas.</small>
-
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
 
-
-
             <div class="form-actions">
                 <a href="{{ route('material_keluar.index') }}" class="btn-batal">Batal</a>
-                <button type="submit" class="btn-simpan">Simpan</button>
+                <button type="submit" class="btn-simpan">Simpan Perubahan</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- SweetAlert (tetap gunakan, asumsikan library sudah di-link) --}}
-{{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @if(session('success'))
 <script>
@@ -185,14 +170,36 @@ Swal.fire({
 </script>
 @endif
 
-{{-- CSS untuk tata letak bersebelahan (dari create.blade.php) --}}
+{{-- Script untuk Otomatisasi Satuan --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const materialSelect = document.getElementById('material_id');
+    const satuanInput = document.getElementById('satuan_material');
+
+    materialSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const satuanOtomatis = selectedOption.getAttribute('data-satuan');
+
+        if (satuanOtomatis) {
+            satuanInput.value = satuanOtomatis;
+        } else {
+            satuanInput.value = "";
+        }
+    });
+});
+</script>
+
 <style>
     .d-flex-group-form {
         display: flex;
-        gap: 20px; /* Jarak antar kolom */
+        gap: 20px;
     }
     .d-flex-group-form .half-width {
-        flex: 1; /* Agar kedua kolom memiliki lebar yang sama */
+        flex: 1;
+    }
+    .table-foto {
+        object-fit: cover;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 </style>
 @endsection
