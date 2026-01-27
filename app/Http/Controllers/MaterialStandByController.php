@@ -45,7 +45,7 @@ class MaterialStandByController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi: Foto Petugas DIHAPUS
+        // Validasi
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'jumlah' => 'required|integer|min:1',
@@ -58,23 +58,52 @@ class MaterialStandByController extends Controller
             File::makeDirectory($destinationPath, 0777, true, true);
         }
 
-        // Upload Foto Material Saja
+        // 1. Upload Foto Baru Terlebih Dahulu
         $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
         $request->file('foto')->move($destinationPath, $fotoName);
-        
-        $material = Material::findOrFail($validated['material_id']);
 
-        // Simpan Data (Tanpa Foto Petugas)
-        MaterialStandBy::create([
-            'material_id' => $validated['material_id'],
-            'nama_material_lengkap' => $material->nama_material, // Opsional
-            'satuan' => $request->satuan, 
-            'jumlah' => $validated['jumlah'],
-            'foto_path' => $fotoName,
-            'tanggal' => Carbon::now('Asia/Makassar'),
-        ]);
+        // 2. LOGIKA MERGE: Cek apakah material sudah ada?
+        $existingItem = MaterialStandBy::where('material_id', $validated['material_id'])->first();
 
-        return redirect()->route('material-stand-by.index')->with('success', 'Data Material Stand By berhasil disimpan!');
+        if ($existingItem) {
+            // --- JIKA DATA SUDAH ADA (UPDATE) ---
+            
+            // Hapus foto lama agar tidak menumpuk di folder
+            $oldPath = public_path($this->uploadFolder . '/' . $existingItem->foto_path);
+            if ($existingItem->foto_path && File::exists($oldPath)) { 
+                File::delete($oldPath); 
+            }
+
+            // Tambahkan Jumlah Lama + Jumlah Baru
+            $existingItem->jumlah = $existingItem->jumlah + $validated['jumlah'];
+            
+            // Update data lainnya (Foto baru, Satuan baru, Tanggal update ke sekarang)
+            $existingItem->foto_path = $fotoName;
+            $existingItem->satuan = $request->satuan;
+            $existingItem->tanggal = Carbon::now('Asia/Makassar'); 
+            
+            $existingItem->save();
+
+            $message = 'Material sudah ada. Jumlah berhasil ditambahkan dan data diperbarui!';
+
+        } else {
+            // --- JIKA DATA BELUM ADA (CREATE BARU) ---
+            
+            $material = Material::findOrFail($validated['material_id']);
+
+            MaterialStandBy::create([
+                'material_id' => $validated['material_id'],
+                'nama_material_lengkap' => $material->nama_material, // Opsional
+                'satuan' => $request->satuan, 
+                'jumlah' => $validated['jumlah'],
+                'foto_path' => $fotoName,
+                'tanggal' => Carbon::now('Asia/Makassar'),
+            ]);
+
+            $message = 'Data Material Stand By baru berhasil disimpan!';
+        }
+
+        return redirect()->route('material-stand-by.index')->with('success', $message);
     }
 
     public function edit(MaterialStandBy $materialStandBy)
@@ -85,7 +114,7 @@ class MaterialStandByController extends Controller
 
     public function update(Request $request, MaterialStandBy $materialStandBy)
     {
-        // Validasi Update: Foto Petugas DIHAPUS
+        // Validasi Update
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'jumlah' => 'required|integer|min:1',
@@ -104,8 +133,6 @@ class MaterialStandByController extends Controller
             $request->file('foto')->move($destinationPath, $fotoName);
             $materialStandBy->foto_path = $fotoName;
         }
-
-        // Logika Update Foto Petugas DIHAPUS
 
         $material = Material::findOrFail($validated['material_id']);
         
@@ -126,8 +153,6 @@ class MaterialStandByController extends Controller
             if (File::exists($path)) { File::delete($path); }
         }
         
-        // Logika Hapus Foto Petugas DIHAPUS
-
         $materialStandBy->delete();
         return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil dihapus!');
     }
@@ -149,8 +174,6 @@ class MaterialStandByController extends Controller
         
         return back()->with('error', 'File fisik tidak ditemukan di server.');
     }
-
-    // Fungsi downloadFotoPetugas DIHAPUS
     
     public function downloadReport(Request $request)
     {

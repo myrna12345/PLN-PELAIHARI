@@ -302,7 +302,7 @@
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
             
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.create') || request()->routeIs('material-retur.create') || request()->routeIs('material_keluar.create') || request()->routeIs('material_kembali.create') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-file-export"></i> <span>Tambah Material</span><i class="fas fa-chevron-right arrow-icon"></i></a>
+                <a class="dropdown-toggle"><i class="fas fa-file-export"></i> <span>Material Fast Moving</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
                     
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
@@ -314,7 +314,7 @@
 
             {{-- 1. DROP DOWN UTAMA UNTUK TAMBAH SIAGA --}}
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.create') || request()->routeIs('siaga-kembali.create') ? 'active open' : '' }}">
-                <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Tambah Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
+                <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Material Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
                     
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
