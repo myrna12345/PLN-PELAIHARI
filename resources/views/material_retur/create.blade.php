@@ -24,6 +24,7 @@
             
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
+                {{-- ID material_id digunakan oleh script JavaScript --}}
                 <select name="material_id" id="material_id" class="form-control-new" required>
                     <option value="" disabled selected>Pilih material</option>
                     @foreach($materials as $material)
@@ -42,14 +43,14 @@
             <div class="form-group-new">
                 <label for="jumlah">Jumlah dan Satuan</label>
                 <div style="display: flex; gap: 10px;">
+                    {{-- Input Jumlah --}}
                     <input type="number" name="jumlah" id="jumlah" class="form-control-new" 
                            value="{{ old('jumlah') }}" placeholder="Jumlah" style="flex: 2;" required min="1">
                     
-                    <select name="satuan" id="satuan" class="form-control-new" style="flex: 1;" required>
-                        <option value="" disabled selected>Satuan</option>
-                        <option value="Buah" {{ old('satuan') == 'Buah' ? 'selected' : '' }}>Buah</option>
-                        <option value="Meter" {{ old('satuan') == 'Meter' ? 'selected' : '' }}>Meter</option>
-                    </select>
+                    {{-- Input Satuan (Teks Readonly, Otomatis) --}}
+                    <input type="text" name="satuan" id="satuan" class="form-control-new" 
+                           style="flex: 1; background-color: #e9ecef; cursor: not-allowed;" 
+                           placeholder="Satuan" readonly required>
                 </div>
             </div>
             
@@ -93,4 +94,50 @@
         </form>
     </div>
 </div>
+
+{{-- SCRIPT OTOMATISASI SATUAN --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const materialSelect = document.getElementById('material_id');
+        const satuanInput = document.getElementById('satuan');
+
+        if (materialSelect && satuanInput) {
+            function updateSatuan() {
+                // Ambil teks nama material dan ubah ke huruf besar
+                const selectedText = materialSelect.options[materialSelect.selectedIndex].text.toUpperCase();
+
+                // LOGIKA: Prioritas Buah (KWH/MCB), sisanya Meter (Kabel)
+                if (selectedText.includes('KWH') || 
+                    selectedText.includes('MCB') || 
+                    selectedText.includes('AMPERE') || 
+                    selectedText.includes('TRAFO') || 
+                    selectedText.includes('FUSE') || 
+                    selectedText.includes('NH') ||
+                    selectedText.includes('CONNECTOR') ||
+                    selectedText.includes('ISOLATOR') ||
+                    selectedText.includes('LBS') ||
+                    selectedText.includes('FCO')) {
+                    
+                    satuanInput.value = 'Buah';
+                
+                } else if (selectedText.includes('KABEL') || 
+                           selectedText.includes('TWISTED') || 
+                           selectedText.includes('SR') || 
+                           selectedText.includes('NYY') || 
+                           selectedText.includes('NYM') ||
+                           selectedText.includes('METER')) {
+                    
+                    satuanInput.value = 'Meter';
+                
+                } else {
+                    // Default jika tidak dikenali
+                    satuanInput.value = 'Buah'; 
+                }
+            }
+
+            // Jalankan fungsi saat dropdown material berubah
+            materialSelect.addEventListener('change', updateSatuan);
+        }
+    });
+</script>
 @endsection
