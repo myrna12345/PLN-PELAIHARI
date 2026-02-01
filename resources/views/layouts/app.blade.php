@@ -174,31 +174,25 @@
         .btn-pdf { background-color: #fce8e6; color: #dc3545; border: 1px solid #f5c6cb; }
         .btn-excel { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
-        /* =========================================
-            5. CSS DROPDOWN SIDEBAR (PERBAIKAN FOKUS DI SINI)
-            ========================================= */
+        /* === 5. CSS DROPDOWN SIDEBAR === */
         .sidebar-menu .menu-item-has-dropdown > a { 
             position: relative; 
             cursor: pointer; 
         }
         .sidebar-menu .arrow-icon {
-            /* MENGHAPUS 'position: absolute' */
-            margin-left: auto; /* Mendorong panah ke paling kanan */
-            padding-left: 5px; /* Jarak aman dari teks */
+            margin-left: auto; 
+            padding-left: 5px; 
             font-size: 0.8rem;
             transition: transform 0.2s ease;
-            flex-shrink: 0; /* Mencegah panah menyusut */
+            flex-shrink: 0; 
         }
         .sidebar-menu .menu-item-has-dropdown.open > .dropdown-toggle .arrow-icon { 
-            transform: rotate(90deg); /* Hanya memutar */
+            transform: rotate(90deg); 
         }
         .submenu { list-style: none; padding: 0 0 0 40px; margin: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .menu-item-has-dropdown.open > .submenu { max-height: 500px; padding-top: 10px; }
         .submenu a { font-size: 0.95rem !important; padding: 10px 12px !important; color: #ced4da !important; }
         .submenu a:hover, .submenu a.sub-active { color: #ffffff !important; background-color: transparent !important; }
-        /* =========================================
-            PERBAIKAN DROPDOWN SELESAI
-            ========================================= */
 
         /* === 6. CSS WIDGET DASHBOARD === */
         .widget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
@@ -218,9 +212,7 @@
         .modal-image { width: 100%; height: auto; max-width: 80vw; max-height: 80vh; object-fit: contain; }
         .modal-close { position: absolute; top: -15px; right: 0px; color: #fff; font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; }
 
-        /* =========================================
-            8. RESPONSIVE (HP & TABLET)
-            ========================================= */
+        /* === 8. RESPONSIVE (HP & TABLET) === */
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
         }
@@ -236,55 +228,16 @@
             .main-content { height: auto; overflow: visible; }
             .main-content-inner { padding: 15px; }
             .card-new { padding: 1.5rem; overflow-x: hidden; }
-            
-            /* FIX FORM SEARCH HP (Vertical & Seragam) */
             .index-header { flexDirection: column; align-items: flex-start; gap: 15px; }
             .index-header h2 { font-size: 1.5rem; white-space: normal; line-height: 1.3; width: 100%; }
-
-            .search-form, .form-download {
-                flex-direction: column; align-items: stretch; width: 100%; gap: 15px;
-            }
-            
-            /* LABEL OTOMATIS DI HP */
+            .search-form, .form-download { flex-direction: column; align-items: stretch; width: 100%; gap: 15px; }
             .form-group-tanggal-filter:nth-of-type(2)::before { content: "Dari Tanggal:"; display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; color: #333; }
             .form-group-tanggal-filter:nth-of-type(3)::before { content: "Sampai Tanggal:"; display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; color: #333; }
             .form-download .form-group-tanggal label { font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; color: #333; }
-
-            /* UKURAN SERAGAM MUTLAK (50px) UNTUK SEMUA */
-            .search-bar input[type="text"],
-            .form-group-tanggal-filter input[type="date"],
-            .form-group-tanggal input[type="date"],
-            .search-form button.btn-primary,
-            .search-form a.btn-secondary,
-            .form-download button.btn-pdf,
-            .form-download button.btn-excel {
-                width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;
-                height: 50px !important; min-height: 50px !important;
-                font-size: 1rem !important;
-                border-radius: 10px !important; margin: 0 !important;
-            }
-            .search-form button, .search-form a.btn-secondary, .form-download button {
-                display: flex !important; align-items: center !important; justify-content: center !important;
-                padding: 0 15px !important;
-            }
-            
-            /* --- PERBAIKAN SPESIFIK UNTUK INPUT (SEARCH & TANGGAL) --- */
-            .search-bar input[type="text"] {
-                display: block !important;
-                line-height: normal !important; 
-                padding: 0 15px 0 40px !important; /* padding-left: 40px untuk ikon search */
-                background-image: none !important; /* Matikan background-image di HP */
-            }
-            .form-group-tanggal-filter input[type="date"], 
-            .form-group-tanggal input[type="date"] {
-                display: flex !important; /* Ubah ke flex agar align-items berfungsi */
-                align-items: center !important; /* Teks tanggal di tengah vertikal */
-                padding: 0 15px !important;
-            }
-            /* --- AKHIR PERBAIKAN SPESIFIK --- */
-
-            .search-bar, .form-group-tanggal-filter, .form-group-tanggal { width: 100% !important; margin-bottom: 0 !important; }
-            .search-form a.btn-secondary { background-color: #6c757d; color: white !important; font-weight: 600; margin-top: 5px !important; }
+            .search-bar input[type="text"], .form-group-tanggal-filter input[type="date"], .form-group-tanggal input[type="date"], .search-form button.btn-primary, .search-form a.btn-secondary, .form-download button.btn-pdf, .form-download button.btn-excel { width: 100% !important; height: 50px !important; font-size: 1rem !important; border-radius: 10px !important; }
+            .search-bar input[type="text"] { padding: 0 15px 0 40px !important; }
+            .form-group-tanggal-filter input[type="date"], .form-group-tanggal input[type="date"] { display: flex !important; align-items: center !important; padding: 0 15px !important; }
+            .search-bar, .form-group-tanggal-filter, .form-group-tanggal { width: 100% !important; }
         }
     </style>
 </head>
@@ -301,10 +254,15 @@
         <ul class="sidebar-menu">
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
             
+            <li>
+                <a href="{{ route('material-history.index') }}" class="{{ request()->routeIs('material-history.index') ? 'active' : '' }}">
+                    <i class="fas fa-history"></i> <span>History Material Standby</span>
+                </a>
+            </li>
+
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.create') || request()->routeIs('material-retur.create') || request()->routeIs('material_keluar.create') || request()->routeIs('material_kembali.create') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-file-export"></i> <span>Material Fast Moving</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
                     <li><a href="{{ route('material_keluar.create') }}" class="{{ request()->routeIs('material_keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
                     <li><a href="{{ route('material_kembali.create') }}" class="{{ request()->routeIs('material_kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
@@ -312,23 +270,18 @@
                 </ul>
             </li>
 
-            {{-- 1. DROP DOWN UTAMA UNTUK TAMBAH SIAGA --}}
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.create') || request()->routeIs('siaga-kembali.create') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Material Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
                     <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
                     <li><a href="{{ route('siaga-kembali.create') }}" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
-                    
                 </ul>
             </li>
 
-            {{-- 2. DROP DOWN UTAMA UNTUK LAPORAN --}}
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.index') || request()->routeIs('material-retur.index') || request()->routeIs('material_keluar.index') || request()->routeIs('material_kembali.index') || request()->routeIs('material-siaga-stand-by.index') || request()->routeIs('siaga-keluar.index') || request()->routeIs('siaga-kembali.index') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-scroll"></i> <span>Laporan</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    
                     <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
                     <li><a href="{{ route('material_keluar.index') }}" class="{{ request()->routeIs('material_keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
                     <li><a href="{{ route('material_kembali.index') }}" class="{{ request()->routeIs('material_kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
@@ -337,7 +290,6 @@
                     <li><a href="{{ route('material-siaga-stand-by.index') }}" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
                     <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
                     <li><a href="{{ route('siaga-kembali.index') }}" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
-                    
                 </ul>
             </li>
         </ul>
@@ -381,31 +333,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar-menu .dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
-            
             const parent = this.closest('li.menu-item-has-dropdown');
             if (!parent) return; 
-
-            // Cek apakah ini dropdown level 1 atau nested (level 2)
             const isNested = parent.classList.contains('nested-dropdown');
-            
-            // Logika penanganan dropdown level 1
             if (!isNested) {
                 document.querySelectorAll('.sidebar-menu > li.menu-item-has-dropdown.open').forEach(open => {
-                    if (open !== parent) {
-                        open.classList.remove('open');
-                    }
+                    if (open !== parent) { open.classList.remove('open'); }
                 });
             }
-            
-            // Logika penanganan dropdown nested (level 2)
             if (isNested) {
                  document.querySelectorAll('.submenu > li.nested-dropdown.open').forEach(open => {
-                    if (open !== parent) {
-                        open.classList.remove('open');
-                    }
+                    if (open !== parent) { open.classList.remove('open'); }
                 });
             }
-
             parent.classList.toggle('open');
         });
     });

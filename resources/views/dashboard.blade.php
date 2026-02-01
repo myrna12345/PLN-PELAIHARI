@@ -91,8 +91,8 @@
             <span class="label-caps text-success">Total Kembali</span>
             <div class="value-main text-success">{{ number_format($volumeKembali) }}<span class="unit-text">Unit</span></div>
             <div class="retur-split text-success">
-                <span>Meter: {{ $kembaliMeter }}</span> 
-                <span>Buah: {{ $kembaliBuah }}</span>
+                {{-- Bagian Meter dihapus sesuai instruksi --}}
+                <span style="width: 100%; text-align: left;">Total Buah: {{ $kembaliBuah }}</span>
             </div>
         </div>
 
