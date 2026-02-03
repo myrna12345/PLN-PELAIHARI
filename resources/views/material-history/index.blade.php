@@ -1,27 +1,110 @@
 @extends('layouts.app')
 
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
     .report-card { background: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px; }
-    .report-title { font-weight: 700; color: #333; text-transform: uppercase; margin-bottom: 5px; }
+    .report-title { font-weight: 700; color: #333; text-transform: uppercase; margin-bottom: 0; }
+    
+    .search-form { display: flex; align-items: center; gap: 10px; }
+    .search-bar { position: relative; }
+    .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+    .search-bar input { padding-left: 35px !important; border-radius: 6px; border: 1px solid #e2e8f0; height: 38px; }
+    .form-control-tanggal { border-radius: 6px; border: 1px solid #e2e8f0; height: 38px; padding: 0 10px; }
+
     .table thead th { background-color: #f1f5f9; color: #333; font-weight: 700; padding: 15px; border-bottom: 2px solid #e2e8f0; text-align: center; }
     .table tbody td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #edf2f7; }
     .img-frame { width: 80px; height: auto; border-radius: 4px; border: 1px solid #ddd; }
     
-    /* Tombol Style */
-    .btn-pdf { background-color: #e3342f; color: white; border: none; font-weight: 600; padding: 8px 16px; border-radius: 6px; }
-    .btn-excel { background-color: #38c172; color: white; border: none; font-weight: 600; padding: 8px 16px; border-radius: 6px; }
-    .form-label-sm { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 4px; display: block; }
+    .btn-cari { background-color: #00467f; color: white; border: none; font-weight: 600; padding: 0 20px; border-radius: 6px; height: 38px; }
+    .btn-reset { background-color: #64748b; color: white; border: none; font-weight: 600; padding: 0 20px; border-radius: 6px; height: 38px; line-height: 38px; text-decoration: none; display: inline-block; }
+
+    /* --- PERBAIKAN BAGIAN UNDUH SESUAI PERMINTAAN --- */
+    .download-section-custom {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .download-flex-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end; /* Membuat tombol dan input sejajar di bawah */
+        gap: 15px;
+    }
+
+    .date-input-group {
+        display: flex;
+        flex-direction: column; /* Label di atas input */
+        gap: 8px;
+    }
+
+    .date-input-group label {
+        font-weight: 700;
+        color: #000;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .date-input-group input {
+        width: 200px;
+        height: 40px;
+        border: 1.5px solid #000; /* Border hitam tipis sesuai gambar */
+        border-radius: 8px;
+        padding: 0 12px;
+    }
+
+    .btn-pdf-pastel {
+        background-color: #ffe8e8 !important; /* Pink pastel */
+        color: #e35d5d !important;
+        border: none;
+        font-weight: 700;
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-excel-pastel {
+        background-color: #e6f4ea !important; /* Hijau pastel */
+        color: #2d7d46 !important;
+        border: none;
+        font-weight: 700;
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 </style>
 
 <div class="container py-4">
     <div class="report-card">
-        <h3 class="report-title">RIWAYAT PENAMBAHAN MATERIAL</h3>
-        <p class="text-muted mb-4">Daftar log aktivitas penambahan stok ke sistem.</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="report-title">RIWAYAT PENAMBAHAN MATERIAL</h3>
+            
+            <form action="{{ route('material-history.index') }}" method="GET" class="search-form">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
+                </div>
+                <div class="form-group-tanggal-filter">
+                    <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}">
+                </div>
+                <div class="form-group-tanggal-filter">
+                    <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}">
+                </div>
+                <button type="submit" class="btn-cari">Cari</button>
+                <a href="{{ route('material-history.index') }}" class="btn-reset">Reset</a>
+            </form>
+        </div>
 
         <div class="table-responsive mb-4">
             <table class="table table-bordered">
@@ -37,7 +120,9 @@
                 <tbody>
                     @forelse($histories as $index => $h)
                     <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">
+                            {{ $histories instanceof \Illuminate\Pagination\LengthAwarePaginator ? $histories->firstItem() + $index : $index + 1 }}
+                        </td>
                         <td class="fw-bold text-uppercase">{{ $h->nama_material }}</td>
                         <td class="text-center"><span class="fw-bold">{{ $h->jumlah }}</span> {{ $h->satuan }}</td>
                         <td class="text-center text-nowrap">
@@ -53,37 +138,45 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">Belum ada data riwayat.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">Data tidak ditemukan.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-       <div class="pt-4 border-top">
-    <form action="{{ route('material-history.download') }}" method="GET">
-        <div class="d-flex align-items-center gap-4 py-2">
-            <div class="d-flex align-items-center gap-2">
-                <label class="fw-bold mb-0 text-nowrap" style="font-size: 0.9rem;">Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai" class="form-control" style="width: 180px;">
+        @if($histories instanceof \Illuminate\Pagination\LengthAwarePaginator)
+            <div class="d-flex justify-content-center">
+                {{ $histories->appends(request()->query())->links() }}
             </div>
+        @endif
 
-            <div class="d-flex align-items-center gap-2">
-                <label class="fw-bold mb-0 text-nowrap" style="font-size: 0.9rem;">Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir" class="form-control" style="width: 180px;">
-            </div>
+        {{-- BAGIAN UNDUH YANG DIRAPIKAN SESUAI PERMINTAAN --}}
+        <div class="download-section-custom">
+            <form action="{{ route('material-history.download') }}" method="GET">
+                <div class="download-flex-container">
+                    
+                    <div class="date-input-group">
+                        <label>Dari Tanggal:</label>
+                        <input type="date" name="tanggal_mulai_dl" required>
+                    </div>
 
-            <div class="d-flex gap-2 ms-2">
-                <button type="submit" name="submit_pdf" class="btn border-0 px-4 py-2" style="background-color: #ffe5e5; color: #d9534f; font-weight: 600; border-radius: 8px;">
-                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh Pdf
-                </button>
-                <button type="submit" name="submit_excel" class="btn border-0 px-4 py-2" style="background-color: #e6f4ea; color: #2d7d46; font-weight: 600; border-radius: 8px;">
-                    <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Unduh Excel
-                </button>
-            </div>
+                    <div class="date-input-group">
+                        <label>Sampai Tanggal:</label>
+                        <input type="date" name="tanggal_akhir_dl" required>
+                    </div>
+
+                    <button type="submit" name="submit_pdf" class="btn-pdf-pastel">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Unduh Pdf
+                    </button>
+
+                    <button type="submit" name="submit_excel" class="btn-excel-pastel">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i> Unduh Excel
+                    </button>
+
+                </div>
+            </form>
         </div>
-    </form>
-</div>
     </div>
 </div>
 @endsection

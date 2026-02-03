@@ -1,159 +1,149 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Material Siaga Stand By')
+@section('title', 'Tambah Material Siaga Standby')
 
 @section('content')
 
 <style>
-    /* Style untuk kontainer utama form */
-    .form-card {
-        width: 700px; /* Lebar diperbesar menjadi 700px */
-        margin: 0 0 50px 0; 
-        padding: 30px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    /* CSS UNTUK MENYAMAKAN TAMPILAN: JUDUL DI LUAR, FORM DI DALAM KOTAK */
+    .form-main-wrapper {
+        max-width: 900px;
+        margin: 10px 0 50px 0;
+        padding: 0; /* Penting: agar tidak ada layer putih di luar judul */
     }
-    
-    /* Style untuk judul */
-    h2 {
-        text-align: left; 
-        margin-top: 15px; 
-        margin-bottom: 30px; 
-        font-weight: 700;
+
+    .form-title-outside {
+        font-weight: 800;
         color: #333;
-        width: 700px; /* Lebar disamakan dengan form-card */
-        margin-left: 0; 
-        font-size: 1.5rem; 
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+        /* Menggunakan font yang sama dengan dashboard Anda */
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Style untuk setiap grup form */
-    .form-group {
-        margin-bottom: 20px;
+    /* Hanya bagian ini yang berwarna putih (Form Box) */
+    .form-content-box {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Shadow halus sesuai teman Anda */
     }
 
-    /* Memastikan label terlihat rapi dan memiliki ukuran standar */
-    label {
+    .form-group-custom {
+        margin-bottom: 25px;
+    }
+
+    .form-group-custom label {
         display: block;
-        margin-bottom: .5rem;
-        font-size: 1rem; 
-        font-weight: 500;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #444;
+        font-size: 0.95rem;
     }
 
-    /* Memastikan input, select, dan file terlihat rapi */
-    .form-control, 
-    .form-select {
+    /* Style input yang memanjang dan bersih */
+    .input-style-clean {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        box-sizing: border-box; 
-        font-size: 1rem; 
+        padding: 14px 18px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
     }
 
-    /* Style khusus untuk readonly field (Tanggal) */
-    .form-control[readonly] {
-        background-color: #e9ecef;
-        opacity: 1;
+    .input-style-clean:focus {
+        border-color: #9BC3AE;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(155, 195, 174, 0.1);
     }
 
-    /* Style untuk tombol Simpan */
-    button {
-    padding: 12px 32px;
-    background: #9BC3AE;      /* hijau pastel seperti gambar */
-    border: none;
-    color: #1f2d27;           /* teks gelap */
-    border-radius: 14px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 16px;
-}
+    .readonly-style {
+        background-color: #f1f5f9 !important;
+        color: #64748b;
+        cursor: not-allowed;
+    }
 
-button:hover {
-    background: #86B29B;      /* lebih gelap saat hover */
-}
+    .btn-submit-green {
+        padding: 14px 50px;
+        background: #9BC3AE; /* Hijau pastel teman Anda */
+        border: none;
+        color: #1f2d27;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 800;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
 
-    /* Style untuk keterangan field (optional) */
-    .form-text {
-        font-size: 0.85em; 
-        color: #6c757d;
-        margin-top: 5px;
+    .btn-submit-green:hover {
+        background: #86B29B;
+    }
+
+    .italic-error {
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-style: italic;
+        margin-top: 8px;
         display: block;
+        font-weight: 600;
     }
 
-    /* Wrapper tambahan (jika diperlukan) untuk menjaga form-card tetap di kiri */
-    .form-wrapper {
-        display: flex; 
-        justify-content: flex-start; 
+    .helper-text {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 8px;
+        display: block;
     }
 </style>
 
-{{-- Wrapper ditambahkan agar form-card menempel ke kiri --}}
-<div class="form-wrapper">
+<div class="form-main-wrapper">
+    <div class="form-title-outside">
+        Tambah Material Siaga Standby
+    </div>
 
-    <div>
-        {{-- JUDUL: Tambah Material Siaga Standby --}}
-        <h2>TAMBAH MATERIAL SIAGA STANDBY</h2>
+    <div class="form-content-box">
+        <form action="{{ route('material-siaga.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
 
-        <div class="form-card">
+            <div class="form-group-custom">
+                <label>Nama Material</label>
+                <select name="nama_material" class="input-style-clean" required>
+                    <option value="" disabled selected>Pilih material</option>
+                    @foreach ($materials as $mat)
+                        <option value="{{ $mat->nama_material }}">{{ $mat->nama_material }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-            <form action="{{ route('material-siaga.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+            <div class="form-group-custom">
+                <label>Nomor Meter</label>
+                <input type="text" name="nomor_meter" class="input-style-clean" placeholder="Masukkan Nomor Meter" required>
+                <span class="helper-text">Pastikan nomor meter yang dimasukkan sesuai dengan data.</span>
+            </div>
 
-                {{-- 1. Nama Material (Dropdown) --}}
-                <div class="form-group">
-                    <label for="nama_material">Nama Material</label>
-                    <select name="nama_material" id="nama_material" class="form-select" required>
-                        <option value="">-- Pilih Material --</option>
-                        @foreach ($materials as $mat)
-                            <option value="{{ $mat->nama_material }}">{{ $mat->nama_material }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                {{-- 2. Nomor Meter --}}
-                <div class="form-group">
-                    <label for="nomor_meter">Nomor Meter</label>
-                    <input type="text" name="nomor_meter" id="nomor_meter" class="form-control" placeholder="Masukkan Nomor Meter" required>
-                    <span class="form-text">Pastikan nomor meter yang dimasukkan sesuai dengan data.</span>
-                </div>
+            <div class="form-group-custom">
+                <label>Stand Meter</label>
+                <input type="text" name="stand_meter" class="input-style-clean" placeholder="Masukkan Stand Meter" required>
+            </div>
 
-                {{-- 3. Stand Meter --}}
-                <div class="form-group">
-                    <label for="stand_meter">Stand Meter</label>
-                    <input type="text" name="stand_meter" id="stand_meter" class="form-control" placeholder="Masukkan Stand Meter" required>
-                </div>
+            <div class="form-group-custom">
+                <label>Tanggal dan Jam</label>
+                <input type="text" name="tanggal" class="input-style-clean readonly-style" 
+                    value="{{ \Carbon\Carbon::now('Asia/Makassar')->format('d M Y, H:i') }}" readonly>
+                <span class="helper-text">Waktu akan otomatis terisi saat disimpan.</span>
+            </div>
 
-                {{-- 4. Tanggal & Jam (Readonly) --}}
-                <div class="form-group">
-                    <label for="tanggal">Tanggal dan Jam</label>
-                    <input type="text" name="tanggal" id="tanggal" class="form-control" value="{{ now()->format('d M Y, H:i') }}" readonly>
-                    <span class="form-text">Waktu akan otomatis terisi saat disimpan.</span>
-                </div>
+            <div class="form-group-custom">
+                <label>Unggah Foto</label>
+                <input type="file" name="unggah_foto" class="input-style-clean" required>
+                <small class="italic-error">* Unggah foto material adalah wajib.</small>
+            </div>
 
-                {{-- 5. Status (Default Ready) --}}
-                <div class="form-group" style="display: none;">
-                    <label for="status">Status</label>
-                    <select name="status" id="status" class="form-select" required>
-                        <option value="Ready" selected>Ready</option>
-                    </select>
-                </div>
-
-                {{-- 6. Unggah Foto --}}
-                <div class="form-group">
-                    <label for="unggah_foto">Unggah Foto</label>
-                    <input type="file" name="unggah_foto" id="unggah_foto" class="form-control" required>
-                    <span class="form-text text-danger">*Unggah foto material adalah wajib.</span>
-                </div>
-
-                {{-- Tombol Simpan --}}
-                <div style="text-align: right; margin-top: 30px;">
-                    <button type="submit" class="btn-submit">Simpan</button>
-                </div>
-
-            </form>
-
-        </div>
+            <div style="margin-top: 40px; text-align: left;">
+                <button type="submit" class="btn-submit-green">Simpan</button>
+            </div>
+        </form>
     </div>
 </div>
 
