@@ -49089,6 +49089,7 @@ Did you mean one of these?
 #60 F:\\PLN-PELAIHARI\\PLN-PELAIHARI\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(23): require_once('F:\\\\PLN-PELAIHAR...')
 #61 {main}
 "} 
+<<<<<<< HEAD
 [2026-02-01 20:19:58] local.ERROR: Class "App\Http\Controllers\MaterialHistory" not found {"exception":"[object] (Error(code: 0): Class \"App\\Http\\Controllers\\MaterialHistory\" not found at F:\\PLN-PELAIHARI\\PLN-PELAIHARI\\app\\Http\\Controllers\\MaterialStandByController.php:68)
 [stacktrace]
 #0 F:\\PLN-PELAIHARI\\PLN-PELAIHARI\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\ControllerDispatcher.php(46): App\\Http\\Controllers\\MaterialStandByController->store(Object(Illuminate\\Http\\Request))
@@ -55006,3 +55007,5 @@ Did you mean one of these?
 #65 F:\\PLN-PELAIHARI\\PLN-PELAIHARI\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(23): require_once('F:\\\\PLN-PELAIHAR...')
 #66 {main}
 "} 
+=======
+>>>>>>> 05bf57db89d32966c7cb155d9f708f0d7dc57793
