@@ -9,7 +9,7 @@ use App\Http\Controllers\MaterialKembaliController;
 use App\Http\Controllers\MaterialSiagaStandByController;
 use App\Http\Controllers\SiagaKeluarController;
 use App\Http\Controllers\SiagaKembaliController;
-use App\Http\Controllers\MaterialHistoryController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -156,7 +156,3 @@ Route::put('material-siaga/update-status/{id}', [MaterialSiagaStandByController:
 Route::resource('material-siaga', MaterialSiagaStandByController::class)->parameters([
     'material-siaga' => 'id'
 ]);
-
-Route::get('/material-history', [MaterialHistoryController::class, 'index'])
-    ->name('material-history.index');
-    Route::get('/material-history/download', [MaterialStandByController::class, 'downloadHistory'])->name('material-history.download');
