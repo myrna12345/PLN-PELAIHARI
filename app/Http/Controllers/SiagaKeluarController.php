@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\SiagaKeluar;
+use App\Models\MaterialSiagaStandBy; // Pastikan Model ini di-import
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File; 
 use Carbon\Carbon;
@@ -54,71 +55,85 @@ class SiagaKeluarController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'material_id'   => 'required|exists:materials,id',
-        'nomor_meter'   => 'required|string|max:255', 
-        'nama_petugas'  => 'required|string|max:255',
-        'stand_meter'   => 'required|string|max:255',
-        'keterangan'    => 'required|string|max:500', 
-        'status'        => 'required|string|max:255', 
-        'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-        'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-    ]);
-
-    // =============================
-    // BUAT FOLDER JIKA BELUM ADA
-    // =============================
-    $path = public_path($this->uploadFolder);
-    if (!File::isDirectory($path)) {
-        File::makeDirectory($path, 0777, true, true);
-    }
-
-    // =============================
-    // UPLOAD FOTO MATERIAL
-    // =============================
-    $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
-    $request->file('foto')->move($path, $fotoName);
-
-    // =============================
-    // UPLOAD FOTO PETUGAS
-    // =============================
-    $fotoPetugasName = time() . '_petugas_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
-    $request->file('foto_petugas')->move($path, $fotoPetugasName);
-
-    // =============================
-    // AMBIL DATA MATERIAL
-    // =============================
-    $material = Material::findOrFail($validated['material_id']);
-
-    // =============================
-    // SIMPAN DATA SIAGA KELUAR
-    // =============================
-    SiagaKeluar::create([
-        'material_id'            => $validated['material_id'],
-        'nomor_meter'            => $validated['nomor_meter'], 
-        'nama_material_lengkap'  => $material->nama_material, 
-        'nama_petugas'           => $validated['nama_petugas'],
-        'stand_meter'            => $validated['stand_meter'],
-        'keterangan'             => $validated['keterangan'], 
-        'status'                 => $validated['status'],
-        'foto_path'              => $fotoName,
-        'foto_petugas'           => $fotoPetugasName, 
-        'tanggal'                => Carbon::now('Asia/Makassar'),
-    ]);
-
-    // =====================================================
-    // 🔑 INI BAGIAN PALING PENTING (RELASI STATUS STANDBY)
-    // =====================================================
-    \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
-        ->where('stand_meter', $validated['stand_meter'])
-        ->update([
-            'status' => 'Terpakai'
+    {
+        $validated = $request->validate([
+            'material_id'   => 'required|exists:materials,id',
+            'nomor_meter'   => 'required|string|max:255', 
+            'nama_petugas'  => 'required|string|max:255',
+            'stand_meter'   => 'required|string|max:255',
+            'keterangan'    => 'required|string|max:500', 
+            'status'        => 'required|string|max:255', 
+            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-    return redirect()->route('siaga-keluar.index')
-        ->with('success', 'Data Siaga Keluar berhasil disimpan!');
-}
+        // ============================================================
+        // VALIDASI STOK (Mencegah Input jika Barang Tidak Ada/Terpakai)
+        // ============================================================
+        
+        // 1. Cari data di tabel Stand By berdasarkan Nomor Meter
+        $stokTersedia = MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])->first();
+
+        // 2. Jika Nomor Meter TIDAK DITEMUKAN
+        if (!$stokTersedia) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['nomor_meter' => 'Gagal! Nomor Meter "' . $validated['nomor_meter'] . '" tidak ditemukan di stok Siaga Stand By.']);
+        }
+
+        // 3. Jika Barang DITEMUKAN tapi Statusnya BUKAN READY (Misal: Terpakai/Rusak)
+        if ($stokTersedia->status !== 'Ready') {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['nomor_meter' => 'Gagal! Material dengan nomor meter ini statusnya sedang "' . $stokTersedia->status . '", tidak bisa dikeluarkan.']);
+        }
+
+        // 4. Validasi Kesesuaian Jenis Material (Opsional tapi disarankan)
+        if ($stokTersedia->material_id != $validated['material_id']) {
+             return redirect()->back()
+                ->withInput()
+                ->withErrors(['material_id' => 'Jenis material yang dipilih tidak cocok dengan Nomor Meter tersebut di data stok.']);
+        }
+        // ============================================================
+
+
+        // Buat folder jika belum ada
+        $path = public_path($this->uploadFolder);
+        if (!File::isDirectory($path)) {
+            File::makeDirectory($path, 0777, true, true);
+        }
+
+        // Upload Foto Material
+        $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
+        $request->file('foto')->move($path, $fotoName);
+
+        // Upload Foto Petugas
+        $fotoPetugasName = time() . '_petugas_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
+        $request->file('foto_petugas')->move($path, $fotoPetugasName);
+
+        $material = Material::findOrFail($validated['material_id']);
+
+        // Simpan Data Siaga Keluar
+        SiagaKeluar::create([
+            'material_id'           => $validated['material_id'],
+            'nomor_meter'           => $validated['nomor_meter'], 
+            'nama_material_lengkap' => $material->nama_material, 
+            'nama_petugas'          => $validated['nama_petugas'],
+            'stand_meter'           => $validated['stand_meter'],
+            'keterangan'            => $validated['keterangan'], 
+            'status'                => $validated['status'],
+            'foto_path'             => $fotoName,
+            'foto_petugas'          => $fotoPetugasName, 
+            'tanggal'               => Carbon::now('Asia/Makassar'),
+        ]);
+
+        // Update status di tabel Standby menjadi Terpakai
+        // Kita gunakan object $stokTersedia yang sudah kita temukan di atas
+        $stokTersedia->update(['status' => 'Terpakai']);
+
+        return redirect()->route('siaga-keluar.index')
+            ->with('success', 'Data Siaga Keluar berhasil disimpan dan stok diperbarui!');
+    }
 
 
     public function edit(SiagaKeluar $siagaKeluar)

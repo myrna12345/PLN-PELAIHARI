@@ -7,7 +7,7 @@
 
 <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-    .report-card { background: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px; }
+    .report-card { background: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px; margin-bottom: 20px; }
     .report-title { font-weight: 700; color: #333; text-transform: uppercase; margin-bottom: 0; }
     
     .search-form { display: flex; align-items: center; gap: 10px; }
@@ -18,71 +18,50 @@
 
     .table thead th { background-color: #f1f5f9; color: #333; font-weight: 700; padding: 15px; border-bottom: 2px solid #e2e8f0; text-align: center; }
     .table tbody td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #edf2f7; }
-    .img-frame { width: 80px; height: auto; border-radius: 4px; border: 1px solid #ddd; }
+    .img-frame { width: 80px; height: auto; border-radius: 4px; border: 1px solid #ddd; display: block; margin: 0 auto; }
     
     .btn-cari { background-color: #00467f; color: white; border: none; font-weight: 600; padding: 0 20px; border-radius: 6px; height: 38px; }
     .btn-reset { background-color: #64748b; color: white; border: none; font-weight: 600; padding: 0 20px; border-radius: 6px; height: 38px; line-height: 38px; text-decoration: none; display: inline-block; }
 
-    /* --- PERBAIKAN BAGIAN UNDUH SESUAI PERMINTAAN --- */
-    .download-section-custom {
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
+    /* --- CSS UNTUK MENGHILANGKAN PREVIOUS & NEXT --- */
+    /* Sembunyikan semua elemen navigasi berbasis teks/ikon (panah) */
+    .pagination .page-item:first-child, 
+    .pagination .page-item:last-child,
+    nav[role="navigation"] span[aria-hidden="true"],
+    nav[role="navigation"] svg {
+        display: none !important;
     }
 
-    .download-flex-container {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-end; /* Membuat tombol dan input sejajar di bawah */
-        gap: 15px;
+    /* Memastikan hanya angka yang muncul */
+    .pagination { margin-bottom: 0; gap: 5px; display: flex; justify-content: center; }
+    .page-link { 
+        border-radius: 6px !important; 
+        color: #00467f; 
+        border: 1px solid #e2e8f0; 
+        padding: 8px 16px; 
+        font-weight: 700; 
+        text-decoration: none;
+    }
+    .page-item.active .page-link { 
+        background-color: #00467f; 
+        color: white; 
+        border-color: #00467f; 
     }
 
-    .date-input-group {
-        display: flex;
-        flex-direction: column; /* Label di atas input */
-        gap: 8px;
+    /* Sembunyikan teks label otomatis Laravel (Showing X to Y) */
+    nav[role="navigation"] .hidden.sm\:flex-1 {
+        display: none !important;
     }
 
-    .date-input-group label {
-        font-weight: 700;
-        color: #000;
-        font-size: 1rem;
-        margin-bottom: 0;
-    }
+    /* --- DOWNLOAD SECTION --- */
+    .download-section-custom { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .download-flex-container { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 15px; }
+    .date-input-group { display: flex; flex-direction: column; gap: 8px; }
+    .date-input-group label { font-weight: 700; color: #000; font-size: 0.9rem; margin-bottom: 0; }
+    .date-input-group input { width: 180px; height: 40px; border: 1.5px solid #333; border-radius: 8px; padding: 0 12px; }
 
-    .date-input-group input {
-        width: 200px;
-        height: 40px;
-        border: 1.5px solid #000; /* Border hitam tipis sesuai gambar */
-        border-radius: 8px;
-        padding: 0 12px;
-    }
-
-    .btn-pdf-pastel {
-        background-color: #ffe8e8 !important; /* Pink pastel */
-        color: #e35d5d !important;
-        border: none;
-        font-weight: 700;
-        height: 40px;
-        padding: 0 20px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-excel-pastel {
-        background-color: #e6f4ea !important; /* Hijau pastel */
-        color: #2d7d46 !important;
-        border: none;
-        font-weight: 700;
-        height: 40px;
-        padding: 0 20px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+    .btn-pdf-pastel { background-color: #ffe8e8 !important; color: #e35d5d !important; border: none; font-weight: 700; height: 40px; padding: 0 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+    .btn-excel-pastel { background-color: #e6f4ea !important; color: #2d7d46 !important; border: none; font-weight: 700; height: 40px; padding: 0 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
 </style>
 
 <div class="container py-4">
@@ -126,7 +105,7 @@
                         <td class="fw-bold text-uppercase">{{ $h->nama_material }}</td>
                         <td class="text-center"><span class="fw-bold">{{ $h->jumlah }}</span> {{ $h->satuan }}</td>
                         <td class="text-center text-nowrap">
-                            {{ \Carbon\Carbon::parse($h->tanggal_input)->format('d M Y, H:i') }}
+                            {{ \Carbon\Carbon::parse($h->tanggal_input)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}
                         </td>
                         <td class="text-center">
                             @if($h->foto_path)
@@ -145,17 +124,18 @@
             </table>
         </div>
 
+        {{-- PAGINATION HANYA ANGKA --}}
         @if($histories instanceof \Illuminate\Pagination\LengthAwarePaginator)
-            <div class="d-flex justify-content-center">
-                {{ $histories->appends(request()->query())->links() }}
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    {{ $histories->appends(request()->query())->links() }}
+                </nav>
             </div>
         @endif
 
-        {{-- BAGIAN UNDUH YANG DIRAPIKAN SESUAI PERMINTAAN --}}
         <div class="download-section-custom">
             <form action="{{ route('material-history.download') }}" method="GET">
                 <div class="download-flex-container">
-                    
                     <div class="date-input-group">
                         <label>Dari Tanggal:</label>
                         <input type="date" name="tanggal_mulai_dl" required>
@@ -166,14 +146,13 @@
                         <input type="date" name="tanggal_akhir_dl" required>
                     </div>
 
-                    <button type="submit" name="submit_pdf" class="btn-pdf-pastel">
+                    <button type="submit" name="submit_pdf" value="1" class="btn-pdf-pastel">
                         <i class="bi bi-file-earmark-pdf-fill"></i> Unduh Pdf
                     </button>
 
-                    <button type="submit" name="submit_excel" class="btn-excel-pastel">
+                    <button type="submit" name="submit_excel" value="1" class="btn-excel-pastel">
                         <i class="bi bi-file-earmark-spreadsheet-fill"></i> Unduh Excel
                     </button>
-
                 </div>
             </form>
         </div>
