@@ -108,7 +108,7 @@
 <div style="margin-top: 20px;">{{ $items->appends(request()->query())->links() }}</div>
 
 <div class="index-footer-form">
-    <form action="{{ route('siaga-kembali.download-report') }}" method="GET" class="form-download" target="_blank">
+    <form action="{{ route('siaga-kembali.download-report') }}" method="GET" class="form-download">
         <div class="form-group-tanggal">
             <label>Dari Tanggal:</label>
             <input type="date" name="tanggal_mulai" class="form-control-tanggal" required>

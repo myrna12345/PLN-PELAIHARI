@@ -109,7 +109,7 @@
     </div>
 
     <div class="index-footer-form">
-        <form action="{{ route('siaga-keluar.download-report') }}" method="GET" class="form-download" target="_blank">
+        <form action="{{ route('siaga-keluar.download-report') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
                 <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
                 <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" required>

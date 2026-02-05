@@ -2,35 +2,58 @@
 
 namespace App\Exports;
 
+use App\Models\MaterialHistory;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class MaterialHistoryExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class MaterialHistoryExport implements FromCollection, WithMapping, WithHeadings
 {
-    protected $items;
+    protected $request;
 
-    public function __construct($items) {
-        $this->items = $items;
+    public function __construct($request)
+    {
+        $this->request = $request;
     }
 
-    public function collection() {
-        return $this->items;
+    public function collection()
+    {
+        $query = MaterialHistory::query();
+
+        if ($this->request->filled('search')) {
+            $query->where('nama_material', 'like', '%' . $this->request->search . '%');
+        }
+        if ($this->request->filled('tanggal_mulai')) {
+            $query->whereDate('tanggal_input', '>=', $this->request->tanggal_mulai);
+        }
+        if ($this->request->filled('tanggal_akhir')) {
+            $query->whereDate('tanggal_input', '<=', $this->request->tanggal_akhir);
+        }
+
+        return $query->orderBy('tanggal_input', 'desc')->get();
     }
 
-    public function headings(): array {
-        return ['NO', 'NAMA MATERIAL', 'JUMLAH', 'SATUAN', 'TANGGAL INPUT (WITA)'];
-    }
+    // KUNCI PERBAIKAN: Pastikan $row dibaca sebagai objek
+    public function map($row): array
+    {
+        static $no = 0;
+        $no++;
 
-    public function map($item): array {
-        static $no = 1;
         return [
-            $no++,
-            strtoupper($item->nama_material),
-            $item->jumlah,
-            $item->satuan,
-            \Carbon\Carbon::parse($item->tanggal_input)->format('d/m/Y H:i')
+            $no,
+            $row->nama_material, // Baris 30 yang tadi error
+            '+ ' . $row->jumlah . ' ' . $row->satuan,
+            \Carbon\Carbon::parse($row->tanggal_input)->format('d/m/Y H:i') . ' WITA',
+        ];
+    }
+
+    public function headings(): array
+    {
+        return [
+            'NO',
+            'NAMA MATERIAL',
+            'JUMLAH',
+            'TANGGAL INPUT',
         ];
     }
 }

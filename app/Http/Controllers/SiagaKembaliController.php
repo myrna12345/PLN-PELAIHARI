@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\SiagaKembali; 
+use App\Models\SiagaKeluar; // ⬅️ Tambahkan ini untuk pengecekan data keluar
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File; 
 use Carbon\Carbon;
@@ -54,59 +55,69 @@ class SiagaKembaliController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'material_id'   => 'required|exists:materials,id',
-        'nomor_meter'   => 'required|string|max:255',
-        'nama_petugas'  => 'required|string|max:255',
-        'stand_meter'   => 'required|string|max:255',
-        'keterangan'    => 'nullable|string',
-        'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-        'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-    ]);
-
-    /* =================== SETUP FOLDER =================== */
-    $path = public_path($this->uploadFolder);
-    if (!File::isDirectory($path)) {
-        File::makeDirectory($path, 0777, true, true);
-    }
-
-    /* =================== UPLOAD FOTO =================== */
-    $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
-    $request->file('foto')->move($path, $fotoName);
-
-    $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
-    $request->file('foto_petugas')->move($path, $fotoPetugasName);
-
-    /* =================== DATA MATERIAL =================== */
-    $material = Material::findOrFail($validated['material_id']);
-
-    /* =================== SIMPAN DATA KEMBALI =================== */
-    SiagaKembali::create([
-        'material_id'            => $validated['material_id'],
-        'nomor_meter'            => $validated['nomor_meter'],
-        'nama_material_lengkap'  => $material->nama_material,
-        'nama_petugas'           => $validated['nama_petugas'],
-        'stand_meter'            => $validated['stand_meter'],
-        'status'                 => 'Kembali', // ⬅️ STATUS DIKUNCI SISTEM
-        'keterangan'             => $validated['keterangan'],
-        'foto_path'              => $fotoName,
-        'foto_petugas'           => $fotoPetugasName,
-        'tanggal'                => Carbon::now('Asia/Makassar'),
-    ]);
-
-    /* =================== UPDATE STATUS STANDBY =================== */
-    \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
-        ->where('stand_meter', $validated['stand_meter'])
-        ->update([
-            'status' => 'Ready'
+    {
+        $validated = $request->validate([
+            'material_id'   => 'required|exists:materials,id',
+            'nomor_meter'   => 'required|string|max:255',
+            'nama_petugas'  => 'required|string|max:255',
+            'stand_meter'   => 'required|string|max:255',
+            'keterangan'    => 'nullable|string',
+            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-    return redirect()
-        ->route('siaga-kembali.index')
-        ->with('success', 'Material berhasil dikembalikan & status Stand By diperbarui');
-}
+        /* ============================================================ */
+        /* 🛡️ VALIDASI: CEK KEBERADAAN DI DATA SIAGA KELUAR */
+        /* ============================================================ */
+        $materialMaster = Material::findOrFail($validated['material_id']);
+        
+        $dataKeluar = SiagaKeluar::where('nomor_meter', $validated['nomor_meter'])
+                        ->where('nama_material_lengkap', $materialMaster->nama_material)
+                        ->first();
 
+        if (!$dataKeluar) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal: Material "' . $materialMaster->nama_material . '" dengan Nomor Meter "' . $validated['nomor_meter'] . '" belum pernah dikeluarkan atau tidak terdata di Siaga Keluar.');
+        }
+
+        /* =================== SETUP FOLDER =================== */
+        $path = public_path($this->uploadFolder);
+        if (!File::isDirectory($path)) {
+            File::makeDirectory($path, 0777, true, true);
+        }
+
+        /* =================== UPLOAD FOTO =================== */
+        $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
+        $request->file('foto')->move($path, $fotoName);
+
+        $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
+        $request->file('foto_petugas')->move($path, $fotoPetugasName);
+
+        /* =================== SIMPAN DATA KEMBALI =================== */
+        SiagaKembali::create([
+            'material_id'            => $validated['material_id'],
+            'nomor_meter'            => $validated['nomor_meter'],
+            'nama_material_lengkap'  => $materialMaster->nama_material,
+            'nama_petugas'           => $validated['nama_petugas'],
+            'stand_meter'            => $validated['stand_meter'],
+            'status'                 => 'Kembali', 
+            'keterangan'             => $validated['keterangan'],
+            'foto_path'              => $fotoName,
+            'foto_petugas'           => $fotoPetugasName,
+            'tanggal'                => Carbon::now('Asia/Makassar'),
+        ]);
+
+        /* =================== UPDATE STATUS STANDBY =================== */
+        \App\Models\MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
+            ->update([
+                'status' => 'Ready'
+            ]);
+
+        return redirect()
+            ->route('siaga-kembali.index')
+            ->with('success', 'Material berhasil dikembalikan & status Stand By diperbarui');
+    }
 
     public function edit(SiagaKembali $siagaKembali)
     {
@@ -169,13 +180,11 @@ class SiagaKembaliController extends Controller
 
     public function destroy(SiagaKembali $siagaKembali)
     {
-        // Hapus Foto Material
         if ($siagaKembali->foto_path) {
             $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
             if (File::exists($path)) { File::delete($path); }
         }
         
-        // Hapus Foto Petugas
         if ($siagaKembali->foto_petugas) {
             $pathPetugas = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
             if (File::exists($pathPetugas)) { File::delete($pathPetugas); }

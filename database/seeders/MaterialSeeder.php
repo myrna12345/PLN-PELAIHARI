@@ -25,7 +25,9 @@ class MaterialSeeder extends Seeder
             // 'KABEL TR 4 X 16', DIHAPUS
             'KABEL TR 16 mm',
             'KABEL TR 35 mm', // Diganti dari KABEL TR 4 X 35
-            'KABEL TR 70 mm'  // Diganti dari KABEL TR 4 X 70
+            'KABEL TR 70 mm',  // Diganti dari KABEL TR 4 X 70
+            'KWH SIAGA 1P',
+            'KWH SIAGA 3P'
         ];
 
         foreach ($materials as $materialName) {

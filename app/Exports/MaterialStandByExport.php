@@ -6,28 +6,22 @@ use App\Models\MaterialStandBy;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Carbon\Carbon;
 
-class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping
 {
-    protected $tanggalMulai;
-    protected $tanggalAkhir;
-    private $rowNumber = 0;
+    private $row = 0;
+    protected $start, $end;
 
-    public function __construct($tanggalMulai, $tanggalAkhir)
+    public function __construct($start, $end)
     {
-        $this->tanggalMulai = $tanggalMulai;
-        $this->tanggalAkhir = $tanggalAkhir;
+        $this->start = $start;
+        $this->end   = $end;
     }
 
     public function query()
     {
         return MaterialStandBy::with('material')
-            ->whereBetween('tanggal', [$this->tanggalMulai, $this->tanggalAkhir])
-            ->orderBy('tanggal', 'asc');
+            ->whereBetween('tanggal', [$this->start, $this->end]);
     }
 
     public function headings(): array
@@ -35,30 +29,18 @@ class MaterialStandByExport implements FromQuery, WithHeadings, WithMapping, Sho
         return [
             'No',
             'Nama Material',
-            'Jumlah & Satuan',
-            'Tanggal (WITA)',
+            'Jumlah',
+            'Tanggal',
         ];
     }
 
-    public function map($item): array
-    {
-        $this->rowNumber++;
-        
-        // Menggabungkan Jumlah dan Satuan menjadi satu string
-        $jumlahSatuan = $item->jumlah . ' ' . ($item->satuan ?? '');
-
-        return [
-            $this->rowNumber,
-            $item->material->nama_material ?? 'N/A',
-            $jumlahSatuan, 
-            Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i'),
-        ];
-    }
-
-    public function styles(Worksheet $sheet)
+    public function map($row): array
     {
         return [
-            1 => ['font' => ['bold' => true]],
+            ++$this->row,
+            $row->material->nama_material ?? '-',
+            $row->jumlah,
+            $row->tanggal,
         ];
     }
 }

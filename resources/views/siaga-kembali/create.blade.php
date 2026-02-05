@@ -8,8 +8,13 @@
         <h2>Tambah Material Siaga Kembali</h2>
     </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger" role="alert"> 
+    {{-- LOGIKA ALERT TUNGGAL: Agar peringatan tidak muncul dua kali --}}
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            {{ session('error') }}
+        </div>
+    @elseif ($errors->any())
+        <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -72,7 +77,6 @@
                 @error('keterangan')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                {{-- Teks Peringatan --}}
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi</small>
             </div>
 
@@ -83,7 +87,6 @@
                 @error('foto')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                 {{-- Teks Peringatan --}}
                  <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto material wajib diisi.</small>
             </div>
 
@@ -94,7 +97,6 @@
                 @error('foto_petugas')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                 {{-- Teks Peringatan --}}
                  <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto petugas wajib diisi.</small>
             </div>
 
@@ -113,7 +115,6 @@
             
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>
-                {{-- Tombol Batal --}}
                 <a href="{{ route('siaga-kembali.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
             </div>
         </form>

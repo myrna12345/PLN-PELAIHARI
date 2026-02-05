@@ -8,9 +8,14 @@
         <h2>Tambah Material Siaga Keluar</h2>
     </div>
 
-    @if(session('error'))
-        <div class="alert alert-danger" role="alert" style="margin-bottom: 20px;"> 
-            <strong>{{ session('error') }}</strong>
+    {{-- Hanya menampilkan satu peringatan utama --}}
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            {{ session('error') }}
+        </div>
+    @elseif ($errors->any())
+        <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <strong>Gagal:</strong> Mohon periksa kembali inputan Anda atau lengkapi data yang kosong.
         </div>
     @endif
 
@@ -20,7 +25,7 @@
             
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                <select name="material_id" id="material_id" class="form-control-new" required>
+                <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
                     <option value="" disabled selected>Pilih material</option>
                     @foreach($materials as $material)
                         <option value="{{ $material->id }}" {{ old('material_id') == $material->id ? 'selected' : '' }}>
@@ -32,34 +37,34 @@
             
             <div class="form-group-new">
                 <label for="nomor_meter">Nomor Meter</label> 
-                <input type="text" name="nomor_meter" id="nomor_meter" class="form-control-new" value="{{ old('nomor_meter') }}" placeholder="Masukkan Nomor Meter" required>
+                <input type="text" name="nomor_meter" id="nomor_meter" class="form-control-new @error('nomor_meter') is-invalid @enderror" value="{{ old('nomor_meter') }}" placeholder="Masukkan Nomor Meter" required>
             </div>
             
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
-                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new" value="{{ old('nama_petugas') }}" required>
+                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control-new @error('nama_petugas') is-invalid @enderror" value="{{ old('nama_petugas') }}" required>
             </div>
             
             <div class="form-group-new">
                 <label for="stand_meter">Stand Meter</label>
-                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new" value="{{ old('stand_meter') }}" required>
+                <input type="text" name="stand_meter" id="stand_meter" class="form-control-new @error('stand_meter') is-invalid @enderror" value="{{ old('stand_meter') }}" required>
             </div>
             
             <div class="form-group-new">
                 <label for="keterangan">Keterangan</label>
-                <textarea name="keterangan" id="keterangan" class="form-control-new" placeholder="Masukkan keterangan material keluar" required>{{ old('keterangan') }}</textarea>
+                <textarea name="keterangan" id="keterangan" class="form-control-new @error('keterangan') is-invalid @enderror" placeholder="Masukkan keterangan material keluar" required>{{ old('keterangan') }}</textarea>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi</small>
             </div>
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label> 
-                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*" required> 
+                <input type="file" name="foto" id="foto" class="form-control-new-file @error('foto') is-invalid @enderror" accept="image/*" required> 
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto material wajib diisi.</small>
             </div>
 
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label> 
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*" required> 
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file @error('foto_petugas') is-invalid @enderror" accept="image/*" required> 
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto petugas wajib diisi.</small>
             </div>
             

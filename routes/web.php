@@ -9,6 +9,7 @@ use App\Http\Controllers\MaterialKembaliController;
 use App\Http\Controllers\MaterialSiagaStandByController;
 use App\Http\Controllers\SiagaKeluarController;
 use App\Http\Controllers\SiagaKembaliController;
+use App\Http\Controllers\MaterialHistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,21 +23,25 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-// --- RUTE MATERIAL STAND BY ---
-// [FIX] Mengganti nama route agar sesuai dengan pemanggilan di blade (downloadReport vs download-report)
-Route::get('material-stand-by/download-report', [MaterialStandByController::class, 'downloadReport'])
-     ->name('material-stand-by.downloadReport'); // PERBAIKAN DI SINI
+//RUTE MATERIAL STANDBY
+Route::post('/material-stand-by/pdf', [MaterialStandByController::class, 'downloadPdf'])
+    ->name('material-stand-by.pdf');
 
-Route::get('material-stand-by/foto/{id}', [MaterialStandByController::class, 'showFoto'])
-     ->name('material-stand-by.show-foto');
+Route::post('/material-stand-by/excel', [MaterialStandByController::class, 'downloadExcel'])
+    ->name('material-stand-by.excel');
 
+
+// FOTO
 Route::get('material-stand-by/{id}/download-foto', [MaterialStandByController::class, 'downloadFoto'])
-     ->name('material-stand-by.download-foto');
+    ->name('material-stand-by.download-foto');
 
 Route::get('material-stand-by/{id}/download-petugas', [MaterialStandByController::class, 'downloadFotoPetugas'])
-     ->name('material-stand-by.download-foto-petugas');
+    ->name('material-stand-by.download-foto-petugas');
 
-Route::resource('material-stand-by', MaterialStandByController::class);
+// RESOURCE (PALING BAWAH)
+Route::resource('material-stand-by', MaterialStandByController::class)
+    ->except(['show']);
+
 
 
 // --- RUTE MATERIAL KELUAR ---
@@ -156,3 +161,17 @@ Route::put('material-siaga/update-status/{id}', [MaterialSiagaStandByController:
 Route::resource('material-siaga', MaterialSiagaStandByController::class)->parameters([
     'material-siaga' => 'id'
 ]);
+
+
+// Ubah 'history.index' menjadi 'material-history.index'
+Route::get('/material-history', [MaterialHistoryController::class, 'index'])->name('material-history.index');
+Route::post('/material-history/store', [MaterialHistoryController::class, 'store'])->name('material-history.store');
+
+// ================= MATERIAL HISTORY =================
+Route::get('/material-history/pdf', [MaterialHistoryController::class, 'exportPDF'])
+    ->name('material-history.pdf');
+
+Route::get('/material-history/excel', [MaterialHistoryController::class, 'exportExcel'])
+    ->name('material-history.excel');
+
+Route::resource('material-history', MaterialHistoryController::class);
