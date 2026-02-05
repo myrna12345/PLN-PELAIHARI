@@ -45,6 +45,15 @@
     border-radius: 12px;
     font-weight: 600;
 }
+
+/* PERBAIKAN: CSS Khusus untuk memposisikan konten foto & tombol ke tengah */
+.wrapper-foto-tengah {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
 </style>
 
 <div class="card-new">
@@ -75,7 +84,7 @@
         </form>
     </div>
 
-    {{-- TABLE (TIDAK DIUBAH) --}}
+    {{-- TABLE --}}
     <div class="table-container">
         <table class="table">
             <thead>
@@ -98,12 +107,16 @@
 
                     <td class="text-center">
                         @if($item->foto_path)
-                            <img src="{{ asset('uploads/material_stand_by/' . $item->foto_path) }}"
-                                 style="max-width:80px; display:block; margin:0 auto 6px;">
-                            <a href="{{ route('material-stand-by.download-foto', $item->id) }}"
-                               class="btn-foto-download">
-                               <i class="fas fa-download"></i> Download
-                            </a>
+                            {{-- Perbaikan Posisi Tombol Download: Menggunakan wrapper foto tengah --}}
+                            <div class="wrapper-foto-tengah">
+                                <img src="{{ asset('uploads/material_stand_by/' . $item->foto_path) }}"
+                                     style="max-width:80px; display:block; margin-bottom: 6px;">
+                                
+                                <a href="{{ route('material-stand-by.download-foto', $item->id) }}"
+                                   class="btn-foto-download">
+                                   <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
                         @else
                             -
                         @endif
@@ -124,44 +137,46 @@
                     </td>
                 </tr>
             @empty
-                <tr>
-                    <td colspan="6" class="text-center">Data tidak ditemukan.</td>
-                </tr>
-            @endforelse
+            <tr>
+                {{-- PERBAIKAN: Menambahkan text-center dan padding agar benar-benar di tengah --}}
+                <td colspan="6" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
+                    Data tidak ditemukan.
+                </td>
+            </tr>
+        @endforelse
             </tbody>
         </table>
     </div>
 
-    {{-- FOOTER DOWNLOAD (SEJAJAR & WARNA SAMA MATERIAL KELUAR) --}}
+    {{-- FOOTER DOWNLOAD --}}
     <div class="index-footer-form">
         <form action="{{ route('material-stand-by.pdf') }}"
-      method="POST"
-      class="form-download">
-    @csrf
+              method="POST"
+              class="form-download">
+            @csrf
 
-    <div class="form-group-tanggal">
-        <label>Dari Tanggal:</label>
-        <input type="date" name="tanggal_mulai"
-               class="form-control-tanggal" required>
-    </div>
+            <div class="form-group-tanggal">
+                <label>Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai"
+                       class="form-control-tanggal" required>
+            </div>
 
-    <div class="form-group-tanggal">
-        <label>Sampai Tanggal:</label>
-        <input type="date" name="tanggal_akhir"
-               class="form-control-tanggal" required>
-    </div>
+            <div class="form-group-tanggal">
+                <label>Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir"
+                       class="form-control-tanggal" required>
+            </div>
 
-    <button type="submit" class="btn-pdf">
-        Unduh PDF
-    </button>
+            <button type="submit" class="btn-pdf">
+                Unduh PDF
+            </button>
 
-    <button type="submit"
-            formaction="{{ route('material-stand-by.excel') }}"
-            class="btn-excel">
-        Unduh Excel
-    </button>
-</form>
-
+            <button type="submit"
+                    formaction="{{ route('material-stand-by.excel') }}"
+                    class="btn-excel">
+                Unduh Excel
+            </button>
+        </form>
     </div>
 
 </div>

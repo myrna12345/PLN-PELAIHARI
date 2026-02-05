@@ -91,7 +91,7 @@
                     <td>
                         <div class="table-actions">
                             <a href="{{ route('siaga-kembali.edit', $item->id) }}" class="btn btn-edit">Edit</a>
-                            <form action="{{ route('siaga-kembali.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
+                            <form action="{{ route('siaga-kembali.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-hapus">Hapus</button>
                             </form>

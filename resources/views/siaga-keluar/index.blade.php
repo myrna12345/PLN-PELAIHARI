@@ -96,10 +96,13 @@
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="10" style="text-align:center;">Data tidak ditemukan.</td>
-                    </tr>
-                @endforelse
+            <tr>
+                {{-- PERBAIKAN: Menambahkan text-center dan padding agar benar-benar di tengah --}}
+                <td colspan="6" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
+                    Data tidak ditemukan.
+                </td>
+            </tr>
+        @endforelse
             </tbody>
         </table>
     </div>
