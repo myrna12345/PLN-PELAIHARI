@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\MaterialStandBy;
 use App\Models\MaterialHistory;
+// use App\Models\MaterialRetur; // Tidak lagi digunakan untuk laporan ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
@@ -51,7 +52,11 @@ class MaterialStandByController extends Controller
     // ===============================
     public function create()
     {
-        $materials = Material::orderBy('nama_material')->get();
+        // FILTER: Hanya ambil material kategori 'teknik' (Bukan Siaga)
+        $materials = Material::where('kategori', 'teknik')
+                             ->orderBy('nama_material')
+                             ->get();
+                             
         return view('material_stand_by.create', compact('materials'));
     }
 
@@ -59,56 +64,59 @@ class MaterialStandByController extends Controller
     // 3. STORE
     // ===============================
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'material_id' => 'required|exists:materials,id',
-        'jumlah'      => 'required|integer|min:1',
-        'satuan'      => 'required|string',
-        'foto'        => 'required|image|mimes:jpg,jpeg,png|max:5120',
-    ]);
+    {
+        $validated = $request->validate([
+            'material_id' => 'required|exists:materials,id',
+            'jumlah'      => 'required|integer|min:1',
+            'satuan'      => 'required|string',
+            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:5120',
+        ]);
 
-    $path = public_path($this->uploadFolder);
-    if (!File::exists($path)) {
-        File::makeDirectory($path, 0777, true);
-    }
+        $path = public_path($this->uploadFolder);
+        if (!File::exists($path)) {
+            File::makeDirectory($path, 0777, true);
+        }
 
-    $fotoName = time() . '_' . uniqid() . '.' . $request->foto->extension();
-    $request->foto->move($path, $fotoName);
+        $fotoName = time() . '_' . uniqid() . '.' . $request->foto->extension();
+        $request->foto->move($path, $fotoName);
 
-    $material = Material::findOrFail($validated['material_id']);
+        $material = Material::findOrFail($validated['material_id']);
 
-    $item = MaterialStandBy::where('material_id', $validated['material_id'])
-        ->where('satuan', $validated['satuan'])
-        ->first();
+        // Cek apakah material sudah ada (Merge Data)
+        $item = MaterialStandBy::where('material_id', $validated['material_id'])
+            ->where('satuan', $validated['satuan'])
+            ->first();
 
-    if ($item) {
-        // ❌ JANGAN HAPUS FOTO LAMA
-        $item->jumlah += $validated['jumlah'];
-        $item->foto_path = $fotoName;
-        $item->tanggal = now('Asia/Makassar');
-        $item->save();
-    } else {
-        MaterialStandBy::create([
-            'material_id' => $validated['material_id'],
-            'nama_material_lengkap' => $material->nama_material,
+        if ($item) {
+            // Update jumlah dan foto terbaru
+            $item->jumlah += $validated['jumlah'];
+            $item->foto_path = $fotoName;
+            $item->tanggal = now('Asia/Makassar');
+            $item->save();
+        } else {
+            // Buat data baru
+            MaterialStandBy::create([
+                'material_id' => $validated['material_id'],
+                'nama_material_lengkap' => $material->nama_material,
+                'jumlah' => $validated['jumlah'],
+                'satuan' => $validated['satuan'],
+                'foto_path' => $fotoName,
+                'tanggal' => now('Asia/Makassar'),
+            ]);
+        }
+
+        // Simpan History
+        MaterialHistory::create([
+            'nama_material' => $material->nama_material,
             'jumlah' => $validated['jumlah'],
             'satuan' => $validated['satuan'],
             'foto_path' => $fotoName,
-            'tanggal' => now('Asia/Makassar'),
+            'tanggal_input' => now('Asia/Makassar'),
         ]);
+
+        return redirect()->route('material-stand-by.index')
+            ->with('success', 'Data berhasil disimpan');
     }
-
-    MaterialHistory::create([
-        'nama_material' => $material->nama_material,
-        'jumlah' => $validated['jumlah'],
-        'satuan' => $validated['satuan'],
-        'foto_path' => $fotoName,
-        'tanggal_input' => now('Asia/Makassar'),
-    ]);
-
-    return redirect()->route('material-stand-by.index')
-        ->with('success', 'Data berhasil disimpan');
-}
 
     // ===============================
     // 4. EDIT
@@ -116,7 +124,11 @@ class MaterialStandByController extends Controller
     public function edit($id)
     {
         $item = MaterialStandBy::findOrFail($id);
-        $materials = Material::orderBy('nama_material')->get();
+        
+        // FILTER: Hanya ambil material kategori 'teknik' (Bukan Siaga)
+        $materials = Material::where('kategori', 'teknik')
+                             ->orderBy('nama_material')
+                             ->get();
 
         return view('material_stand_by.edit', compact('item', 'materials'));
     }
@@ -146,7 +158,7 @@ class MaterialStandByController extends Controller
         }
 
         $item->jumlah = $validated['jumlah'];
-        $item->tanggal = now('Asia/Makassar');
+        $item->tanggal = now('Asia/Makassar'); // Update tanggal ke waktu edit
         $item->save();
 
         return redirect()->route('material-stand-by.index')
@@ -172,7 +184,7 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 7. DOWNLOAD PDF
+    // 7. DOWNLOAD PDF (MURNI MATERIAL STAND BY)
     // ===============================
     public function downloadPdf(Request $request)
     {
@@ -184,13 +196,15 @@ class MaterialStandByController extends Controller
         $start = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $end   = Carbon::parse($request->tanggal_akhir)->endOfDay();
 
+        // REVISI: Hanya mengambil data dari tabel MaterialStandBy
+        // Tidak lagi digabung dengan MaterialRetur sesuai permintaan
         $items = MaterialStandBy::with('material')
             ->whereBetween('tanggal', [$start, $end])
-            ->orderBy('tanggal', 'asc')
+            ->latest('tanggal')
             ->get();
 
         if ($items->isEmpty()) {
-            return back()->with('error', 'Data tidak ditemukan');
+            return back()->with('error', 'Data tidak ditemukan pada periode tersebut.');
         }
 
         $tanggal_mulai = $start->format('d M Y');
@@ -222,26 +236,27 @@ class MaterialStandByController extends Controller
             'Laporan_Material_Standby.xlsx'
         );
     }
+
     public function showFoto($id)
-{
-    $item = MaterialStandBy::findOrFail($id);
-    return view('material_stand_by.show_foto', compact('item'));
-}
-public function downloadFoto($id)
-{
-    $item = MaterialStandBy::findOrFail($id);
-
-    if (!$item->foto_path) {
-        abort(404, 'Foto tidak ditemukan');
+    {
+        $item = MaterialStandBy::findOrFail($id);
+        return view('material_stand_by.show_foto', compact('item'));
     }
 
-    $path = public_path('uploads/material_stand_by/' . $item->foto_path);
+    public function downloadFoto($id)
+    {
+        $item = MaterialStandBy::findOrFail($id);
 
-    if (!file_exists($path)) {
-        abort(404, 'File foto tidak ada di server');
+        if (!$item->foto_path) {
+            abort(404, 'Foto tidak ditemukan');
+        }
+
+        $path = public_path('uploads/material_stand_by/' . $item->foto_path);
+
+        if (!file_exists($path)) {
+            abort(404, 'File foto tidak ada di server');
+        }
+
+        return response()->download($path);
     }
-
-    return response()->download($path);
-}
-
 }

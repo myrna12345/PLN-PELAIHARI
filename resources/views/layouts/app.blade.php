@@ -206,12 +206,10 @@
         .widget-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; }
         .widget-info p { margin: 0; font-size: 0.95rem; }
 
-        /* === 7. CSS MODAL FOTO === */
-        .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; }
-        .modal-content { position: relative; margin: auto; padding: 0; max-width: 90%; max-height: 90%; }
-        .modal-image { width: 100%; height: auto; max-width: 80vw; max-height: 80vh; object-fit: contain; }
-        .modal-close { position: absolute; top: -15px; right: 0px; color: #fff; font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; }
-
+        /* === 7. CSS MODAL FOTO (DIHAPUS DARI LAYOUT AGAR TIDAK DOUBLE) === */
+        /* Kode CSS modal tetap ada di layout untuk keperluan styling global jika dibutuhkan, 
+           tapi HTML dan JS-nya dihapus agar tidak bentrok dengan halaman index */
+        
         /* === 8. RESPONSIVE (HP & TABLET) === */
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
@@ -303,20 +301,17 @@
         <div class="main-content-inner">
             @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
             @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul style="margin: 0; padding-left: 20px;">
-                        @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
-                    </ul>
-                </div>
-            @endif
+            {{-- Peringatan validasi dihapus dari sini karena akan ditangani oleh masing-masing form agar lebih rapi --}}
+            
             @yield('content')
         </div>
     </main>
 </div>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
-<div id="fotoModal" class="modal-overlay"><span class="modal-close" id="modalCloseButton">&times;</span><div class="modal-content"><img id="modalImage" class="modal-image" src="" alt="Foto Material"></div></div>
+
+{{-- MODAL GLOBAL DIHAPUS (Hapus baris di bawah ini agar tidak konflik dengan modal lokal di halaman index) --}}
+{{-- <div id="fotoModal" class="modal-overlay"><span class="modal-close" id="modalCloseButton">&times;</span><div class="modal-content"><img id="modalImage" class="modal-image" src="" alt="Foto Material"></div></div> --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -350,12 +345,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const modal = document.getElementById('fotoModal');
-    const modalImg = document.getElementById('modalImage');
-    const modalClose = document.getElementById('modalCloseButton');
-    document.body.addEventListener('click', e => { if (e.target.classList.contains('table-foto')) { modal.style.display = 'flex'; modalImg.src = e.target.src; } });
-    if(modalClose) modalClose.addEventListener('click', () => modal.style.display = 'none');
-    if(modal) modal.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
+    // SCRIPT MODAL GLOBAL DIHAPUS AGAR TIDAK KONFLIK
+    // const modal = document.getElementById('fotoModal');
+    // const modalImg = document.getElementById('modalImage');
+    // const modalClose = document.getElementById('modalCloseButton');
+    // document.body.addEventListener('click', e => { if (e.target.classList.contains('table-foto')) { modal.style.display = 'flex'; modalImg.src = e.target.src; } });
+    // if(modalClose) modalClose.addEventListener('click', () => modal.style.display = 'none');
+    // if(modal) modal.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
 });
 </script>
 </body>

@@ -18,7 +18,7 @@ class MaterialKeluarController extends Controller
      * Pastikan Anda telah menambahkan relasi berikut di model MaterialKeluar:
      * public function material()
      * {
-     *     return $this->belongsTo(Material::class, 'material_id');
+     * return $this->belongsTo(Material::class, 'material_id');
      * }
      */
 
@@ -112,7 +112,10 @@ class MaterialKeluarController extends Controller
 
             if ($materialStok) {
                 if ($materialStok->jumlah >= $jumlahKeluar) {
+                    // FIX: Ensure decrement is saved or use property subtraction + save
                     $materialStok->decrement('jumlah', $jumlahKeluar);
+                    // $materialStok->save(); // decrement() automatically saves, but explicitly checking logic is good.
+                    
                     MaterialKeluar::create($validated);
                     return redirect()->route('material_keluar.index')->with('success', 'Data Material Keluar berhasil disimpan dan stok Stand By berhasil dikurangi!');
                 } else {
@@ -174,13 +177,13 @@ class MaterialKeluarController extends Controller
                     $materialStokBaru->decrement('jumlah', $jumlahBaru);
                 } else {
                     if ($materialStokLama) {
-                        $materialStokLama->decrement('jumlah', $jumlahLama);
+                        $materialStokLama->decrement('jumlah', $jumlahLama); // Revert increment if failed
                     }
                     return redirect()->back()->with('error', 'Gagal update: Jumlah material baru melebihi stok yang tersedia (Tersedia: ' . $materialStokBaru->jumlah . ' ' . $materialStokBaru->satuan . ')')->withInput();
                 }
             } else {
                 if ($materialStokLama) {
-                    $materialStokLama->decrement('jumlah', $jumlahLama);
+                    $materialStokLama->decrement('jumlah', $jumlahLama); // Revert
                 }
                 return redirect()->back()->with('error', 'Gagal update: Stok Material Stand By baru tidak ditemukan.')->withInput();
             }

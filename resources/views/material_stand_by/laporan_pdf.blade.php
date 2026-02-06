@@ -23,7 +23,7 @@
             <tr>
                 <th style="width: 5%;">No</th>
                 <th>Nama Material</th>
-                <th>Jumlah & Satuan</th>
+                <th>Jumlah</th>
                 <th>Tanggal (WITA)</th>
                 <th>Foto Material</th>
                 {{-- Kolom Foto Petugas DIHAPUS --}}

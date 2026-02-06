@@ -8,12 +8,8 @@
         <h2>Tambah Material Siaga Kembali</h2>
     </div>
 
-    {{-- LOGIKA ALERT TUNGGAL: Agar peringatan tidak muncul dua kali --}}
-    @if (session('error'))
-        <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-            {{ session('error') }}
-        </div>
-    @elseif ($errors->any())
+    {{-- PERBAIKAN: Menghapus blok session('error') agar tidak muncul double dengan layout utama --}}
+    @if ($errors->any())
         <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)

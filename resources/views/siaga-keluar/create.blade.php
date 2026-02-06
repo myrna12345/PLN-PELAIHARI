@@ -8,12 +8,9 @@
         <h2>Tambah Material Siaga Keluar</h2>
     </div>
 
-    {{-- Hanya menampilkan satu peringatan utama --}}
-    @if (session('error'))
-        <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-            {{ session('error') }}
-        </div>
-    @elseif ($errors->any())
+    {{-- PERBAIKAN: Menghapus blok session('error') di sini karena kemungkinan besar sudah ditampilkan di layout utama (layouts.app), sehingga tidak muncul double --}}
+    
+    @if ($errors->any())
         <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <strong>Gagal:</strong> Mohon periksa kembali inputan Anda atau lengkapi data yang kosong.
         </div>

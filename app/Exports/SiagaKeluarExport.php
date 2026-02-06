@@ -41,6 +41,7 @@ class SiagaKeluarExport implements FromQuery, WithHeadings, WithMapping, ShouldA
             // DIHAPUS: 'Jumlah Siaga Keluar', 
             // DIHAPUS: 'Jumlah Siaga Masuk',
             'Status',
+            'Keterangan', // TAMBAHAN: Kolom Keterangan ditambahkan di sini
             'Tanggal (WITA)',
         ];
     }
@@ -64,6 +65,7 @@ class SiagaKeluarExport implements FromQuery, WithHeadings, WithMapping, ShouldA
             // DIHAPUS: $item->jumlah_siaga_keluar,
             // DIHAPUS: $item->jumlah_siaga_masuk ?? 0,
             $item->status,
+            $item->keterangan, // TAMBAHAN: Data Keterangan dari database
             Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i'),
         ];
     }
