@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\SiagaKembali; 
-use App\Models\SiagaKeluar; // ⬅️ Tambahkan ini untuk pengecekan data keluar
+use App\Models\SiagaKeluar; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File; 
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel; 
 use App\Exports\SiagaKembaliExport; 
+use Intervention\Image\Laravel\Facades\Image; // WAJIB: Library Kompresi
 
 class SiagaKembaliController extends Controller
 {
@@ -62,8 +63,8 @@ class SiagaKembaliController extends Controller
             'nama_petugas'  => 'required|string|max:255',
             'stand_meter'   => 'required|string|max:255',
             'keterangan'    => 'nullable|string',
-            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
+            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
         ]);
 
         /* ============================================================ */
@@ -72,8 +73,8 @@ class SiagaKembaliController extends Controller
         $materialMaster = Material::findOrFail($validated['material_id']);
         
         $dataKeluar = SiagaKeluar::where('nomor_meter', $validated['nomor_meter'])
-                        ->where('nama_material_lengkap', $materialMaster->nama_material)
-                        ->first();
+                                 ->where('nama_material_lengkap', $materialMaster->nama_material)
+                                 ->first();
 
         if (!$dataKeluar) {
             return redirect()->back()
@@ -84,28 +85,36 @@ class SiagaKembaliController extends Controller
         /* =================== SETUP FOLDER =================== */
         $path = public_path($this->uploadFolder);
         if (!File::isDirectory($path)) {
-            File::makeDirectory($path, 0777, true, true);
+            File::makeDirectory($path, 0755, true, true);
         }
 
-        /* =================== UPLOAD FOTO =================== */
-        $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
-        $request->file('foto')->move($path, $fotoName);
+        /* =================== UPLOAD & KOMPRESI FOTO =================== */
+        // 1. Foto Material
+        $fotoName = time() . '_mat_' . uniqid() . '.jpg'; // Paksa .jpg
+        $imageMat = Image::read($request->file('foto'));
+        $imageMat->scale(width: 800); // Resize
+        $encodedMat = $imageMat->toJpeg(60); // Convert JPG 60%
+        $encodedMat->save($path . '/' . $fotoName);
 
-        $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
-        $request->file('foto_petugas')->move($path, $fotoPetugasName);
+        // 2. Foto Petugas
+        $fotoPetugasName = time() . '_pet_' . uniqid() . '.jpg'; // Paksa .jpg
+        $imagePet = Image::read($request->file('foto_petugas'));
+        $imagePet->scale(width: 800); // Resize
+        $encodedPet = $imagePet->toJpeg(60); // Convert JPG 60%
+        $encodedPet->save($path . '/' . $fotoPetugasName);
 
         /* =================== SIMPAN DATA KEMBALI =================== */
         SiagaKembali::create([
-            'material_id'            => $validated['material_id'],
-            'nomor_meter'            => $validated['nomor_meter'],
-            'nama_material_lengkap'  => $materialMaster->nama_material,
-            'nama_petugas'           => $validated['nama_petugas'],
-            'stand_meter'            => $validated['stand_meter'],
-            'status'                 => 'Kembali', 
-            'keterangan'             => $validated['keterangan'],
-            'foto_path'              => $fotoName,
-            'foto_petugas'           => $fotoPetugasName,
-            'tanggal'                => Carbon::now('Asia/Makassar'),
+            'material_id'           => $validated['material_id'],
+            'nomor_meter'           => $validated['nomor_meter'],
+            'nama_material_lengkap' => $materialMaster->nama_material,
+            'nama_petugas'          => $validated['nama_petugas'],
+            'stand_meter'           => $validated['stand_meter'],
+            'status'                => 'Kembali', 
+            'keterangan'            => $validated['keterangan'],
+            'foto_path'             => $fotoName,
+            'foto_petugas'          => $fotoPetugasName,
+            'tanggal'               => Carbon::now('Asia/Makassar'),
         ]);
 
         /* =================== UPDATE STATUS STANDBY =================== */
@@ -139,27 +148,43 @@ class SiagaKembaliController extends Controller
             'stand_meter' => 'required|string|max:255',
             'status' => 'nullable|string',
             'keterangan' => 'nullable|string', 
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         $destinationPath = public_path($this->uploadFolder);
+        // Buat folder jika belum ada (safety check)
+        if (!File::exists($destinationPath)) {
+            File::makeDirectory($destinationPath, 0755, true);
+        }
 
+        // --- UPDATE FOTO MATERIAL (KOMPRESI) ---
         if ($request->hasFile('foto')) {
             $oldFile = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
             if ($siagaKembali->foto_path && File::exists($oldFile)) { File::delete($oldFile); }
             
-            $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
-            $request->file('foto')->move($destinationPath, $fotoName);
+            $fotoName = time() . '_mat_' . uniqid() . '.jpg';
+            
+            $imageMat = Image::read($request->file('foto'));
+            $imageMat->scale(width: 800);
+            $encodedMat = $imageMat->toJpeg(60);
+            $encodedMat->save($destinationPath . '/' . $fotoName);
+            
             $siagaKembali->foto_path = $fotoName;
         }
 
+        // --- UPDATE FOTO PETUGAS (KOMPRESI) ---
         if ($request->hasFile('foto_petugas')) {
             $oldFilePetugas = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
             if ($siagaKembali->foto_petugas && File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
             
-            $fotoPetugasName = time() . '_pet_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
-            $request->file('foto_petugas')->move($destinationPath, $fotoPetugasName);
+            $fotoPetugasName = time() . '_pet_' . uniqid() . '.jpg';
+            
+            $imagePet = Image::read($request->file('foto_petugas'));
+            $imagePet->scale(width: 800);
+            $encodedPet = $imagePet->toJpeg(60);
+            $encodedPet->save($destinationPath . '/' . $fotoPetugasName);
+            
             $siagaKembali->foto_petugas = $fotoPetugasName;
         }
 

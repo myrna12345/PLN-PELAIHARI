@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\MaterialStandByExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Intervention\Image\Laravel\Facades\Image; // WAJIB: Library Kompresi
 
 class MaterialStandByController extends Controller
 {
@@ -69,16 +70,24 @@ class MaterialStandByController extends Controller
             'material_id' => 'required|exists:materials,id',
             'jumlah'      => 'required|integer|min:1',
             'satuan'      => 'required|string',
-            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:10240', // Max 10MB sebelum dikompres
         ]);
 
         $path = public_path($this->uploadFolder);
         if (!File::exists($path)) {
-            File::makeDirectory($path, 0777, true);
+            File::makeDirectory($path, 0755, true);
         }
 
-        $fotoName = time() . '_' . uniqid() . '.' . $request->foto->extension();
-        $request->foto->move($path, $fotoName);
+        // --- LOGIKA BARU: KOMPRESI FOTO ---
+        // 1. Paksa nama file berakhiran .jpg
+        $fotoName = time() . '_' . uniqid() . '.jpg';
+        
+        // 2. Baca file -> Resize -> Convert JPG Quality 60 -> Simpan
+        $image = Image::read($request->file('foto'));
+        $image->scale(width: 800);
+        $encoded = $image->toJpeg(60);
+        $encoded->save($path . '/' . $fotoName);
+        // ----------------------------------
 
         $material = Material::findOrFail($validated['material_id']);
 
@@ -142,18 +151,26 @@ class MaterialStandByController extends Controller
 
         $validated = $request->validate([
             'jumlah' => 'required|integer|min:0',
-            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
         ]);
 
         if ($request->hasFile('foto')) {
             $path = public_path($this->uploadFolder);
 
+            // Hapus foto lama
             if ($item->foto_path && File::exists($path . '/' . $item->foto_path)) {
                 File::delete($path . '/' . $item->foto_path);
             }
 
-            $fotoName = time() . '_' . uniqid() . '.' . $request->foto->extension();
-            $request->foto->move($path, $fotoName);
+            // --- LOGIKA BARU: KOMPRESI FOTO SAAT UPDATE ---
+            $fotoName = time() . '_' . uniqid() . '.jpg';
+            
+            $image = Image::read($request->file('foto'));
+            $image->scale(width: 800);
+            $encoded = $image->toJpeg(60);
+            $encoded->save($path . '/' . $fotoName);
+            // ----------------------------------------------
+
             $item->foto_path = $fotoName;
         }
 

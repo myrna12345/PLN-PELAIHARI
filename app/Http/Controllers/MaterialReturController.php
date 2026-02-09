@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MaterialReturExport;
+use Intervention\Image\Laravel\Facades\Image; // WAJIB: Library Kompresi
 
 class MaterialReturController extends Controller
 {
@@ -54,23 +55,33 @@ class MaterialReturController extends Controller
             'satuan' => 'required|in:Buah,Meter',
             'status' => 'required|in:bekas_andal,rusak,baik', 
             'keterangan' => 'required|string',
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
+            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240' // Max 10MB
         ]);
 
         // Buat folder jika belum ada
         $path = public_path($this->uploadFolder);
         if(!File::isDirectory($path)){
-            File::makeDirectory($path, 0777, true, true);
+            File::makeDirectory($path, 0755, true, true);
         }
 
-        // Upload Foto Material ke Public
-        $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
-        $request->file('foto')->move($path, $fotoName);
+        // --- KOMPRESI FOTO MATERIAL ---
+        // Paksa ekstensi jadi .jpg
+        $fotoName = time() . '_mat_' . uniqid() . '.jpg';
+        
+        $imageMat = Image::read($request->file('foto'));
+        $imageMat->scale(width: 800); // Resize lebar max 800px
+        $encodedMat = $imageMat->toJpeg(60); // Convert JPG Quality 60
+        $encodedMat->save($path . '/' . $fotoName);
 
-        // Upload Foto Petugas ke Public
-        $fotoPetugasName = time() . '_ptg_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
-        $request->file('foto_petugas')->move($path, $fotoPetugasName);
+        // --- KOMPRESI FOTO PETUGAS ---
+        // Paksa ekstensi jadi .jpg
+        $fotoPetugasName = time() . '_ptg_' . uniqid() . '.jpg';
+        
+        $imagePtg = Image::read($request->file('foto_petugas'));
+        $imagePtg->scale(width: 800); // Resize lebar max 800px
+        $encodedPtg = $imagePtg->toJpeg(60); // Convert JPG Quality 60
+        $encodedPtg->save($path . '/' . $fotoPetugasName);
 
         MaterialRetur::create([
             'material_id' => $validated['material_id'],
@@ -104,8 +115,8 @@ class MaterialReturController extends Controller
             'satuan' => 'required|in:Buah,Meter',
             'status' => 'required|in:bekas_andal,rusak,baik', 
             'keterangan' => 'required|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
         ]);
 
         $data = [
@@ -118,28 +129,43 @@ class MaterialReturController extends Controller
         ];
 
         $destinationPath = public_path($this->uploadFolder);
+        
+        // Buat folder jika belum ada (safety check)
+        if (!File::exists($destinationPath)) {
+            File::makeDirectory($destinationPath, 0755, true);
+        }
 
-        // Update Foto Material
+        // --- UPDATE FOTO MATERIAL (KOMPRESI) ---
         if ($request->hasFile('foto')) {
             // Hapus lama
             $oldFile = public_path($this->uploadFolder . '/' . $materialRetur->foto_path);
-            if (File::exists($oldFile)) { File::delete($oldFile); }
+            if ($materialRetur->foto_path && File::exists($oldFile)) { File::delete($oldFile); }
             
-            // Upload baru
-            $fotoName = time() . '_mat_' . uniqid() . '.' . $request->file('foto')->getClientOriginalExtension();
-            $request->file('foto')->move($destinationPath, $fotoName);
+            // Upload baru kompres
+            $fotoName = time() . '_mat_' . uniqid() . '.jpg';
+            
+            $imageMat = Image::read($request->file('foto'));
+            $imageMat->scale(width: 800);
+            $encodedMat = $imageMat->toJpeg(60);
+            $encodedMat->save($destinationPath . '/' . $fotoName);
+            
             $data['foto_path'] = $fotoName;
         }
 
-        // Update Foto Petugas
+        // --- UPDATE FOTO PETUGAS (KOMPRESI) ---
         if ($request->hasFile('foto_petugas')) {
             // Hapus lama
             $oldFile = public_path($this->uploadFolder . '/' . $materialRetur->foto_petugas);
-            if (File::exists($oldFile)) { File::delete($oldFile); }
+            if ($materialRetur->foto_petugas && File::exists($oldFile)) { File::delete($oldFile); }
             
-            // Upload baru
-            $fotoPetugasName = time() . '_ptg_' . uniqid() . '.' . $request->file('foto_petugas')->getClientOriginalExtension();
-            $request->file('foto_petugas')->move($destinationPath, $fotoPetugasName);
+            // Upload baru kompres
+            $fotoPetugasName = time() . '_ptg_' . uniqid() . '.jpg';
+            
+            $imagePtg = Image::read($request->file('foto_petugas'));
+            $imagePtg->scale(width: 800);
+            $encodedPtg = $imagePtg->toJpeg(60);
+            $encodedPtg->save($destinationPath . '/' . $fotoPetugasName);
+            
             $data['foto_petugas'] = $fotoPetugasName;
         }
 
@@ -182,6 +208,25 @@ class MaterialReturController extends Controller
                     ->get();
 
         if ($request->has('submit_pdf')) {
+            // Convert gambar ke base64 agar tampil di PDF
+            foreach ($items as $item) {
+                // Foto Material
+                if ($item->foto_path && File::exists(public_path($this->uploadFolder . '/' . $item->foto_path))) {
+                    $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $dataImg = file_get_contents($path);
+                    $item->foto_base64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+                }
+                
+                // Foto Petugas (Jika perlu ditampilkan di PDF)
+                if ($item->foto_petugas && File::exists(public_path($this->uploadFolder . '/' . $item->foto_petugas))) {
+                    $path = public_path($this->uploadFolder . '/' . $item->foto_petugas);
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $dataImg = file_get_contents($path);
+                    $item->foto_petugas_base64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+                }
+            }
+
             $pdf = Pdf::loadView('material_retur.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'));
             return $pdf->download('laporan_material_retur.pdf');
         }
