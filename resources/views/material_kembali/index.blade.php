@@ -10,23 +10,17 @@
 
         <form action="{{ route('material_kembali.index') }}" method="GET" class="search-form">
             
-            {{-- Bagian Pencarian Teks --}}
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" placeholder="Cari Nama Material / Petugas..." value="{{ request('search') }}">
             </div>
 
-            {{-- 🟢 PENAMBAHAN: Input Tanggal Mulai dan Akhir untuk Filter 🟢 --}}
             <div class="date-filter-group">
-                <input type="date" name="tanggal_mulai" 
-                    class="form-control-tanggal" 
-                    value="{{ request('tanggal_mulai') }}" 
-                    placeholder="Dari Tanggal">
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal"
+                    value="{{ request('tanggal_mulai') }}" placeholder="Dari Tanggal">
                 
-                <input type="date" name="tanggal_akhir" 
-                    class="form-control-tanggal" 
-                    value="{{ request('tanggal_akhir') }}" 
-                    placeholder="Sampai Tanggal">
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal"
+                    value="{{ request('tanggal_akhir') }}" placeholder="Sampai Tanggal">
             </div>
 
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
@@ -38,7 +32,6 @@
         <div class="alert alert-success text-center">{{ session('success') }}</div>
     @endif
     
-    {{-- Tambahkan error alert untuk laporan --}}
     @if(session('error'))
         <div class="alert alert-danger text-center">{{ session('error') }}</div>
     @endif
@@ -51,7 +44,7 @@
                     <th>Nama Material</th>
                     <th>Nama Petugas</th>
                     <th>Jumlah</th>
-                    <th>Stok</th> 
+                    <th>Saldo Saat Ini</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
@@ -62,26 +55,20 @@
                 @forelse($materialKembali as $item)
                     <tr>
                         <td>{{ $materialKembali->firstItem() + $loop->index }}</td>
-                        
-                        {{-- Mengambil nama material melalui relasi 'material' --}}
                         <td>{{ $item->material->nama_material ?? 'Material Dihapus' }}</td>
-                        
                         <td>{{ $item->nama_petugas }}</td>
-                        
-                        {{-- Menggabungkan jumlah dan satuan --}}
-                        <td class="text-nowrap">{{ $item->jumlah_material }} {{ $item->satuan }}</td>                        
-                        {{-- 🟢 TAMPILKAN DATA STOK 🟢 --}}
+                        <td class="text-nowrap">{{ $item->jumlah_material }} {{ $item->satuan }}</td>
                         <td class="text-nowrap">{{ $item->stok_saat_ini }}</td>
 
-                        <td class="text-nowrap">{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
+                        <td class="text-nowrap">
+                            {{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}
+                        </td>
 
-                        {{-- TAMPILKAN DATA FOTO --}}
                         <td style="text-align:center; vertical-align:top;">
                             @if($item->foto)
                                 <img src="{{ route('material_kembali.show-foto', $item->id) }}"
-                                    alt="Foto Material"
                                     class="table-foto zoomable"
-                                    style="max-width:80px; height:auto; object-fit:cover; display:block; margin:0 auto 5px; cursor:pointer;">
+                                    style="max-width:80px; margin-bottom:5px; cursor:pointer;">
 
                                 <a href="{{ route('material_kembali.download-foto', $item->id) }}"
                                     class="btn-foto-download">
@@ -92,13 +79,11 @@
                             @endif
                         </td>
 
-                        {{-- TAMPILKAN DATA FOTO PETUGAS --}}
                         <td style="text-align:center; vertical-align:top;">
                             @if($item->foto_petugas)
                                 <img src="{{ route('material_kembali.show-foto-petugas', $item->id) }}"
-                                    alt="Foto Petugas"
                                     class="table-foto zoomable"
-                                    style="max-width:80px; height:auto; object-fit:cover; display:block; margin:0 auto 5px; cursor:pointer;">
+                                    style="max-width:80px; margin-bottom:5px; cursor:pointer;">
 
                                 <a href="{{ route('material_kembali.download-foto-petugas', $item->id) }}"
                                     class="btn-foto-download">
@@ -109,11 +94,11 @@
                             @endif
                         </td>
 
-
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('material_kembali.edit', $item->id) }}" class="btn-edit">Edit</a>
-                                <form action="{{ route('material_kembali.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Aksi ini akan mengurangi stok Stand By.')">
+                                <form action="{{ route('material_kembali.destroy', $item->id) }}" method="POST"
+                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Aksi ini akan mengurangi stok Stand By.')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-hapus">Hapus</button>
@@ -123,8 +108,9 @@
                     </tr>
                 @empty
                     <tr>
-                        {{-- Colspan 8 untuk 8 kolom --}}
-                        <td colspan="9" style="text-align:center; color:#6c757d; padding:50px 0;">Data tidak ditemukan.</td>
+                        <td colspan="9" style="text-align:center; color:#6c757d; padding:50px 0;">
+                            Data tidak ditemukan.
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
@@ -138,25 +124,21 @@
     <div class="index-footer-form">
         <form action="{{ route('material_kembali.download') }}" method="POST" class="form-download">
             @csrf
-            
-            @error('tanggal_mulai')
-                <div class="text-danger small mb-2" style="margin-left: 10px;">{{ $message }}</div>
-            @enderror
-            @error('tanggal_akhir')
-                <div class="text-danger small mb-2" style="margin-left: 10px;">{{ $message }}</div>
-            @enderror
-            
+
             <div class="form-group-tanggal">
-                <label for="tanggal_mulai_pdf">Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai" id="tanggal_mulai_pdf" class="form-control-tanggal" value="{{ old('tanggal_mulai') }}" required>
+                <label>Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal" required>
             </div>
+
             <div class="form-group-tanggal">
-                <label for="tanggal_akhir_pdf">Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir" id="tanggal_akhir_pdf" class="form-control-tanggal" value="{{ old('tanggal_akhir') }}" required>
+                <label>Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal" required>
             </div>
+
             <button type="submit" name="submit_pdf" value="1" class="btn btn-pdf">
                 <i class="fas fa-file-pdf"></i> Unduh PDF
             </button>
+
             <button type="submit" name="submit_excel" value="1" class="btn btn-excel">
                 <i class="fas fa-file-excel"></i> Unduh Excel
             </button>
@@ -165,27 +147,109 @@
 
 </div>
 
-{{-- 🟢 PENAMBAHAN: Tambahkan CSS untuk date-filter-group agar layout pencarian berfungsi --}}
 <style>
-    .search-form {
-        display: flex;
-        align-items: center;
-        gap: 15px; /* Jarak antar elemen */
-    }
-    .date-filter-group {
-        display: flex;
-        gap: 10px;
-    }
-    .date-filter-group input {
-        padding: 5px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        width: 130px; /* Atur lebar agar tidak terlalu panjang */
-    }
+.search-form { display:flex; align-items:center; gap:15px; }
+.date-filter-group { display:flex; gap:10px; }
+.date-filter-group input {
+    padding:5px 10px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    width:130px;
+}
 
-    .text-nowrap {
-    white-space: nowrap;
-    text-align: center;
+.text-nowrap {
+    white-space:nowrap;
+    text-align:center;
+}
+
+/* ===== WARNA TOMBOL DOWNLOAD ===== */
+
+.btn-foto-download,
+.btn-pdf,
+.btn-excel {
+    background-color:#5a8dee !important;
+    color:white !important;
+    border:none !important;
+}
+
+/* icon putih */
+.btn-foto-download i,
+.btn-pdf i,
+.btn-excel i {
+    color:#ffffff !important;
+}
+
+/* hover */
+.btn-foto-download:hover,
+.btn-pdf:hover,
+.btn-excel:hover {
+    background-color:#4a7bd1 !important;
+}
+
+/* ===== UKURAN TOMBOL PDF & EXCEL ===== */
+
+.btn-pdf,
+.btn-excel {
+    padding:6px 12px !important;
+    font-size:13px !important;
+    border-radius:6px !important;
+}
+
+.btn-pdf i,
+.btn-excel i {
+    font-size:12px !important;
+}
+
+/* ===== MODAL FOTO ===== */
+
+.image-modal {
+    display:none;
+    position:fixed;
+    z-index:9999;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.9);
+}
+
+.modal-content {
+    margin:auto;
+    display:block;
+    max-width:90%;
+    max-height:90%;
+    margin-top:5%;
+}
+
+.close-modal {
+    position:absolute;
+    top:20px;
+    right:30px;
+    color:white;
+    font-size:40px;
+    cursor:pointer;
 }
 </style>
+
+<div id="imageModal" class="image-modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    const closeBtn = document.querySelector(".close-modal");
+
+    document.querySelectorAll(".zoomable").forEach(img => {
+        img.addEventListener("click", function () {
+            modal.style.display = "block";
+            modalImg.src = this.src;
+        });
+    });
+
+    closeBtn.onclick = () => modal.style.display = "none";
+    modal.onclick = () => modal.style.display = "none";
+});
+</script>
+
 @endsection
