@@ -71,6 +71,24 @@ class MaterialKembaliController extends Controller
         return view('material_kembali.create', compact('materialList', 'satuanList'));
     }
 
+    public function edit($id)
+{
+    // Ubah nama variabel dari $data menjadi $materialKembali
+    $materialKembali = MaterialKembali::findOrFail($id);
+
+    // Mengambil list material untuk dropdown
+    $materialList = Material::where('kategori', '!=', 'siaga')
+                            ->orWhereNull('kategori')
+                            ->orderBy('nama_material')
+                            ->get();
+
+    // List satuan
+    $satuanList = ['Buah', 'Meter'];
+
+    // Pastikan variabel yang dipassing bernama 'materialKembali'
+    return view('material_kembali.edit', compact('materialKembali', 'materialList', 'satuanList'));
+}
+
     public function store(Request $request)
     {
         $validated = $request->validate([

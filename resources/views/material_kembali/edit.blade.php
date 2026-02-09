@@ -140,7 +140,7 @@
             {{-- Tombol --}}
             <div class="form-actions">
                 <a href="{{ route('material_kembali.index') }}" class="btn-batal">Batal</a>
-                <button type="submit" class="btn-simpan">Simpan Perubahan</button>
+                <button type="submit" class="btn-simpan">Update</button>
             </div>
         </form>
     </div>

@@ -10,6 +10,7 @@
 <body>
     <h2 style="text-align: center;">LAPORAN MATERIAL RETUR</h2>
     <p style="text-align: center;">Periode: {{ $tanggal_mulai->format('d M Y') }} s/d {{ $tanggal_akhir->format('d M Y') }}</p>
+    
     <table>
         <thead>
             <tr>
@@ -19,7 +20,7 @@
                 <th>Jumlah</th>
                 <th>Status</th>
                 <th>Keterangan</th>
-                <th>Foto Material</th>
+                <th>Tanggal (WITA)</th> <th>Foto Material</th>
                 <th>Foto Petugas</th>
             </tr>
         </thead>
@@ -33,6 +34,11 @@
                 <td>{{ $item->status }}</td>
                 <td>{{ $item->keterangan }}</td>
                 
+                {{-- TAMBAHAN: Data Tanggal Format WITA --}}
+                <td>
+                    {{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}
+                </td>
+
                 {{-- Foto Material --}}
                 <td>
                     @if($item->foto_path && file_exists(public_path('uploads/material_retur/' . $item->foto_path)))
