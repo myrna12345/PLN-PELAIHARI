@@ -6,14 +6,18 @@
 <div class="card-form-container mx-auto">
     <div class="card-form-header">
         <h2>Tambah Material Keluar</h2>
-        {{-- ALERT ERROR DIHAPUS, SUDAH DITANGANI DI layouts.app --}}
+        
+        {{-- Tampilkan error dari controller, misalnya stok tidak cukup --}}
+        @if(session('error'))
+            <div class="alert alert-danger text-center mb-3 mt-3">{{ session('error') }}</div>
+        @endif
     </div>
 
     <div class="card-form-body">
         <form action="{{ route('material_keluar.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            {{-- Nama Material --}}
+            {{-- Nama Material (Select) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
                 <select name="material_id" id="material_id" class="form-control-new" required>
@@ -21,15 +25,15 @@
                     @foreach($materialList as $material)
                         @php
                             $namaMaterial = strtoupper($material->nama_material);
-                            $satuanOtomatis = 'Buah';
-
+                            $satuanOtomatis = 'Buah'; // Default untuk MCB, KWH, dll
+                            
                             if (str_contains($namaMaterial, 'KABEL')) {
                                 $satuanOtomatis = 'Meter';
                             }
                         @endphp
-                        <option value="{{ $material->id }}"
-                            data-satuan="{{ $satuanOtomatis }}"
-                            {{ old('material_id') == $material->id ? 'selected' : '' }}>
+                        <option value="{{ $material->id }}" 
+                                data-satuan="{{ $satuanOtomatis }}"
+                                {{ old('material_id') == $material->id ? 'selected' : '' }}>
                             {{ $material->nama_material }}
                         </option>
                     @endforeach
@@ -38,15 +42,16 @@
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
-
+            
             <div class="d-flex-group-form">
-                {{-- Jumlah Material --}}
+                {{-- Jumlah Material Keluar --}}
                 <div class="form-group-new half-width">
                     <label for="jumlah_material">Jumlah Material Keluar</label>
-                    <input type="number"
-                        name="jumlah_material"
-                        id="jumlah_material"
-                        class="form-control-new"
+                    <input type="number" 
+                        name="jumlah_material" 
+                        id="jumlah_material" 
+                        class="form-control-new" 
+                        placeholder="Masukkan jumlah material" 
                         value="{{ old('jumlah_material') }}"
                         min="1"
                         required>
@@ -55,16 +60,18 @@
                     @enderror
                 </div>
 
-                {{-- Satuan Material --}}
+                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
                 <div class="form-group-new half-width">
                     <label for="satuan_material">Satuan Material</label>
-                    <input type="text"
-                        name="satuan_material"
-                        id="satuan_material"
-                        class="form-control-new"
-                        style="background-color:#f8f9fa; cursor:not-allowed;"
-                        value="{{ old('satuan_material') }}"
-                        readonly
+                    {{-- Menggunakan input readonly agar user tidak bisa mengubah, tapi data tetap terkirim ke server --}}
+                    <input type="text" 
+                        name="satuan_material" 
+                        id="satuan_material" 
+                        class="form-control-new" 
+                        style="background-color: #f8f9fa; cursor: not-allowed;"
+                        value="{{ old('satuan_material') }}" 
+                        placeholder="Satuan"
+                        readonly 
                         required>
                     @error('satuan_material')
                         <small style="color:red;">{{ $message }}</small>
@@ -75,10 +82,11 @@
             {{-- Nama Petugas --}}
             <div class="form-group-new">
                 <label for="nama_petugas">Nama Petugas</label>
-                <input type="text"
-                    name="nama_petugas"
-                    id="nama_petugas"
-                    class="form-control-new"
+                <input type="text" 
+                    name="nama_petugas" 
+                    id="nama_petugas" 
+                    class="form-control-new" 
+                    placeholder="Masukkan nama petugas" 
                     value="{{ old('nama_petugas') }}"
                     required>
                 @error('nama_petugas')
@@ -86,59 +94,65 @@
                 @enderror
             </div>
 
-            {{-- Keterangan --}}
             <div class="form-group-new">
                 <label for="keterangan">Keterangan</label>
-                <textarea
-                    name="keterangan"
-                    id="keterangan"
-                    class="form-control-new"
+                <textarea 
+                    name="keterangan" 
+                    id="keterangan" 
+                    class="form-control-new" 
                     rows="3"
+                    placeholder="Masukkan keterangan material keluar" 
                     required>{{ old('keterangan') }}</textarea>
                 @error('keterangan')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                <small style="color:red; font-style:italic;">*keterangan wajib diisi.</small>
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi.</small>
             </div>
 
-            {{-- Tanggal --}}
+            {{-- Tanggal dan Waktu --}}
             <div class="form-group-new">
-                <label>Tanggal dan Waktu</label>
-                <input type="text"
+                <label for="tanggal_display">Tanggal dan Waktu</label>
+                <input type="text" 
+                    id="tanggal_display" 
                     class="form-control-new"
                     value="{{ now('Asia/Makassar')->format('d M Y, H:i') }} WITA"
                     disabled>
-                <small class="text-muted">*Waktu otomatis terisi saat data disimpan.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Waktu otomatis terisi saat data disimpan.
+                </small>
             </div>
 
-            {{-- Foto Material --}}
+            {{-- Upload Foto Material--}}
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label>
-                <input type="file"
-                    name="foto"
-                    id="foto"
-                    class="form-control-new-file"
+                <input type="file" 
+                    name="foto" 
+                    id="foto" 
+                    class="form-control-new-file" 
                     accept="image/*"
                     required>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
             </div>
 
-            {{-- Foto Petugas --}}
+            {{-- Upload Foto Petugas --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label>
-                <input type="file"
-                    name="foto_petugas"
-                    id="foto_petugas"
-                    class="form-control-new-file"
+                <input type="file" 
+                    name="foto_petugas" 
+                    id="foto_petugas" 
+                    class="form-control-new-file" 
                     accept="image/*"
                     required>
                 @error('foto_petugas')
-                    <small style="color:red;">{{ $message }}</small>
+                    <small style="color: red;">{{ $message }}</small>
                 @enderror
+                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
             </div>
 
+            {{-- Tombol Aksi --}}
             <div class="form-actions">
                 <a href="{{ route('material_keluar.index') }}" class="btn-batal">Batal</a>
                 <button type="submit" class="btn-simpan">Simpan</button>
@@ -147,40 +161,51 @@
     </div>
 </div>
 
-{{-- SweetAlert Success --}}
+{{-- SweetAlert --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @if(session('success'))
 <script>
 Swal.fire({
     icon: 'success',
     title: 'Berhasil!',
     text: '{{ session('success') }}',
-    timer: 2000,
-    showConfirmButton: false
+    showConfirmButton: false,
+    timer: 2000
 });
 </script>
 @endif
 
-{{-- Script Satuan Otomatis --}}
+{{-- Script untuk Otomatisasi Satuan --}}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const materialSelect = document.getElementById('material_id');
     const satuanInput = document.getElementById('satuan_material');
 
-    materialSelect.addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        satuanInput.value = selected.getAttribute('data-satuan') || '';
+    materialSelect.addEventListener('change', function() {
+        // Ambil opsi yang dipilih
+        const selectedOption = this.options[this.selectedIndex];
+        
+        // Ambil atribut data-satuan
+        const satuanOtomatis = selectedOption.getAttribute('data-satuan');
+
+        if (satuanOtomatis) {
+            satuanInput.value = satuanOtomatis;
+        } else {
+            satuanInput.value = "";
+        }
     });
 });
 </script>
 
 <style>
-.d-flex-group-form {
-    display: flex;
-    gap: 20px;
-}
-.half-width {
-    flex: 1;
-}
+    .d-flex-group-form {
+        display: flex;
+        gap: 20px;
+    }
+    .d-flex-group-form .half-width {
+        flex: 1;
+    }
 </style>
+
 @endsection
