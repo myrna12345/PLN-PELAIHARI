@@ -11,7 +11,6 @@
     .table th { background-color: #f1f5f9; vertical-align: middle; font-size: 0.9rem; color: #334155; }
     .table td { vertical-align: middle; }
 
-    /* Filter Atas Sejajar Horizontal */
     .filter-row-top { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: nowrap; margin-bottom: 12px; }
     .search-wrapper-custom { position: relative; width: 300px; flex-shrink: 0; }
     .search-wrapper-custom i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
@@ -21,38 +20,17 @@
     .btn-cari-outline { background-color: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
     .btn-reset-grey { background-color: #64748b; color: #ffffff; border: none; }
 
-    /* Toolbar Bawah Sejajar Horizontal */
     .bottom-action-row { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
     .bottom-action-row label { font-size: 0.85rem; font-weight: 600; margin-bottom: 0; white-space: nowrap; }
     .bottom-action-row input { height: 34px; width: 140px; border-radius: 8px; border: 1px solid #cbd5e1; }
     .btn-pdf { background-color: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; font-weight: 600; white-space: nowrap; }
     .btn-excel { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; font-weight: 600; white-space: nowrap; }
 
-    /* PAGINATION MANUAL STYLE - POSISI UJUNG KIRI */
-    /* PAGINATION MANUAL STYLE - DIPERKECIL */
-.custom-pagination { 
-    display: flex; 
-    justify-content: flex-start; 
-    align-items: center; 
-    gap: 4px; /* Jarak antar tombol dipersempit */
-    margin-top: 10px; 
-    margin-bottom: 10px;
-}
-
-.page-btn { 
-    padding: 4px 10px; /* Ukuran padding diperkecil agar kotak lebih mungil */
-    border: 1px solid #dee2e6; 
-    background: white; 
-    color: #00467f; 
-    text-decoration: none; 
-    border-radius: 5px; 
-    font-size: 0.75rem; /* Ukuran tulisan diperkecil dari 0.85rem ke 0.75rem */
-    font-weight: 600;
-}
-
-.page-btn:hover { background-color: #f8fafc; }
-.page-btn.active { background-color: #00467f; color: white; border-color: #00467f; }
-.page-btn.disabled { color: #ccc; pointer-events: none; background-color: #f9f9f9; }
+    .custom-pagination { display: flex; justify-content: flex-start; align-items: center; gap: 4px; margin-top: 10px; margin-bottom: 10px; }
+    .page-btn { padding: 4px 10px; border: 1px solid #dee2e6; background: white; color: #00467f; text-decoration: none; border-radius: 5px; font-size: 0.75rem; font-weight: 600; }
+    .page-btn:hover { background-color: #f8fafc; }
+    .page-btn.active { background-color: #00467f; color: white; border-color: #00467f; }
+    .page-btn.disabled { color: #ccc; pointer-events: none; background-color: #f9f9f9; }
 </style>
 
 <div class="container py-3">
@@ -78,7 +56,8 @@
                     <tr>
                         <th width="50">No</th>
                         <th class="text-start">Nama Material</th>
-                        <th>Jumlah</th>
+                        <th width="100">Jumlah</th> {{-- Kolom Dipisah --}}
+                        <th width="100">Satuan</th> {{-- Kolom Dipisah --}}
                         <th>Tanggal (WITA)</th>
                         <th width="120">Foto Bukti</th>
                     </tr>
@@ -88,7 +67,9 @@
                         <tr>
                             <td class="text-center">{{ $histories->firstItem() + $index }}</td>
                             <td class="fw-bold text-uppercase">{{ $h->nama_material }}</td>
-                            <td class="text-center">+ {{ $h->jumlah }} {{ $h->satuan }}</td>
+                            {{-- Menghapus tanda + --}}
+                            <td class="text-center">{{ ltrim($h->jumlah, '+ ') }}</td>
+                            <td class="text-center text-uppercase">{{ $h->satuan }}</td>
                             <td class="text-center">{{ \Carbon\Carbon::parse($h->tanggal_input)->format('d/m/Y H:i') }} WITA</td>
                             <td class="text-center">
                                 @if($h->foto_path)
@@ -99,7 +80,8 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-center py-4 text-muted">Data tidak ditemukan.</td></tr>
+                        {{-- Colspan diubah menjadi 6 --}}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Data tidak ditemukan.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -110,7 +92,7 @@
             Menampilkan {{ $histories->firstItem() ?? 0 }} sampai {{ $histories->lastItem() ?? 0 }} dari {{ $histories->total() }} data
         </div>
 
-        {{-- PAGINATION MANUAL - UJUNG KIRI --}}
+        {{-- PAGINATION MANUAL --}}
         <div class="custom-pagination">
             @if ($histories->onFirstPage())
                 <span class="page-btn disabled">« Previous</span>
@@ -140,7 +122,6 @@
                 <a href="{{ route('material-history.excel', request()->query()) }}" class="btn btn-excel btn-sm d-flex align-items-center px-3 text-decoration-none"><i class="fas fa-file-excel me-2"></i> Unduh Excel</a>
             </form>
         </div>
-
     </div>
 </div>
 @endsection

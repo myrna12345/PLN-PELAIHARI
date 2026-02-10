@@ -261,4 +261,4 @@ class SiagaKeluarController extends Controller
             return Excel::download(new SiagaKeluarExport($dateStart, $dateEnd), 'Laporan_Siaga_Keluar.xlsx'); 
         }
     }
-}
+} 
