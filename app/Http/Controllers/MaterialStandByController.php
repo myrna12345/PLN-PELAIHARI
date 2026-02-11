@@ -5,21 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\MaterialStandBy;
 use App\Models\MaterialHistory;
-// use App\Models\MaterialRetur; // Tidak lagi digunakan untuk laporan ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\MaterialStandByExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Intervention\Image\Laravel\Facades\Image; // WAJIB: Library Kompresi
+use Intervention\Image\Laravel\Facades\Image; 
 
 class MaterialStandByController extends Controller
 {
     private $uploadFolder = 'uploads/material_stand_by';
 
     // ===============================
-    // 1. INDEX
+    // 1. INDEX (SEMUA BISA AKSES)
     // ===============================
     public function index(Request $request)
     {
@@ -49,7 +48,7 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 2. CREATE
+    // 2. CREATE (SEMUA BISA AKSES)
     // ===============================
     public function create()
     {
@@ -62,7 +61,7 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 3. STORE
+    // 3. STORE (SEMUA BISA AKSES - Redirect ke Index)
     // ===============================
     public function store(Request $request)
     {
@@ -70,7 +69,7 @@ class MaterialStandByController extends Controller
             'material_id' => 'required|exists:materials,id',
             'jumlah'      => 'required|integer|min:1',
             'satuan'      => 'required|string',
-            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:10240', // Max 10MB sebelum dikompres
+            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:10240',
         ]);
 
         $path = public_path($this->uploadFolder);
@@ -78,11 +77,9 @@ class MaterialStandByController extends Controller
             File::makeDirectory($path, 0755, true);
         }
 
-        // --- LOGIKA BARU: KOMPRESI FOTO ---
-        // 1. Paksa nama file berakhiran .jpg
+        // --- KOMPRESI FOTO ---
         $fotoName = time() . '_' . uniqid() . '.jpg';
         
-        // 2. Baca file -> Resize -> Convert JPG Quality 60 -> Simpan
         $image = Image::read($request->file('foto'));
         $image->scale(width: 800);
         $encoded = $image->toJpeg(60);
@@ -97,13 +94,11 @@ class MaterialStandByController extends Controller
             ->first();
 
         if ($item) {
-            // Update jumlah dan foto terbaru
             $item->jumlah += $validated['jumlah'];
             $item->foto_path = $fotoName;
             $item->tanggal = now('Asia/Makassar');
             $item->save();
         } else {
-            // Buat data baru
             MaterialStandBy::create([
                 'material_id' => $validated['material_id'],
                 'nama_material_lengkap' => $material->nama_material,
@@ -128,13 +123,18 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 4. EDIT
+    // 4. EDIT (DILARANG UNTUK SATPAM)
     // ===============================
     public function edit($id)
     {
+        // [SECURITY CHECK]
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material-stand-by.index')
+                ->with('error', 'Akses Ditolak. Satpam tidak boleh mengedit data.');
+        }
+
         $item = MaterialStandBy::findOrFail($id);
         
-        // FILTER: Hanya ambil material kategori 'teknik' (Bukan Siaga)
         $materials = Material::where('kategori', 'teknik')
                              ->orderBy('nama_material')
                              ->get();
@@ -143,10 +143,16 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 5. UPDATE
+    // 5. UPDATE (DILARANG UNTUK SATPAM)
     // ===============================
     public function update(Request $request, $id)
     {
+        // [SECURITY CHECK]
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material-stand-by.index')
+                ->with('error', 'Akses Ditolak. Satpam tidak boleh mengubah data.');
+        }
+
         $item = MaterialStandBy::findOrFail($id);
 
         $validated = $request->validate([
@@ -162,20 +168,20 @@ class MaterialStandByController extends Controller
                 File::delete($path . '/' . $item->foto_path);
             }
 
-            // --- LOGIKA BARU: KOMPRESI FOTO SAAT UPDATE ---
+            // --- KOMPRESI FOTO ---
             $fotoName = time() . '_' . uniqid() . '.jpg';
             
             $image = Image::read($request->file('foto'));
             $image->scale(width: 800);
             $encoded = $image->toJpeg(60);
             $encoded->save($path . '/' . $fotoName);
-            // ----------------------------------------------
+            // ---------------------
 
             $item->foto_path = $fotoName;
         }
 
         $item->jumlah = $validated['jumlah'];
-        $item->tanggal = now('Asia/Makassar'); // Update tanggal ke waktu edit
+        $item->tanggal = now('Asia/Makassar'); 
         $item->save();
 
         return redirect()->route('material-stand-by.index')
@@ -183,10 +189,16 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 6. DELETE
+    // 6. DELETE (DILARANG UNTUK SATPAM)
     // ===============================
     public function destroy($id)
     {
+        // [SECURITY CHECK]
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material-stand-by.index')
+                ->with('error', 'Akses Ditolak. Satpam tidak boleh menghapus data.');
+        }
+
         $item = MaterialStandBy::findOrFail($id);
 
         $path = public_path($this->uploadFolder . '/' . $item->foto_path);
@@ -201,10 +213,16 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 7. DOWNLOAD PDF (MURNI MATERIAL STAND BY)
+    // 7. DOWNLOAD PDF (DILARANG UNTUK SATPAM)
     // ===============================
     public function downloadPdf(Request $request)
     {
+        // [SECURITY CHECK]
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()
+                ->with('error', 'Akses Ditolak. Satpam tidak memiliki izin download PDF.');
+        }
+
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
@@ -213,8 +231,6 @@ class MaterialStandByController extends Controller
         $start = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $end   = Carbon::parse($request->tanggal_akhir)->endOfDay();
 
-        // REVISI: Hanya mengambil data dari tabel MaterialStandBy
-        // Tidak lagi digabung dengan MaterialRetur sesuai permintaan
         $items = MaterialStandBy::with('material')
             ->whereBetween('tanggal', [$start, $end])
             ->latest('tanggal')
@@ -236,10 +252,16 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 8. DOWNLOAD EXCEL
+    // 8. DOWNLOAD EXCEL (DILARANG UNTUK SATPAM)
     // ===============================
     public function downloadExcel(Request $request)
     {
+        // [SECURITY CHECK]
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()
+                ->with('error', 'Akses Ditolak. Satpam tidak memiliki izin download Excel.');
+        }
+
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
@@ -256,12 +278,19 @@ class MaterialStandByController extends Controller
 
     public function showFoto($id)
     {
+        // Ini untuk melihat foto di browser (bukan download), jadi Satpam boleh akses
         $item = MaterialStandBy::findOrFail($id);
         return view('material_stand_by.show_foto', compact('item'));
     }
 
     public function downloadFoto($id)
     {
+        // [SECURITY CHECK]
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()
+                ->with('error', 'Akses Ditolak. Satpam tidak boleh mendownload file asli.');
+        }
+
         $item = MaterialStandBy::findOrFail($id);
 
         if (!$item->foto_path) {

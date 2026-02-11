@@ -48,7 +48,9 @@
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
+                    @if(auth()->user()->role !== 'satpam')
                     <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -70,10 +72,12 @@
                                     class="table-foto zoomable"
                                     style="max-width:80px; margin-bottom:5px; cursor:pointer;">
 
+                                @if(auth()->user()->role !== 'satpam')
                                 <a href="{{ route('material_kembali.download-foto', $item->id) }}"
                                     class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 <span class="text-danger">Tidak ada</span>
                             @endif
@@ -85,15 +89,18 @@
                                     class="table-foto zoomable"
                                     style="max-width:80px; margin-bottom:5px; cursor:pointer;">
 
+                                @if(auth()->user()->role !== 'satpam')
                                 <a href="{{ route('material_kembali.download-foto-petugas', $item->id) }}"
                                     class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 <span class="text-danger">Tidak ada</span>
                             @endif
                         </td>
 
+                        @if(auth()->user()->role !== 'satpam')
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('material_kembali.edit', $item->id) }}" class="btn-edit">Edit</a>
@@ -105,10 +112,11 @@
                                 </form>
                             </div>
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" style="text-align:center; color:#6c757d; padding:50px 0;">
+                        <td colspan="{{ auth()->user()->role !== 'satpam' ? 9 : 8 }}" style="text-align:center; color:#6c757d; padding:50px 0;">
                             Data tidak ditemukan.
                         </td>
                     </tr>
@@ -121,6 +129,7 @@
         {{ $materialKembali->appends(request()->query())->links() }}
     </div>
 
+    @if(auth()->user()->role !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('material_kembali.download') }}" method="POST" class="form-download">
             @csrf
@@ -144,6 +153,7 @@
             </button>
         </form>
     </div>
+    @endif
 
 </div>
 

@@ -72,22 +72,23 @@ class MaterialKembaliController extends Controller
     }
 
     public function edit($id)
-{
-    // Ubah nama variabel dari $data menjadi $materialKembali
-    $materialKembali = MaterialKembali::findOrFail($id);
+    {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material_kembali.index')->with('error', 'Akses ditolak.');
+        }
 
-    // Mengambil list material untuk dropdown
-    $materialList = Material::where('kategori', '!=', 'siaga')
-                            ->orWhereNull('kategori')
-                            ->orderBy('nama_material')
-                            ->get();
+        $materialKembali = MaterialKembali::findOrFail($id);
 
-    // List satuan
-    $satuanList = ['Buah', 'Meter'];
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->orderBy('nama_material')
+                                ->get();
 
-    // Pastikan variabel yang dipassing bernama 'materialKembali'
-    return view('material_kembali.edit', compact('materialKembali', 'materialList', 'satuanList'));
-}
+        $satuanList = ['Buah', 'Meter'];
+
+        return view('material_kembali.edit', compact('materialKembali', 'materialList', 'satuanList'));
+    }
 
     public function store(Request $request)
     {
@@ -102,7 +103,6 @@ class MaterialKembaliController extends Controller
 
         $validated['tanggal'] = now('Asia/Makassar');
 
-        // Inisialisasi Image Manager v3
         $manager = new ImageManager(new Driver());
 
         $uploadPath = public_path('uploads/material_kembali');
@@ -110,17 +110,15 @@ class MaterialKembaliController extends Controller
             File::makeDirectory($uploadPath, 0755, true, true);
         }
 
-        // --- Simpan & Kompres Foto Material ---
         if ($request->hasFile('foto')) {
             $fileName = time() . '_foto_' . $request->file('foto')->getClientOriginalName();
             $image = $manager->read($request->file('foto'));
-            $image->scale(width: 800); // Resize lebar ke 800px (proporsional)
-            $image->toJpeg(70)->save($uploadPath . '/' . $fileName); // Simpan kualitas 70%
+            $image->scale(width: 800); 
+            $image->toJpeg(70)->save($uploadPath . '/' . $fileName); 
             
             $validated['foto'] = 'uploads/material_kembali/' . $fileName;
         }
 
-        // --- Simpan & Kompres Foto Petugas ---
         if ($request->hasFile('foto_petugas')) {
             $fileNamePetugas = time() . '_petugas_' . $request->file('foto_petugas')->getClientOriginalName();
             $imagePetugas = $manager->read($request->file('foto_petugas'));
@@ -147,6 +145,11 @@ class MaterialKembaliController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material_kembali.index')->with('error', 'Akses ditolak.');
+        }
+
         $materialKembali = MaterialKembali::findOrFail($id);
         $jumlahLama = $materialKembali->jumlah_material;
         $materialIdLama = $materialKembali->material_id;
@@ -163,7 +166,6 @@ class MaterialKembaliController extends Controller
         $manager = new ImageManager(new Driver());
         $uploadPath = public_path('uploads/material_kembali');
 
-        // Logika penyesuaian stok (Tetap sama)
         $materialIdBaru = $validated['material_id'];
         $jumlahBaru = $validated['jumlah_material'];
 
@@ -185,7 +187,6 @@ class MaterialKembaliController extends Controller
             }
         }
 
-        // --- Update & Kompres Foto Material ---
         if ($request->hasFile('foto')) {
             if ($materialKembali->foto && File::exists(public_path($materialKembali->foto))) {
                 File::delete(public_path($materialKembali->foto));
@@ -197,7 +198,6 @@ class MaterialKembaliController extends Controller
             $validated['foto'] = 'uploads/material_kembali/' . $fileName;
         }
 
-        // --- Update & Kompres Foto Petugas ---
         if ($request->hasFile('foto_petugas')) {
             if ($materialKembali->foto_petugas && File::exists(public_path($materialKembali->foto_petugas))) {
                 File::delete(public_path($materialKembali->foto_petugas));
@@ -215,6 +215,11 @@ class MaterialKembaliController extends Controller
 
     public function destroy($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material_kembali.index')->with('error', 'Akses ditolak.');
+        }
+
         $data = MaterialKembali::findOrFail($id);
         $materialStok = MaterialStandBy::where('material_id', $data->material_id)->first();
         if ($materialStok) $materialStok->decrement('jumlah', $data->jumlah_material);
@@ -225,8 +230,6 @@ class MaterialKembaliController extends Controller
         $data->delete();
         return redirect()->route('material_kembali.index')->with('success', 'Data berhasil dihapus!');
     }
-
-    // --- Fungsi Pendukung Lainnya (Sama Seperti Sebelumnya) ---
 
     public function lihat($id)
     {
@@ -253,6 +256,11 @@ class MaterialKembaliController extends Controller
 
     public function downloadFoto($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialKembali::findOrFail($id);
         $filePath = public_path($item->foto);
         if ($item->foto && File::exists($filePath)) return response()->download($filePath);
@@ -261,6 +269,11 @@ class MaterialKembaliController extends Controller
 
     public function downloadFotoPetugas($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialKembali::findOrFail($id);
         $filePath = public_path($item->foto_petugas);
         if ($item->foto_petugas && File::exists($filePath)) return response()->download($filePath);
@@ -268,44 +281,47 @@ class MaterialKembaliController extends Controller
     }
 
     public function downloadReport(Request $request)
-{
-    $request->validate([
-        'tanggal_mulai' => 'required|date',
-        'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
-    ]);
+    {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
 
-    $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
-    $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
-    $filename = 'laporan_material_kembali_' . $tanggal_mulai->format('Ymd') . '_sd_' . $tanggal_akhir->format('Ymd');
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
 
-    $items = MaterialKembali::with('material')
-        ->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])
-        ->orderBy('tanggal', 'asc')
-        ->get();
+        $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+        $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+        $filename = 'laporan_material_kembali_' . $tanggal_mulai->format('Ymd') . '_sd_' . $tanggal_akhir->format('Ymd');
 
-    // --- TAMBAHKAN LOGIKA STOK DI SINI ---
-    $items->each(function ($item) {
-        $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
-        $item->stok_saat_ini = $materialStok 
-            ? $materialStok->jumlah . ' ' . $materialStok->satuan 
-            : '0';
-    });
-    // -------------------------------------
+        $items = MaterialKembali::with('material')
+            ->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])
+            ->orderBy('tanggal', 'asc')
+            ->get();
 
-    if ($request->has('submit_pdf')) {
-        $pdf = Pdf::loadView('material_kembali.laporan_pdf', [
-            'items' => $items, 
-            'tanggal_mulai' => $tanggal_mulai, 
-            'tanggal_akhir' => $tanggal_akhir
-        ])->setPaper('a4', 'portrait'); // Paksa portrait agar rapi
-        
-        return $pdf->download($filename . '.pdf');
+        $items->each(function ($item) {
+            $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
+            $item->stok_saat_ini = $materialStok 
+                ? $materialStok->jumlah . ' ' . $materialStok->satuan 
+                : '0';
+        });
+
+        if ($request->has('submit_pdf')) {
+            $pdf = Pdf::loadView('material_kembali.laporan_pdf', [
+                'items' => $items, 
+                'tanggal_mulai' => $tanggal_mulai, 
+                'tanggal_akhir' => $tanggal_akhir
+            ])->setPaper('a4', 'portrait'); 
+            
+            return $pdf->download($filename . '.pdf');
+        }
+
+        if ($request->has('submit_excel')) {
+            return Excel::download(new MaterialKembaliExport($tanggal_mulai, $tanggal_akhir), $filename . '.xlsx');
+        }
+
+        return redirect()->back()->with('error', 'Terjadi kesalahan.');
     }
-
-    if ($request->has('submit_excel')) {
-        return Excel::download(new MaterialKembaliExport($tanggal_mulai, $tanggal_akhir), $filename . '.xlsx');
-    }
-
-    return redirect()->back()->with('error', 'Terjadi kesalahan.');
-}
 }

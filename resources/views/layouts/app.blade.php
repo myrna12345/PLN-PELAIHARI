@@ -58,7 +58,7 @@
         }
 
         /* Sidebar Menu Styles */
-        .sidebar-menu { list-style: none; padding: 0; }
+        .sidebar-menu { list-style: none; padding: 0; margin-bottom: 0; }
         .sidebar-menu li { margin-bottom: 15px; }
         .sidebar-menu a {
             color: #f8f9fa;
@@ -206,10 +206,6 @@
         .widget-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; }
         .widget-info p { margin: 0; font-size: 0.95rem; }
 
-        /* === 7. CSS MODAL FOTO (DIHAPUS DARI LAYOUT AGAR TIDAK DOUBLE) === */
-        /* Kode CSS modal tetap ada di layout untuk keperluan styling global jika dibutuhkan, 
-           tapi HTML dan JS-nya dihapus agar tidak bentrok dengan halaman index */
-        
         /* === 8. RESPONSIVE (HP & TABLET) === */
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
@@ -237,6 +233,46 @@
             .form-group-tanggal-filter input[type="date"], .form-group-tanggal input[type="date"] { display: flex !important; align-items: center !important; padding: 0 15px !important; }
             .search-bar, .form-group-tanggal-filter, .form-group-tanggal { width: 100% !important; }
         }
+
+        /* === 9. CSS LOGOUT BUTTON (TAMBAHAN BARU) === */
+        .sidebar-footer {
+            margin-top: auto; /* Ini yang membuat tombol menempel di bagian bawah */
+            border-top: 1px solid #4f565d;
+            padding-top: 15px;
+        }
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: #d06368ff; /* Warna kemerahan agar kontras sebagai tombol keluar */
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            white-space: nowrap;
+        }
+        .btn-logout:hover {
+            background-color: #495057;
+            color: #ff6b6b;
+        }
+        .btn-logout i {
+            width: 30px;
+            text-align: center;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .btn-logout span {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -249,48 +285,93 @@
             </div>
             <button class="sidebar-close-btn" id="sidebarCloseBtn">&times;</button>
         </div>
+        
+        {{-- MENU SIDEBAR START --}}
         <ul class="sidebar-menu">
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
             
+            {{-- PERBAIKAN: History Material Standby HANYA UNTUK ADMIN --}}
+            @if(strtolower(auth()->user()->role) === 'admin')
             <li>
                 <a href="{{ route('material-history.index') }}" class="{{ request()->routeIs('material-history.index') ? 'active' : '' }}">
                     <i class="fas fa-history"></i> <span>History Material Standby</span>
                 </a>
             </li>
+            @endif
 
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.create') || request()->routeIs('material-retur.create') || request()->routeIs('material_keluar.create') || request()->routeIs('material_kembali.create') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-file-export"></i> <span>Material Fast Moving</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
+                    
+                    {{-- Sembunyikan Material Stand By dari Satpam --}}
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
+                    @endif
+                    
+                    {{-- Sembunyikan dari Gudang --}}
+                    @if(strtolower(auth()->user()->role) !== 'gudang')
                     <li><a href="{{ route('material_keluar.create') }}" class="{{ request()->routeIs('material_keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
                     <li><a href="{{ route('material_kembali.create') }}" class="{{ request()->routeIs('material_kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
                     <li><a href="{{ route('material-retur.create') }}" class="{{ request()->routeIs('material-retur.create') ? 'sub-active' : '' }}"><i class="fas fa-undo"></i> <span>Material Retur</span></a></li>
+                    @endif
                 </ul>
             </li>
 
+            {{-- Sembunyikan Halaman Material Siaga sepenuhnya dari Gudang --}}
+            @if(strtolower(auth()->user()->role) !== 'gudang')
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.create') || request()->routeIs('siaga-kembali.create') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Material Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
+                    
+                    {{-- TAMBAHAN: Sembunyikan Form Siaga Stand By dari Satpam --}}
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
+                    @endif
+                    
                     <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
                     <li><a href="{{ route('siaga-kembali.create') }}" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
                 </ul>
             </li>
+            @endif
 
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.index') || request()->routeIs('material-retur.index') || request()->routeIs('material_keluar.index') || request()->routeIs('material_kembali.index') || request()->routeIs('material-siaga-stand-by.index') || request()->routeIs('siaga-keluar.index') || request()->routeIs('siaga-kembali.index') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-scroll"></i> <span>Laporan</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
+                    
+                    {{-- Sembunyikan Laporan Material Stand By dari Satpam --}}
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
+                    @endif
+                    
+                    {{-- Sembunyikan laporan lainnya dari Gudang --}}
+                    @if(strtolower(auth()->user()->role) !== 'gudang')
                     <li><a href="{{ route('material_keluar.index') }}" class="{{ request()->routeIs('material_keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
                     <li><a href="{{ route('material_kembali.index') }}" class="{{ request()->routeIs('material_kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
                     <li><a href="{{ route('material-retur.index') }}" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}"><i class="fas fa-undo"></i> <span>Material Retur</span></a></li>
                     <hr style="border-top: 1px solid #4f565d; margin: 5px 0;">
+                    
+                    {{-- PERUBAHAN: Laporan Siaga Stand By KINI BISA DIAKSES OLEH SATPAM --}}
                     <li><a href="{{ route('material-siaga-stand-by.index') }}" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
+                    
                     <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
                     <li><a href="{{ route('siaga-kembali.index') }}" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
+                    @endif
                 </ul>
             </li>
         </ul>
+        {{-- MENU SIDEBAR END --}}
+
+        {{-- BAGIAN TOMBOL LOGOUT --}}
+        <div class="sidebar-footer">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </button>
+            </form>
+        </div>
+        {{-- AKHIR BAGIAN LOGOUT --}}
+
     </aside>
 
     <main class="main-content">
@@ -301,7 +382,6 @@
         <div class="main-content-inner">
             @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
             @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
-            {{-- Peringatan validasi dihapus dari sini karena akan ditangani oleh masing-masing form agar lebih rapi --}}
             
             @yield('content')
         </div>
@@ -309,9 +389,6 @@
 </div>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-{{-- MODAL GLOBAL DIHAPUS (Hapus baris di bawah ini agar tidak konflik dengan modal lokal di halaman index) --}}
-{{-- <div id="fotoModal" class="modal-overlay"><span class="modal-close" id="modalCloseButton">&times;</span><div class="modal-content"><img id="modalImage" class="modal-image" src="" alt="Foto Material"></div></div> --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -344,14 +421,6 @@ document.addEventListener('DOMContentLoaded', function() {
             parent.classList.toggle('open');
         });
     });
-
-    // SCRIPT MODAL GLOBAL DIHAPUS AGAR TIDAK KONFLIK
-    // const modal = document.getElementById('fotoModal');
-    // const modalImg = document.getElementById('modalImage');
-    // const modalClose = document.getElementById('modalCloseButton');
-    // document.body.addEventListener('click', e => { if (e.target.classList.contains('table-foto')) { modal.style.display = 'flex'; modalImg.src = e.target.src; } });
-    // if(modalClose) modalClose.addEventListener('click', () => modal.style.display = 'none');
-    // if(modal) modal.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
 });
 </script>
 </body>

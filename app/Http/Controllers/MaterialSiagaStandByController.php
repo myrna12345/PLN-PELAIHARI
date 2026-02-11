@@ -13,7 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class MaterialSiagaStandByController extends Controller
 {
-    // --- 1. INDEX ---
+    // --- 1. INDEX (Dapat diakses oleh Satpam) ---
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -41,6 +41,10 @@ class MaterialSiagaStandByController extends Controller
     // --- 2. CREATE ---
     public function create()
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        }
+
         $materials = Material::where('kategori', 'siaga')->get();
         return view('material-siaga.create', compact('materials'));
     }
@@ -70,7 +74,7 @@ class MaterialSiagaStandByController extends Controller
             'tanggal'               => $validatedData['tanggal'],
             'nama_petugas'          => $validatedData['nama_petugas'] ?? null, 
             'jumlah_siaga_standby'  => $validatedData['jumlah_siaga_standby'] ?? 1,
-            'unggah_foto'           => $path, // Kolom ini yang menyimpan path di DB
+            'unggah_foto'           => $path,
             'status'                => 'Ready',
         ]);
 
@@ -80,6 +84,10 @@ class MaterialSiagaStandByController extends Controller
     // --- 4. EDIT ---
     public function edit($id)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        }
+
         $material = MaterialSiagaStandBy::findOrFail($id);
         return view('material-siaga.edit', compact('material'));
     }
@@ -87,6 +95,10 @@ class MaterialSiagaStandByController extends Controller
     // --- 5. UPDATE ---
     public function update(Request $request, $id)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        }
+
         $data = MaterialSiagaStandBy::findOrFail($id);
 
         $request->validate([
@@ -98,14 +110,12 @@ class MaterialSiagaStandByController extends Controller
             'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        $path = $data->unggah_foto; // Ambil path foto lama
+        $path = $data->unggah_foto; 
 
         if ($request->hasFile('unggah_foto')) {
-            // Hapus foto lama dari storage
             if ($path && Storage::disk('public')->exists($path)) { 
                 Storage::disk('public')->delete($path); 
             }
-            // Simpan foto baru
             $path = $request->file('unggah_foto')->store('foto_siaga', 'public');
         }
 
@@ -124,19 +134,22 @@ class MaterialSiagaStandByController extends Controller
     }
 
    public function showFoto($id) 
-{
-    $item = MaterialSiagaStandBy::findOrFail($id);
-    
-    // Gunakan 'unggah_foto' sesuai dengan fungsi store Anda
-    if (!$item->unggah_foto || !Storage::disk('public')->exists($item->unggah_foto)) {
-        // Jika file fisik tidak ada di storage/app/public/foto_siaga
-        abort(404, 'File fisik tidak ditemukan di folder storage.');
+    {
+        $item = MaterialSiagaStandBy::findOrFail($id);
+        
+        if (!$item->unggah_foto || !Storage::disk('public')->exists($item->unggah_foto)) {
+            abort(404, 'File fisik tidak ditemukan di folder storage.');
+        }
+        
+        return Storage::disk('public')->response($item->unggah_foto);
     }
-    
-    return Storage::disk('public')->response($item->unggah_foto);
-}
+
     public function downloadFoto($id)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialSiagaStandBy::findOrFail($id);
         
         if ($item->unggah_foto && Storage::disk('public')->exists($item->unggah_foto)) {
@@ -149,6 +162,10 @@ class MaterialSiagaStandByController extends Controller
     // --- 6. DESTROY ---
     public function destroy($id)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialSiagaStandBy::findOrFail($id);
 
         if ($item->unggah_foto) {
@@ -162,6 +179,10 @@ class MaterialSiagaStandByController extends Controller
     // --- 7. UPDATE STATUS ---
     public function updateStatus(Request $request, $id)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        }
+
         $request->validate(['status' => 'required|in:Ready,Terpakai']);
         $item = MaterialSiagaStandBy::findOrFail($id);
         $item->status = $request->status;
@@ -172,6 +193,10 @@ class MaterialSiagaStandByController extends Controller
     // --- 8. EXPORT ---
     public function export(Request $request)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         $exportType = $request->input('export');
@@ -191,10 +216,8 @@ class MaterialSiagaStandByController extends Controller
             return back()->with('error', 'Data kosong.');
         }
         
-        // --- PROSES EXPORT PDF ---
         if ($exportType === 'pdf') {
             foreach ($data as $item) {
-                // Konversi foto ke Base64 agar muncul di PDF
                 if ($item->unggah_foto && Storage::disk('public')->exists($item->unggah_foto)) {
                     $path = storage_path('app/public/' . $item->unggah_foto);
                     $type = pathinfo($path, PATHINFO_EXTENSION);
@@ -210,7 +233,6 @@ class MaterialSiagaStandByController extends Controller
             return $pdf->download('material-siaga-' . now()->format('Ymd_His') . '.pdf');
         }
 
-        // --- PROSES EXPORT EXCEL ---
         if ($exportType === 'excel') {
             $exportData[] = ['No', 'Nama Material & Nomor Meter', 'Stand Meter', 'Tanggal Input', 'Status'];
             foreach ($data as $index => $item) {

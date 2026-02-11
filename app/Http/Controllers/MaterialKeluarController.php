@@ -114,6 +114,10 @@ class MaterialKeluarController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material_keluar.index')->with('error', 'Akses ditolak.');
+        }
+
         $data = MaterialKeluar::findOrFail($id);
         $jumlahLama = $data->jumlah_material;
         $materialIdLama = $data->material_id;
@@ -172,6 +176,10 @@ class MaterialKeluarController extends Controller
 
     public function destroy($id)
     {
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material_keluar.index')->with('error', 'Akses ditolak.');
+        }
+
         $data = MaterialKeluar::findOrFail($id);
         $stok = MaterialStandBy::where('material_id', $data->material_id)->first();
         if ($stok) $stok->increment('jumlah', $data->jumlah_material);
@@ -189,6 +197,10 @@ class MaterialKeluarController extends Controller
     }
 
     public function edit($id) {
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material_keluar.index')->with('error', 'Akses ditolak.');
+        }
+
         $data = MaterialKeluar::findOrFail($id);
         $materialList = Material::where('kategori', '!=', 'siaga')->orWhereNull('kategori')->orderBy('nama_material', 'asc')->get();
         $satuanList = ['Buah', 'Meter'];
@@ -209,6 +221,10 @@ class MaterialKeluarController extends Controller
 
     public function downloadFoto($id)
     {
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialKeluar::findOrFail($id);
         $filePath = public_path($item->foto);
         if ($item->foto && File::exists($filePath)) {
@@ -219,6 +235,10 @@ class MaterialKeluarController extends Controller
 
     public function downloadFotoPetugas($id)
     {
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialKeluar::findOrFail($id);
         $filePath = public_path($item->foto_petugas);
         if ($item->foto_petugas && File::exists($filePath)) {
@@ -229,6 +249,10 @@ class MaterialKeluarController extends Controller
 
    public function downloadReport(Request $request)
 {
+    if (auth()->user()->role === 'satpam') {
+        return redirect()->back()->with('error', 'Akses ditolak.');
+    }
+
     $request->validate([
         'tanggal_mulai' => 'required|date',
         'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',

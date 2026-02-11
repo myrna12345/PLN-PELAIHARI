@@ -239,7 +239,6 @@
                 <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             
-            {{-- Menggunakan class form-control-tanggal agar tinggi sama --}}
             <div class="form-group-tanggal-filter">
                 <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
             </div>
@@ -265,7 +264,10 @@
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
+                    {{-- Sembunyikan Header Aksi dari Satpam --}}
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -293,9 +295,13 @@
                                      class="table-foto" 
                                      onclick="openModal(this)"
                                      alt="Foto Material">
+                                
+                                {{-- Sembunyikan Download Foto dari Satpam --}}
+                                @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 <span>-</span>
                             @endif
@@ -308,15 +314,20 @@
                                      class="table-foto" 
                                      onclick="openModal(this)"
                                      alt="Foto Petugas">
-                                {{-- Mengubah href agar sama dengan style button download --}}
-                                <a href="{{ asset('uploads/siaga_keluar/' . $item->foto_petugas) }}" download class="btn-foto-download">
+                                
+                                {{-- Sembunyikan Download Foto Petugas dari Satpam --}}
+                                @if(strtolower(auth()->user()->role) !== 'satpam')
+                                <a href="{{ route('siaga-keluar.download-foto-petugas', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 <span>-</span>
                             @endif
                         </td>
 
+                        {{-- Sembunyikan Tombol Aksi dari Satpam --}}
+                        @if(strtolower(auth()->user()->role) !== 'satpam')
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('siaga-keluar.edit', $item->id) }}" class="btn btn-edit">
@@ -330,10 +341,11 @@
                                 </form>
                             </div>
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
+                        <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 10 : 9 }}" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
                             Data tidak ditemukan.
                         </td>
                     </tr>
@@ -346,6 +358,8 @@
         {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>
 
+    {{-- Sembunyikan Form Download Laporan dari Satpam --}}
+    @if(strtolower(auth()->user()->role) !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('siaga-keluar.download-report') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
@@ -365,6 +379,7 @@
             </button>
         </form>
     </div>
+    @endif
 </div>
 
 {{-- MODAL POP-UP IMAGE --}}

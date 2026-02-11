@@ -126,6 +126,11 @@ class SiagaKeluarController extends Controller
 
     public function edit(SiagaKeluar $siagaKeluar)
     {
+        // Proteksi Satpam
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('siaga-keluar.index')->with('error', 'Akses ditolak.');
+        }
+
         $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P'];
         $materials = Material::where('kategori', 'siaga')
                              ->whereIn('nama_material', $allowedMaterials)
@@ -137,6 +142,11 @@ class SiagaKeluarController extends Controller
 
     public function update(Request $request, SiagaKeluar $siagaKeluar)
     {
+        // Proteksi Satpam
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('siaga-keluar.index')->with('error', 'Akses ditolak.');
+        }
+
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nomor_meter' => 'required|string|max:255', 
@@ -203,6 +213,11 @@ class SiagaKeluarController extends Controller
 
     public function destroy(SiagaKeluar $siagaKeluar) 
     {
+        // Proteksi Satpam
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('siaga-keluar.index')->with('error', 'Akses ditolak.');
+        }
+
         if ($siagaKeluar->foto_path) {
             $path = public_path($this->uploadFolder . '/' . $siagaKeluar->foto_path);
             if (File::exists($path)) { File::delete($path); }
@@ -220,6 +235,11 @@ class SiagaKeluarController extends Controller
     
     public function downloadFoto(SiagaKeluar $siagaKeluar)
     {
+        // Proteksi Satpam
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $path = public_path($this->uploadFolder . '/' . $siagaKeluar->foto_path);
         if (File::exists($path)) { return response()->download($path); }
         return redirect()->back()->with('error', 'File foto tidak ditemukan.');
@@ -227,6 +247,11 @@ class SiagaKeluarController extends Controller
     
     public function downloadFotoPetugas(SiagaKeluar $siagaKeluar)
     {
+        // Proteksi Satpam
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $path = public_path($this->uploadFolder . '/' . $siagaKeluar->foto_petugas);
         if (File::exists($path)) { return response()->download($path); }
         return redirect()->back()->with('error', 'File tidak ditemukan.');
@@ -234,6 +259,11 @@ class SiagaKeluarController extends Controller
 
     public function downloadReport(Request $request)
     {
+        // Proteksi Satpam
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
@@ -261,4 +291,4 @@ class SiagaKeluarController extends Controller
             return Excel::download(new SiagaKeluarExport($dateStart, $dateEnd), 'Laporan_Siaga_Keluar.xlsx'); 
         }
     }
-} 
+}

@@ -189,8 +189,8 @@
     display: block;
 }
 
-/* CSS MODAL POP-UP */
-.image-modal {
+/* PERBAIKAN CSS MODAL POP-UP: Kembali ke Fixed agar di tengah layar */
+#imageModalSiagaKembali {
     display: none; 
     position: fixed; 
     z-index: 9999; 
@@ -203,7 +203,7 @@
     justify-content: center;
     align-items: center;
 }
-.image-modal-content {
+#imageModalSiagaKembali .image-modal-content {
     margin: auto;
     display: block;
     width: auto; 
@@ -213,7 +213,7 @@
     border-radius: 4px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
-.close-modal {
+#imageModalSiagaKembali .close-modal {
     position: absolute;
     top: 20px;
     right: 35px;
@@ -223,7 +223,7 @@
     cursor: pointer;
     z-index: 10001;
 }
-.close-modal:hover {
+#imageModalSiagaKembali .close-modal:hover {
     color: #ccc;
 }
 </style>
@@ -239,7 +239,6 @@
                 <input type="text" name="search" placeholder="Cari Material/Petugas" value="{{ request('search') }}">
             </div>
             
-            {{-- Menggunakan class form-control-tanggal agar tinggi sama --}}
             <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
             <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
             
@@ -261,7 +260,9 @@
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -290,9 +291,12 @@
                                      class="table-foto" 
                                      onclick="openModalSiagaKembali(this)"
                                      alt="Foto Material">
+                                
+                                @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-kembali.download-foto', $item->id) }}" class="btn-foto-download" title="Download Foto">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 <span>-</span>
                             @endif
@@ -305,14 +309,18 @@
                                      class="table-foto" 
                                      onclick="openModalSiagaKembali(this)"
                                      alt="Foto Petugas">
+                                
+                                @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-kembali.download-foto-petugas', $item->id) }}" class="btn-foto-download" title="Download Foto Petugas">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 <span>-</span>
                             @endif
                         </td>
 
+                        @if(strtolower(auth()->user()->role) !== 'satpam')
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('siaga-kembali.edit', $item->id) }}" class="btn btn-edit">
@@ -326,10 +334,11 @@
                                 </form>
                             </div>
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
+                        <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 10 : 9 }}" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
                             Data tidak ditemukan.
                         </td>
                     </tr>
@@ -342,6 +351,7 @@
         {{ $items->appends(request()->query())->links() }}
     </div>
 
+    @if(strtolower(auth()->user()->role) !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('siaga-kembali.download-report') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
@@ -360,6 +370,7 @@
             </button>
         </form>
     </div>
+    @endif
 
 </div>
 
@@ -369,7 +380,7 @@
     <img class="image-modal-content" id="img01SiagaKembali">
 </div>
 
-{{-- SCRIPT JAVASCRIPT (FUNGSI UNIK) --}}
+{{-- SCRIPT JAVASCRIPT --}}
 <script>
     function openModalSiagaKembali(element) {
         var modal = document.getElementById("imageModalSiagaKembali");

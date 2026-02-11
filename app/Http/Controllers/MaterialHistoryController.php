@@ -14,6 +14,11 @@ class MaterialHistoryController extends Controller
     // 1. Tampilan Utama
     public function index(Request $request)
     {
+        // [SECURITY CHECK] Hanya Admin yang boleh akses
+        if (strtolower(auth()->user()->role) !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Akses Ditolak. Halaman ini hanya untuk Admin.');
+        }
+
         $search = $request->query('search');
         $tanggalMulai = $request->query('tanggal_mulai');
         $tanggalAkhir = $request->query('tanggal_akhir');
@@ -36,10 +41,14 @@ class MaterialHistoryController extends Controller
         return view('material-history.index', compact('histories'));
     }
 
-    // 2. Export PDF - PERBAIKAN ERROR $query
+    // 2. Export PDF
     public function exportPDF(Request $request)
     {
-        // BARIS KUNCI: Kamu harus mendefinisikan $query di sini
+        // [SECURITY CHECK]
+        if (strtolower(auth()->user()->role) !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki izin untuk mengunduh laporan ini.');
+        }
+
         $query = MaterialHistory::query(); 
 
         if ($request->filled('search')) {
@@ -52,10 +61,8 @@ class MaterialHistoryController extends Controller
             $query->whereDate('tanggal_input', '<=', $request->tanggal_akhir);
         }
 
-        // Ambil data berdasarkan filter di atas
         $data = $query->orderBy('tanggal_input', 'desc')->get();
         
-        // Load view pdf_view dan kirim variabel $data
         $pdf = Pdf::loadView('material-history.pdf_view', compact('data'))
                   ->setPaper('a4', 'portrait');
 
@@ -64,8 +71,12 @@ class MaterialHistoryController extends Controller
 
     // 3. Export Excel
     public function exportExcel(Request $request)
-{
-    // Pastikan mengirim $request agar filter pencarian & tanggal terbawa ke Excel
-    return Excel::download(new MaterialHistoryExport($request), 'Riwayat_Material_Standby.xlsx');
-}
+    {
+        // [SECURITY CHECK]
+        if (strtolower(auth()->user()->role) !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki izin untuk mengunduh laporan ini.');
+        }
+
+        return Excel::download(new MaterialHistoryExport($request), 'Riwayat_Material_Standby.xlsx');
+    }
 }

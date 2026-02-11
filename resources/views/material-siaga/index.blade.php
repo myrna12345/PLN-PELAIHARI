@@ -82,7 +82,9 @@
                     <th width="15%">Tanggal(WITA)</th>
                     <th width="10%">Status</th>
                     <th width="15%">Foto</th>
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th width="20%">Aksi</th>
+                    @endif
                 </tr>
             </thead>
 
@@ -120,18 +122,21 @@
                                  style="cursor:pointer;border-radius:4px;border:1px solid #ddd"
                                  onclick="bukaFotoModal(this.src)">
                             <br>
+                            @if(strtolower(auth()->user()->role) !== 'satpam')
                             <a href="{{ route('material-siaga.download-foto', $data->id) }}" class="btn-download-custom">
                                 Download
                             </a>
+                            @endif
                         @else
                             <span style="font-size:11px;color:#aaa;">Tidak ada foto</span>
                         @endif
                     </td>
 
-                    {{-- AKSI --}}
+                    {{-- AKSI (Sembunyikan dari Satpam) --}}
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <td align="center">
                         <a href="{{ route('material-siaga.edit', $data->id) }}"
-                           style="background:#82c49e;color:white;padding:5px 10px;border-radius:4px;font-size:12px;">
+                           style="background:#82c49e;color:white;padding:5px 10px;border-radius:4px;font-size:12px; text-decoration: none;">
                            Edit
                         </a>
 
@@ -146,11 +151,11 @@
                             </button>
                         </form>
                     </td>
+                    @endif
                 </tr>
                 @empty
             <tr>
-                {{-- PERBAIKAN: Menambahkan text-center dan padding agar benar-benar di tengah --}}
-                <td colspan="6" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
+                <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 7 : 6 }}" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
                     Data tidak ditemukan.
                 </td>
             </tr>
@@ -159,7 +164,8 @@
         </table>
     </div>
 
-   {{-- FOOTER EXPORT --}}
+   {{-- FOOTER EXPORT (Sembunyikan dari Satpam) --}}
+@if(strtolower(auth()->user()->role) !== 'satpam')
 <div
     class="index-footer-form"
     style="margin-top:35px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;"
@@ -221,6 +227,9 @@
             </button>
         </div>
     </form>
+</div>
+@endif
+
 </div>
 
 

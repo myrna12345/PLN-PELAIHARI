@@ -179,7 +179,6 @@
 }
 
 /* ===== CSS MODAL POP-UP (ID UNIK: imageModalRetur) ===== */
-/* Menggunakan ID khusus agar tidak bentrok dengan layout utama */
 #imageModalRetur {
     display: none; 
     position: fixed; 
@@ -235,6 +234,8 @@
         </form>
     </div>
 
+    {{-- KETERANGAN: Baris alert sukses/error di sini dihapus agar tidak double dengan layout utama --}}
+
     <div class="table-container">
         <table class="table">
             <thead>
@@ -248,7 +249,9 @@
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
+                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -265,14 +268,16 @@
                         {{-- Foto Material --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_path)
-                                {{-- PERBAIKAN: onclick menggunakan fungsi unik openModalRetur --}}
                                 <img src="{{ asset('uploads/material_retur/' . $item->foto_path) }}" 
                                      class="table-foto" 
                                      onclick="openModalRetur(this)"
                                      alt="Foto Material">
+                                
+                                @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('material-retur.download-foto', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 -
                             @endif
@@ -281,19 +286,22 @@
                         {{-- Foto Petugas --}}
                         <td style="text-align: center;">
                             @if($item->foto_petugas)
-                                {{-- PERBAIKAN: onclick menggunakan fungsi unik openModalRetur --}}
                                 <img src="{{ asset('uploads/material_retur/' . $item->foto_petugas) }}" 
                                      class="table-foto" 
                                      onclick="openModalRetur(this)"
                                      alt="Foto Petugas">
+                                
+                                @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('material-retur.download-foto-petugas', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
                                 </a>
+                                @endif
                             @else
                                 -
                             @endif
                         </td>
 
+                        @if(strtolower(auth()->user()->role) !== 'satpam')
                         <td>
                             <div class="table-actions">
                                 <a href="{{ route('material-retur.edit', $item->id) }}" class="btn btn-edit">
@@ -307,10 +315,11 @@
                                 </form>
                             </div>
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center" style="padding: 40px 0; color: #6b7280; text-align: center;">
+                        <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 10 : 9 }}" class="text-center" style="padding: 40px 0; color: #6b7280; text-align: center;">
                             @if(request('search') || request('tanggal_mulai') || request('tanggal_akhir'))
                                 Data tidak ditemukan.
                             @else
@@ -323,6 +332,7 @@
         </table>
     </div>
 
+    @if(strtolower(auth()->user()->role) !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('material-retur.download-report') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
@@ -342,16 +352,14 @@
             </button>
         </form>
     </div>
+    @endif
 </div>
 
-{{-- MODAL POP-UP IMAGE (ID UNIK) --}}
-{{-- ID ini berbeda dengan yang ada di Layout Utama --}}
 <div id="imageModalRetur">
     <span class="close-modal" onclick="closeModalRetur()">&times;</span>
     <img class="image-modal-content" id="img01Retur">
 </div>
 
-{{-- SCRIPT JAVASCRIPT (FUNGSI UNIK) --}}
 <script>
     function openModalRetur(element) {
         var modal = document.getElementById("imageModalRetur");
@@ -366,7 +374,6 @@
         modal.style.display = "none";
     }
 
-    // Klik di luar gambar untuk menutup modal
     window.onclick = function(event) {
         var modal = document.getElementById("imageModalRetur");
         if (event.target == modal) {

@@ -263,7 +263,11 @@
                     <th>Jumlah</th>
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
-                    <th>Aksi</th>
+                    
+                    {{-- REVISI 1: Sembunyikan Header Aksi untuk Satpam --}}
+                    @if(auth()->user()->role !== 'satpam')
+                        <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -283,17 +287,21 @@
                                      alt="Foto Material"
                                      style="max-width:80px; display:block; margin-bottom: 6px;">
                                 
-                                {{-- Tombol Download Foto --}}
-                                <a href="{{ route('material-stand-by.download-foto', $item->id) }}"
-                                   class="btn-foto-download">
-                                   <i class="fas fa-download"></i> Download
-                                </a>
+                                {{-- REVISI 2: Sembunyikan Tombol Download Foto untuk Satpam --}}
+                                @if(auth()->user()->role !== 'satpam')
+                                    <a href="{{ route('material-stand-by.download-foto', $item->id) }}"
+                                       class="btn-foto-download">
+                                       <i class="fas fa-download"></i> Download
+                                    </a>
+                                @endif
                             </div>
                         @else
                             -
                         @endif
                     </td>
 
+                    {{-- REVISI 3: Sembunyikan Seluruh Kolom Aksi (Edit/Hapus) untuk Satpam --}}
+                    @if(auth()->user()->role !== 'satpam')
                     <td>
                         <div class="table-actions" style="display: flex; gap: 5px; justify-content: center;">
                             {{-- Tombol Edit --}}
@@ -313,24 +321,27 @@
                             </form>
                         </div>
                     </td>
+                    @endif
                 </tr>
             @empty
-            <tr>
-                {{-- Logika Pesan Kosong --}}
-                <td colspan="6" class="text-center" style="padding: 40px 0; color: #6b7280; text-align: center;">
-                    @if(request('search') || request('tanggal_mulai') || request('tanggal_akhir'))
-                        Data tidak ditemukan.
-                    @else
-                        Tidak ada data saat ini.
-                    @endif
-                </td>
-            </tr>
-        @endforelse
+                <tr>
+                    {{-- Logika Pesan Kosong --}}
+                    {{-- Colspan disesuaikan jika Satpam (5 kolom) vs Admin (6 kolom) --}}
+                    <td colspan="{{ auth()->user()->role !== 'satpam' ? 6 : 5 }}" class="text-center" style="padding: 40px 0; color: #6b7280; text-align: center;">
+                        @if(request('search') || request('tanggal_mulai') || request('tanggal_akhir'))
+                            Data tidak ditemukan.
+                        @else
+                            Tidak ada data saat ini.
+                        @endif
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>
 
-    {{-- FOOTER DOWNLOAD --}}
+    {{-- REVISI 4: Sembunyikan Footer Download PDF & Excel untuk Satpam --}}
+    @if(auth()->user()->role !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('material-stand-by.pdf') }}"
               method="POST"
@@ -360,6 +371,7 @@
             </button>
         </form>
     </div>
+    @endif
 
 </div>
 

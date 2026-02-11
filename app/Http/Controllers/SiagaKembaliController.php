@@ -29,11 +29,11 @@ class SiagaKembaliController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama_petugas', 'like', "%$search%")
-                    ->orWhere('stand_meter', 'like', "%$search%")
-                    ->orWhere('nomor_meter', 'like', "%$search%")
-                    ->orWhereHas('material', function($subQ) use ($search) {
-                        $subQ->where('nama_material', 'like', "%$search%");
-                    });
+                  ->orWhere('stand_meter', 'like', "%$search%")
+                  ->orWhere('nomor_meter', 'like', "%$search%")
+                  ->orWhereHas('material', function($subQ) use ($search) {
+                      $subQ->where('nama_material', 'like', "%$search%");
+                  });
             });
         }
         
@@ -137,6 +137,11 @@ class SiagaKembaliController extends Controller
 
     public function edit(SiagaKembali $siagaKembali)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.');
+        }
+
         $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P'];
         $materials = Material::where('kategori', 'siaga')
                              ->whereIn('nama_material', $allowedMaterials)
@@ -148,6 +153,11 @@ class SiagaKembaliController extends Controller
 
     public function update(Request $request, SiagaKembali $siagaKembali)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.');
+        }
+
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nomor_meter' => 'required|string|max:255', 
@@ -200,6 +210,11 @@ class SiagaKembaliController extends Controller
 
     public function destroy(SiagaKembali $siagaKembali)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.');
+        }
+
         if ($siagaKembali->foto_path) {
             $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
             if (File::exists($path)) { File::delete($path); }
@@ -214,5 +229,72 @@ class SiagaKembaliController extends Controller
         return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus!');
     }
 
-    // ... (downloadFoto dan downloadReport tetap sama)
+    // --- REKONSTRUKSI METODE DOWNLOAD AGAR TIDAK TERPOTONG ---
+    
+    public function downloadFoto($id)
+    {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        $item = SiagaKembali::findOrFail($id);
+        $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+        
+        if (File::exists($path)) {
+            return response()->download($path);
+        }
+        return back()->with('error', 'File tidak ditemukan.');
+    }
+
+    public function downloadFotoPetugas($id)
+    {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        $item = SiagaKembali::findOrFail($id);
+        $path = public_path($this->uploadFolder . '/' . $item->foto_petugas);
+        
+        if (File::exists($path)) {
+            return response()->download($path);
+        }
+        return back()->with('error', 'File tidak ditemukan.');
+    }
+
+    public function downloadReport(Request $request)
+    {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+
+        $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+        $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+        
+        $items = SiagaKembali::with('material')
+                    ->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])
+                    ->orderBy('tanggal', 'asc')
+                    ->get();
+
+        if ($request->has('submit_pdf')) {
+            $pdf = Pdf::loadView('siaga-kembali.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'));
+            return $pdf->download('laporan_siaga_kembali.pdf');
+        }
+        
+        if ($request->has('submit_excel')) {
+            return Excel::download(
+                new SiagaKembaliExport($tanggal_mulai, $tanggal_akhir), 
+                'laporan_siaga_kembali.xlsx'
+            );
+        }
+        
+        return back()->with('error', 'Terjadi kesalahan saat mengunduh laporan.');
+    }
 }

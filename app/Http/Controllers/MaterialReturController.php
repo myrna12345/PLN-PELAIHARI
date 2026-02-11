@@ -100,6 +100,11 @@ class MaterialReturController extends Controller
 
     public function edit($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material-retur.index')->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialRetur::findOrFail($id);
         $materials = Material::where('kategori', '!=', 'siaga')->orWhereNull('kategori')->get()->sortBy('nama_material', SORT_NATURAL);
         return view('material_retur.edit', compact('item', 'materials'));
@@ -107,6 +112,11 @@ class MaterialReturController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material-retur.index')->with('error', 'Akses ditolak.');
+        }
+
         $materialRetur = MaterialRetur::findOrFail($id);
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
@@ -175,6 +185,11 @@ class MaterialReturController extends Controller
 
     public function destroy($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->route('material-retur.index')->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialRetur::findOrFail($id);
         
         // Hapus fisik file di public
@@ -194,6 +209,11 @@ class MaterialReturController extends Controller
     // --- FITUR DOWNLOAD REPORT ---
     public function downloadReport(Request $request)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
@@ -241,6 +261,11 @@ class MaterialReturController extends Controller
 
     public function downloadFoto($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialRetur::findOrFail($id);
         $path = public_path($this->uploadFolder . '/' . $item->foto_path);
         
@@ -252,6 +277,11 @@ class MaterialReturController extends Controller
 
     public function downloadFotoPetugas($id)
     {
+        // Blokir akses Satpam
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
         $item = MaterialRetur::findOrFail($id);
         $path = public_path($this->uploadFolder . '/' . $item->foto_petugas);
         
