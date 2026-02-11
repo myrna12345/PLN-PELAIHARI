@@ -1,3 +1,144 @@
+
+<div align="center">
+
+  <h1>⚡ Sistem Manajemen PLN ULP Pelaihari</h1>
+  
+  <p>
+    Aplikasi terintegrasi untuk <strong>Manajemen Material</strong> dan <strong>Monitoring K3 (Kesehatan & Keselamatan Kerja)</strong>.
+    <br>
+    Dibangun untuk meningkatkan efisiensi operasional dan digitalisasi laporan lapangan.
+  </p>
+
+  <p>
+    <a href="https://laravel.com">
+      <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel" alt="Laravel" />
+    </a>
+    <a href="https://php.net">
+      <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php" alt="PHP" />
+    </a>
+    <a href="https://tailwindcss.com">
+      <img src="https://img.shields.io/badge/Tailwind-3.0-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind" />
+    </a>
+    <a href="https://mysql.com">
+      <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql" alt="MySQL" />
+    </a>
+  </p>
+</div>
+
+<br>
+
+## ✨ Fitur Utama
+
+Aplikasi ini mencakup berbagai modul untuk kebutuhan operasional:
+
+| Modul | Deskripsi |
+| :--- | :--- |
+| 📦 **Material Masuk/Keluar** | Pencatatan realtime stok material gardu dan distribusi. |
+| 🔄 **Material Retur & Kembali** | Manajemen pengembalian material sisa atau rusak dari lapangan. |
+| 👷 **Monitoring K3** | Checklist kelengkapan APD dan keselamatan petugas (Siaga). |
+| 📊 **Dashboard & Laporan** | Visualisasi data dan ekspor laporan otomatis ke PDF. |
+| 🔐 **Role Management** | Akses bertingkat untuk Admin, Gudang, dan Supervisor. |
+
+---
+
+## 🚀 Instalasi (Quick Start)
+
+Pastikan di komputermu sudah terinstall **PHP, Composer,dan Git**.
+
+### 1. Dapatkan Project
+```bash
+git clone [https://github.com/myrna12345/PLN-PELAIHARI.git](https://github.com/myrna12345/PLN-PELAIHARI.git)
+cd PLN-PELAIHARI
+
+```
+
+### 2. Install Dependencies
+
+Install library backend dan frontend sekaligus.
+
+```bash
+composer install
+
+```
+
+### 3. Konfigurasi Environment
+
+Salin file pengaturan dan generate kunci keamanan.
+
+```bash
+cp .env.example .env
+php artisan key:generate
+
+```
+
+### 4. Setup Database
+
+1. Buat database kosong di MySQL bernama `pln_pelaihari`.
+2. Edit file `.env` di text editor, sesuaikan bagian ini:
+
+```env
+DB_DATABASE=pln_pelaihari
+DB_USERNAME=root
+DB_PASSWORD=
+
+```
+
+### 5. Jalankan Migrasi & Data Dummy
+
+Masukkan tabel dan data akun default ke database.
+
+```bash
+php artisan migrate --seed
+php artisan storage:link
+
+```
+
+---
+
+## 🖥️ Cara Menjalankan
+**Terminal 1**
+
+```bash
+php artisan serve
+
+
+Buka browser dan akses: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+---
+
+## 🔑 Akun Default (Login)
+
+Gunakan akun ini untuk masuk pertama kali (dibuat dari `UserSeeder`):
+
+* **Email:** `` (Cek `UserSeeder.php` jika berbeda)
+* **Password:** `password`
+
+---
+
+## 📝 Catatan Pengembang
+
+* **Folder Upload:** Semua bukti foto lapangan tersimpan di `storage/app/public/uploads`. Folder ini sudah di-*ignore* oleh Git agar repository tetap ringan.
+* **Generate Laporan:** Fitur ekspor PDF membutuhkan extension `gd` atau `dompdf` yang sudah terinstall via Composer.
+
+<div align="center">
+<sub>Made with ❤️ by Tim Pengembang PLN Pelaihari</sub>
+</div>
+
+```
+
+### Apa yang Baru di Versi Ini?
+
+1.  **Header Cantik:** Judul ada di tengah dengan logo teknologi (Badges) yang rapi.
+2.  **Tabel Fitur:** Orang lebih suka baca tabel daripada teks panjang. Langsung kelihatan aplikasinya bisa apa saja.
+3.  **Terminal Terpisah:** Saya perjelas bahwa `npm run dev` dan `php artisan serve` harus jalan bareng (ini sering bikin bingung pemula).
+4.  **Akun Default:** Saya siapkan slot untuk info login, jadi kalau dosen/teman mau tes, mereka nggak perlu nanya password ke kamu.
+
+Pasang ini, lalu `git add`, `commit`, dan `push`. Dijamin repo kamu langsung kelihatan "Mahal".
+
+```
+
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -59,168 +200,3 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-Berikut adalah template **README.md** yang sudah saya rapikan agar terlihat profesional, modern, dan mudah dibaca di GitHub.
-
-Saya sudah menambahkan **Badge**, **Formatting Code Block**, dan struktur yang rapi. Kamu tinggal copy dan paste kode di bawah ini ke dalam file bernama `README.md` di folder project kamu.
-
-### Copy Kode di Bawah Ini:
-
-```markdown
-# ⚡ PLN Pelaihari System
-
-Sistem Manajemen Material dan Keselamatan Kerja (K3) PLN ULP Pelaihari. Aplikasi ini dibangun menggunakan Laravel untuk mempermudah pencatatan keluar-masuk material dan monitoring petugas.
-
-![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
----
-
-## 📋 Syarat Minimum (Requirements)
-
-Pastikan perangkat Anda sudah terinstall:
-* **PHP** ^8.1 atau lebih baru
-* **Composer** (Manajer paket PHP)
-* **MySQL** atau **MariaDB**
-* **Node.js & NPM** (Untuk kompilasi aset frontend)
-* **Git**
-
----
-
-## 🚀 Panduan Instalasi (Installation Guide)
-
-Ikuti langkah-langkah berikut untuk menjalankan project ini di komputer lokal Anda:
-
-### 1️⃣ Clone Repository
-Unduh source code project ini ke komputer lokal Anda.
-
-```bash
-git clone [https://github.com/username/PLN-PELAIHARI.git](https://github.com/username/PLN-PELAIHARI.git)
-cd PLN-PELAIHARI
-
-```
-
-### 2️⃣ Install Dependency Backend
-
-Install semua library PHP yang dibutuhkan oleh Laravel menggunakan Composer.
-
-```bash
-composer install
-
-```
-
-### 3️⃣ Setup Environment
-
-Duplikat file konfigurasi `.env.example` menjadi `.env`.
-
-**Untuk Windows:**
-
-```bash
-copy .env.example .env
-
-```
-
-**Untuk Mac / Linux:**
-
-```bash
-cp .env.example .env
-
-```
-
-### 4️⃣ Generate Application Key
-
-Buat kunci enkripsi aplikasi Laravel.
-
-```bash
-php artisan key:generate
-
-```
-
-### 5️⃣ Konfigurasi Database
-
-1. Buat database baru di MySQL (misal: `pln_pelaihari`).
-2. Buka file `.env` dan sesuaikan konfigurasi database Anda:
-
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=pln_pelaihari
-DB_USERNAME=root
-DB_PASSWORD=
-
-```
-
-### 6️⃣ Migrasi & Seeder
-
-Jalankan perintah berikut untuk membuat tabel dan mengisi data awal (akun admin, data dummy, dll).
-
-```bash
-# Migrasi tabel saja
-php artisan migrate
-
-# Migrasi beserta data dummy (Disarankan)
-php artisan migrate --seed
-
-```
-
-### 7️⃣ Install Dependency Frontend
-
-Install dan compile aset frontend (CSS/JS) menggunakan Vite.
-
-```bash
-npm install
-npm run dev
-
-```
-
-### 8️⃣ Setup Storage Link
-
-Agar foto upload (bukti material/petugas) bisa diakses publik.
-
-```bash
-php artisan storage:link
-
-```
-
-### 9️⃣ Jalankan Server
-
-Jalankan server lokal Laravel.
-
-```bash
-php artisan serve
-
-```
-
-Aplikasi sekarang dapat diakses melalui browser di:
-🔗 **http://127.0.0.1:8000**
-
----
-
-## 🛠️ Catatan Tambahan
-
-* **Login Default:** Jika menggunakan seeder, cek file `UserSeeder.php` untuk melihat email/password default.
-* **Masalah Permission:** Jika folder `storage` atau `bootstrap/cache` tidak bisa ditulis, jalankan: `chmod -R 775 storage bootstrap/cache` (Linux/Mac).
-
----
-
-Made with ❤️ by Tim Pengembang
-
-```
-
-### Cara Memasangnya:
-1.  Buka folder project kamu di VS Code.
-2.  Cari file bernama `README.md` (kalau belum ada, buat baru).
-3.  **Hapus semua isinya**, lalu **Paste** kode di atas.
-4.  Simpan, lalu lakukan push ke GitHub:
-    ```bash
-    git add README.md
-    git commit -m "Docs: Update README with professional installation guide"
-    git push origin main
-    ```
-
-Setelah ini, halaman depan GitHub kamu akan terlihat sangat **profesional** seperti project open-source kelas dunia! 😎
-
-```
