@@ -130,6 +130,11 @@ class SiagaKembaliController extends Controller
                 'status'      => 'Ready'
             ]);
 
+        // MODIFIKASI REDIRECT KHUSUS SATPAM
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('dashboard')->with('success', 'Material berhasil dikembalikan.');
+        }
+
         return redirect()
             ->route('siaga-kembali.index')
             ->with('success', 'Material berhasil dikembalikan. Stand meter master telah diperbarui ke: ' . $validated['stand_meter']);
@@ -229,8 +234,6 @@ class SiagaKembaliController extends Controller
         return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus!');
     }
 
-    // --- REKONSTRUKSI METODE DOWNLOAD AGAR TIDAK TERPOTONG ---
-    
     public function downloadFoto($id)
     {
         // Blokir akses Satpam

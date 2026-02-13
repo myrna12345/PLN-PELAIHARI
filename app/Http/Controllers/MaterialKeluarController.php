@@ -106,6 +106,12 @@ class MaterialKeluarController extends Controller
         if ($materialStok && $materialStok->jumlah >= $jumlahKeluar) {
             $materialStok->decrement('jumlah', $jumlahKeluar);
             MaterialKeluar::create($validated);
+
+            // LOGIKA PENGALIHAN BARU UNTUK SATPAM
+            if (strtolower(auth()->user()->role) === 'satpam') {
+                return redirect()->route('dashboard')->with('success', 'Data berhasil disimpan!');
+            }
+
             return redirect()->route('material_keluar.index')->with('success', 'Data berhasil disimpan!');
         }
 
@@ -247,40 +253,38 @@ class MaterialKeluarController extends Controller
         return redirect()->back()->with('error', 'Foto petugas tidak ditemukan.');
     }
 
-   public function downloadReport(Request $request)
-{
-    if (auth()->user()->role === 'satpam') {
-        return redirect()->back()->with('error', 'Akses ditolak.');
+    public function downloadReport(Request $request)
+    {
+        if (auth()->user()->role === 'satpam') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+
+        $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
+        $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+
+        $items = MaterialKeluar::with('material')
+            ->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])
+            ->get();
+
+        $items->each(function ($item) {
+            $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
+            $item->stok_saat_ini = $materialStok 
+                ? $materialStok->jumlah . ' ' . $materialStok->satuan 
+                : '0';
+        });
+
+        if ($request->has('submit_pdf')) {
+            $pdf = Pdf::loadView('material_keluar.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'))
+                      ->setPaper('a4', 'portrait'); 
+            
+            return $pdf->download('laporan_keluar.pdf');
+        }
+
+        return Excel::download(new MaterialKeluarExport($tanggal_mulai, $tanggal_akhir), 'laporan_keluar.xlsx');
     }
-
-    $request->validate([
-        'tanggal_mulai' => 'required|date',
-        'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
-    ]);
-
-    $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
-    $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
-
-    $items = MaterialKeluar::with('material')
-        ->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])
-        ->get();
-
-    // AMBIL DATA STOK (Penting agar kolom stok tidak kosong)
-    $items->each(function ($item) {
-        $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
-        $item->stok_saat_ini = $materialStok 
-            ? $materialStok->jumlah . ' ' . $materialStok->satuan 
-            : '0';
-    });
-
-    if ($request->has('submit_pdf')) {
-        // SetPaper ke 'portrait'
-        $pdf = Pdf::loadView('material_keluar.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'))
-                  ->setPaper('a4', 'portrait'); 
-        
-        return $pdf->download('laporan_keluar.pdf');
-    }
-
-    return Excel::download(new MaterialKeluarExport($tanggal_mulai, $tanggal_akhir), 'laporan_keluar.xlsx');
-}
 }

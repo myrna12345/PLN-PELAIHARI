@@ -47,12 +47,6 @@
             font-size: 14px;
         }
 
-        .logo-icon {
-            font-size: 40px;
-            color: #5a8dee;
-            margin-bottom: 10px;
-        }
-
         .logo-img {
             max-width: 140px; 
             height: auto;
@@ -85,25 +79,22 @@
             color: #aaa;
         }
 
-        /* --- TAMBAHAN CSS ICON MATA --- */
         .input-group i.toggle-password {
             position: absolute;
-            right: 15px; /* Posisikan di kanan */
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: #aaa;
-            cursor: pointer; /* Ubah kursor jadi telunjuk saat diarahkan */
+            cursor: pointer;
             transition: color 0.3s;
         }
         
         .input-group i.toggle-password:hover {
-            color: #5a8dee; /* Warna biru saat di-hover */
+            color: #5a8dee;
         }
-        /* ------------------------------ */
 
         .form-control {
             width: 100%;
-            /* Padding disesuaikan: Kiri (40px) untuk icon gembok, Kanan (40px) untuk icon mata */
             padding: 12px 40px 12px 40px; 
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -172,12 +163,10 @@
     <div class="login-container">
         <div class="login-header">
             <img src="{{ asset('images/logo-pln.png') }}" alt="Logo PLN" class="logo-img">
-            
             <h2>Selamat Datang</h2>
             <p>Silakan login untuk masuk ke sistem</p>
         </div>
 
-        {{-- Tampilkan Error Jika Login Gagal --}}
         @if ($errors->any())
             <div class="alert-error">
                 <i class="fas fa-exclamation-circle"></i> 
@@ -188,15 +177,15 @@
         <form action="{{ route('login.post') }}" method="POST">
             @csrf
 
-            {{-- Input Email --}}
+            {{-- Input Username (Diubah dari Email) --}}
             <div class="form-group">
-                <label for="email">Email Address</label>
+                <label for="username">Username</label>
                 <div class="input-group">
-                    <i class="fas fa-envelope icon-left"></i>
-                    <input type="email" name="email" id="email" 
+                    <i class="fas fa-user icon-left"></i> {{-- Icon diganti ke user --}}
+                    <input type="text" name="username" id="username" 
                            class="form-control" 
-                           placeholder="admin@example.com" 
-                           value="{{ old('email') }}" required autofocus>
+                           placeholder="Masukkan username" 
+                           value="{{ old('username') }}" required autofocus>
                 </div>
             </div>
 
@@ -208,13 +197,10 @@
                     <input type="password" name="password" id="password" 
                            class="form-control" 
                            placeholder="••••••••" required>
-                    
-                    {{-- TAMBAHAN ICON MATA DI SINI --}}
                     <i class="fas fa-eye toggle-password" id="togglePassword"></i>
                 </div>
             </div>
 
-            {{-- Link Lupa Password & Remember Me --}}
             <div class="auth-footer">
                 <div class="remember-me">
                     <input type="checkbox" name="remember" id="remember">
@@ -231,7 +217,6 @@
                 Masuk <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
             </button>
 
-            {{-- TOMBOL GOOGLE LOGIN --}}
             <div style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
                 <a href="{{ route('google.login') }}" 
                    style="display: flex; align-items: center; justify-content: center; gap: 10px; background-color: #fff; color: #757575; border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background 0.3s;">
@@ -242,17 +227,13 @@
         </form>
     </div>
 
-    {{-- SCRIPT BARU UNTUK BUKA TUTUP PASSWORD --}}
     <script>
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
 
         togglePassword.addEventListener('click', function (e) {
-            // Cek apakah tipenya password, kalau ya ubah jadi text, kalau tidak kembali ke password
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
-            
-            // Ganti icon dari mata terbuka (fa-eye) ke mata tertutup (fa-eye-slash)
             this.classList.toggle('fa-eye');
             this.classList.toggle('fa-eye-slash');
         });

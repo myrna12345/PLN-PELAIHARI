@@ -120,6 +120,11 @@ class SiagaKeluarController extends Controller
         // UPDATE STATUS STOK
         $stokTersedia->update(['status' => 'Terpakai']);
 
+        // MODIFIKASI REDIRECT KHUSUS SATPAM
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('dashboard')->with('success', 'Data Siaga Keluar berhasil disimpan!');
+        }
+
         return redirect()->route('siaga-keluar.index')
             ->with('success', 'Data Siaga Keluar berhasil disimpan!');
     }

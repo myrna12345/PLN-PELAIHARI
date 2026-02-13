@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
             ['email' => 'adm.plnpelaihari@gmail.com'], // Kunci pengecekan (unik)
             [
                 'name' => 'Admin',
+                'username' => 'admin', // Tambahan username
                 'role' => 'admin',
                 'password' => bcrypt('passwordadmin01')
             ]
@@ -28,6 +29,7 @@ class UserSeeder extends Seeder
             ['email' => 'satpam.plnpelaihari@gmail.com'], 
             [
                 'name' => 'Satpam',
+                'username' => 'satpam', // Tambahan username
                 'role' => 'satpam',
                 'password' => bcrypt('satpampln')
             ]
@@ -38,6 +40,7 @@ class UserSeeder extends Seeder
             ['email' => 'gudang.plnpelaihari@gmail.com'], 
             [
                 'name' => 'Gudang',
+                'username' => 'gudang', // Tambahan username
                 'role' => 'gudang',
                 'password' => bcrypt('gudangpelaihari')
             ]

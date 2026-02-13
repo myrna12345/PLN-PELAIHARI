@@ -140,12 +140,16 @@ class MaterialKembaliController extends Controller
 
         MaterialKembali::create($validated);
 
-        return redirect()->route('material_kembali.index')->with('success', 'Data berhasil disimpan! Foto telah dikompres.');
+        // MODIFIKASI REDIRECT UNTUK SATPAM
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('dashboard')->with('success', 'Data berhasil disimpan');
+        }
+
+        return redirect()->route('material_kembali.index')->with('success', 'Data berhasil disimpan');
     }
 
     public function update(Request $request, $id)
     {
-        // Blokir akses Satpam
         if (auth()->user()->role === 'satpam') {
             return redirect()->route('material_kembali.index')->with('error', 'Akses ditolak.');
         }
@@ -215,7 +219,6 @@ class MaterialKembaliController extends Controller
 
     public function destroy($id)
     {
-        // Blokir akses Satpam
         if (auth()->user()->role === 'satpam') {
             return redirect()->route('material_kembali.index')->with('error', 'Akses ditolak.');
         }
@@ -256,7 +259,6 @@ class MaterialKembaliController extends Controller
 
     public function downloadFoto($id)
     {
-        // Blokir akses Satpam
         if (auth()->user()->role === 'satpam') {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }
@@ -269,7 +271,6 @@ class MaterialKembaliController extends Controller
 
     public function downloadFotoPetugas($id)
     {
-        // Blokir akses Satpam
         if (auth()->user()->role === 'satpam') {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }
@@ -282,7 +283,6 @@ class MaterialKembaliController extends Controller
 
     public function downloadReport(Request $request)
     {
-        // Blokir akses Satpam
         if (auth()->user()->role === 'satpam') {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }

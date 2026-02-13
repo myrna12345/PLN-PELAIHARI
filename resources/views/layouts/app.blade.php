@@ -69,7 +69,6 @@
             padding: 12px;
             border-radius: 5px;
             transition: background-color 0.3s;
-            /* Tambahan: Pastikan tidak membungkus teks */
             white-space: nowrap; 
             overflow: hidden;
             text-overflow: ellipsis;
@@ -82,11 +81,10 @@
             text-align: center;
             margin-right: 10px;
             font-size: 1.2rem;
-            flex-shrink: 0; /* Mencegah icon menyusut */
+            flex-shrink: 0; 
         }
-        /* Tambahan: Pastikan span mengambil sisa ruang */
         .sidebar-menu a span {
-            flex-grow: 1; /* Membuat span mengambil ruang */
+            flex-grow: 1; 
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -96,7 +94,7 @@
         .main-content {
             flex-grow: 1;
             background-color: #E9ECEF; 
-            overflow: auto; /* PENTING: Scroll vertikal & horizontal */
+            overflow: auto; 
             -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
@@ -236,14 +234,14 @@
 
         /* === 9. CSS LOGOUT BUTTON (TAMBAHAN BARU) === */
         .sidebar-footer {
-            margin-top: auto; /* Ini yang membuat tombol menempel di bagian bawah */
+            margin-top: auto; 
             border-top: 1px solid #4f565d;
             padding-top: 15px;
         }
         .btn-logout {
             background: transparent;
             border: none;
-            color: #d06368ff; /* Warna kemerahan agar kontras sebagai tombol keluar */
+            color: #d06368ff; 
             font-size: 1rem;
             display: flex;
             align-items: center;
@@ -290,7 +288,9 @@
         <ul class="sidebar-menu">
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
             
-            {{-- PERBAIKAN: History Material Standby HANYA UNTUK ADMIN --}}
+            {{-- MENU GANTI PASSWORD DIHAPUS DARI SINI SESUAI PERMINTAAN --}}
+
+            {{-- History Material Standby HANYA UNTUK ADMIN --}}
             @if(strtolower(auth()->user()->role) === 'admin')
             <li>
                 <a href="{{ route('material-history.index') }}" class="{{ request()->routeIs('material-history.index') ? 'active' : '' }}">
@@ -334,30 +334,26 @@
             </li>
             @endif
 
+            {{-- MENU LAPORAN DISEMBUNYIKAN DARI SATPAM --}}
+            @if(strtolower(auth()->user()->role) !== 'satpam')
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.index') || request()->routeIs('material-retur.index') || request()->routeIs('material_keluar.index') || request()->routeIs('material_kembali.index') || request()->routeIs('material-siaga-stand-by.index') || request()->routeIs('siaga-keluar.index') || request()->routeIs('siaga-kembali.index') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-scroll"></i> <span>Laporan</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    
-                    {{-- Sembunyikan Laporan Material Stand By dari Satpam --}}
-                    @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-stand-by.index') }}" class="{{ request()->routeIs('material-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
-                    @endif
                     
-                    {{-- Sembunyikan laporan lainnya dari Gudang --}}
                     @if(strtolower(auth()->user()->role) !== 'gudang')
                     <li><a href="{{ route('material_keluar.index') }}" class="{{ request()->routeIs('material_keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
                     <li><a href="{{ route('material_kembali.index') }}" class="{{ request()->routeIs('material_kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
                     <li><a href="{{ route('material-retur.index') }}" class="{{ request()->routeIs('material-retur.index') ? 'sub-active' : '' }}"><i class="fas fa-undo"></i> <span>Material Retur</span></a></li>
                     <hr style="border-top: 1px solid #4f565d; margin: 5px 0;">
                     
-                    {{-- PERUBAHAN: Laporan Siaga Stand By KINI BISA DIAKSES OLEH SATPAM --}}
                     <li><a href="{{ route('material-siaga-stand-by.index') }}" class="{{ request()->routeIs('material-siaga-stand-by.index') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
-                    
                     <li><a href="{{ route('siaga-keluar.index') }}" class="{{ request()->routeIs('siaga-keluar.index') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
                     <li><a href="{{ route('siaga-kembali.index') }}" class="{{ request()->routeIs('siaga-kembali.index') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
                     @endif
                 </ul>
             </li>
+            @endif
         </ul>
         {{-- MENU SIDEBAR END --}}
 
