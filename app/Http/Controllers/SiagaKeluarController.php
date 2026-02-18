@@ -56,78 +56,87 @@ class SiagaKeluarController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'material_id'   => 'required|exists:materials,id',
-            'nomor_meter'   => 'required|string|max:255', 
-            'nama_petugas'  => 'required|string|max:255',
-            'stand_meter'   => 'required|string|max:255',
-            'keterangan'    => 'required|string|max:500', 
-            'status'        => 'required|string|max:255', 
-            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
-            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
-        ]);
+{
+    $validated = $request->validate([
+        'material_id'   => 'required|exists:materials,id',
+        'nomor_meter'   => 'required|string|max:255', 
+        'nama_petugas'  => 'required|string|max:255',
+        'stand_meter'   => 'required|string|max:255',
+        'keterangan'    => 'required|string|max:500', 
+        'status'        => 'required|string|max:255', 
+        'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
+        'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
+    ]);
 
-        // AMBIL DATA MATERIAL DARI TABEL MASTER
-        $materialMaster = Material::findOrFail($validated['material_id']);
+    // AMBIL DATA MATERIAL DARI TABEL MASTER
+    $materialMaster = Material::findOrFail($validated['material_id']);
 
-        // CEK STOK DI SIAGA STANDBY
-        $stokTersedia = MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
-                        ->where('nama_material', $materialMaster->nama_material)
-                        ->where('status', 'Ready')
-                        ->first();
+    // CEK STOK DI SIAGA STANDBY
+    $stokTersedia = MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
+                    ->where('nama_material', $materialMaster->nama_material)
+                    ->where('status', 'Ready')
+                    ->first();
 
-        if (!$stokTersedia) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal: Material "' . $materialMaster->nama_material . '" dengan Nomor Meter "' . $validated['nomor_meter'] . '" tidak ditemukan di Siaga Stand By.');
-        }
-
-        // PROSES UPLOAD & KOMPRESI
-        $path = public_path($this->uploadFolder);
-        if (!File::isDirectory($path)) {
-            File::makeDirectory($path, 0755, true, true);
-        }
-
-        // --- 1. KOMPRESI FOTO MATERIAL ---
-        $fotoName = time() . '_mat_' . uniqid() . '.jpg'; // Paksa .jpg
-        $imageMat = Image::read($request->file('foto'));
-        $imageMat->scale(width: 800); // Resize lebar max 800px
-        $encodedMat = $imageMat->toJpeg(60); // Convert JPG Quality 60
-        $encodedMat->save($path . '/' . $fotoName);
-
-        // --- 2. KOMPRESI FOTO PETUGAS ---
-        $fotoPetugasName = time() . '_petugas_' . uniqid() . '.jpg'; // Paksa .jpg
-        $imagePtg = Image::read($request->file('foto_petugas'));
-        $imagePtg->scale(width: 800); // Resize lebar max 800px
-        $encodedPtg = $imagePtg->toJpeg(60); // Convert JPG Quality 60
-        $encodedPtg->save($path . '/' . $fotoPetugasName);
-
-        // SIMPAN DATA
-        SiagaKeluar::create([
-            'material_id'            => $validated['material_id'],
-            'nomor_meter'            => $validated['nomor_meter'], 
-            'nama_material_lengkap'  => $materialMaster->nama_material, 
-            'nama_petugas'           => $validated['nama_petugas'],
-            'stand_meter'            => $validated['stand_meter'],
-            'keterangan'             => $validated['keterangan'], 
-            'status'                 => $validated['status'],
-            'foto_path'              => $fotoName,
-            'foto_petugas'           => $fotoPetugasName, 
-            'tanggal'                => Carbon::now('Asia/Makassar'),
-        ]);
-
-        // UPDATE STATUS STOK
-        $stokTersedia->update(['status' => 'Terpakai']);
-
-        // MODIFIKASI REDIRECT KHUSUS SATPAM
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('dashboard')->with('success', 'Data Siaga Keluar berhasil disimpan!');
-        }
-
-        return redirect()->route('siaga-keluar.index')
-            ->with('success', 'Data Siaga Keluar berhasil disimpan!');
+    if (!$stokTersedia) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Gagal: Material "' . $materialMaster->nama_material . '" dengan Nomor Meter "' . $validated['nomor_meter'] . '" tidak ditemukan di Siaga Stand By.');
     }
+
+    // --- LOGIKA TAMBAHAN: VALIDASI KESAMAAN STAND METER ---
+    // Memastikan Stand Meter saat keluar sama dengan Stand Meter saat standby
+    if ($stokTersedia->stand_meter !== $validated['stand_meter']) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Gagal: Stand Meter tidak sesuai. Data Standby mencatat Stand Meter: ' . $stokTersedia->stand_meter);
+    }
+    // ------------------------------------------------------
+
+    // PROSES UPLOAD & KOMPRESI
+    $path = public_path($this->uploadFolder);
+    if (!File::isDirectory($path)) {
+        File::makeDirectory($path, 0755, true, true);
+    }
+
+    // --- 1. KOMPRESI FOTO MATERIAL ---
+    $fotoName = time() . '_mat_' . uniqid() . '.jpg'; // Paksa .jpg
+    $imageMat = Image::read($request->file('foto'));
+    $imageMat->scale(width: 800); // Resize lebar max 800px
+    $encodedMat = $imageMat->toJpeg(60); // Convert JPG Quality 60
+    $encodedMat->save($path . '/' . $fotoName);
+
+    // --- 2. KOMPRESI FOTO PETUGAS ---
+    $fotoPetugasName = time() . '_petugas_' . uniqid() . '.jpg'; // Paksa .jpg
+    $imagePtg = Image::read($request->file('foto_petugas'));
+    $imagePtg->scale(width: 800); // Resize lebar max 800px
+    $encodedPtg = $imagePtg->toJpeg(60); // Convert JPG Quality 60
+    $encodedPtg->save($path . '/' . $fotoPetugasName);
+
+    // SIMPAN DATA
+    SiagaKeluar::create([
+        'material_id'            => $validated['material_id'],
+        'nomor_meter'            => $validated['nomor_meter'], 
+        'nama_material_lengkap'  => $materialMaster->nama_material, 
+        'nama_petugas'           => $validated['nama_petugas'],
+        'stand_meter'            => $validated['stand_meter'],
+        'keterangan'             => $validated['keterangan'], 
+        'status'                 => $validated['status'],
+        'foto_path'              => $fotoName,
+        'foto_petugas'           => $fotoPetugasName, 
+        'tanggal'                => Carbon::now('Asia/Makassar'),
+    ]);
+
+    // UPDATE STATUS STOK
+    $stokTersedia->update(['status' => 'Terpakai']);
+
+    // MODIFIKASI REDIRECT KHUSUS SATPAM
+    if (strtolower(auth()->user()->role) === 'satpam') {
+        return redirect()->route('dashboard')->with('success', 'Data Siaga Keluar berhasil disimpan!');
+    }
+
+    return redirect()->route('siaga-keluar.index')
+        ->with('success', 'Data Siaga Keluar berhasil disimpan!');
+}
 
     public function edit(SiagaKeluar $siagaKeluar)
     {

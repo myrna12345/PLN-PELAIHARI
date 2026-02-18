@@ -13,33 +13,51 @@ class MaterialHistoryController extends Controller
 {
     // 1. Tampilan Utama
     public function index(Request $request)
-    {
-        // [SECURITY CHECK] Hanya Admin yang boleh akses
-        if (strtolower(auth()->user()->role) !== 'admin') {
-            return redirect()->route('dashboard')->with('error', 'Akses Ditolak. Halaman ini hanya untuk Admin.');
-        }
-
-        $search = $request->query('search');
-        $tanggalMulai = $request->query('tanggal_mulai');
-        $tanggalAkhir = $request->query('tanggal_akhir');
-
-        $query = MaterialHistory::query();
-
-        if ($search) {
-            $query->where('nama_material', 'like', "%$search%");
-        }
-
-        if ($tanggalMulai) {
-            $query->whereDate('tanggal_input', '>=', $tanggalMulai);
-        }
-        if ($tanggalAkhir) {
-            $query->whereDate('tanggal_input', '<=', $tanggalAkhir);
-        }
-
-        $histories = $query->orderBy('tanggal_input', 'desc')->paginate(10);
-
-        return view('material-history.index', compact('histories'));
+{
+    // [SECURITY CHECK] Hanya Admin yang boleh akses
+    if (strtolower(auth()->user()->role) !== 'admin') {
+        return redirect()->route('dashboard')->with('error', 'Akses Ditolak. Halaman ini hanya untuk Admin.');
     }
+
+    $search = $request->query('search');
+    $tanggalMulai = $request->query('tanggal_mulai');
+    $tanggalAkhir = $request->query('tanggal_akhir');
+    $exportType = $request->query('export'); // Ambil parameter export
+
+    $query = MaterialHistory::query();
+
+    if ($search) {
+        $query->where('nama_material', 'like', "%$search%");
+    }
+
+    if ($tanggalMulai) {
+        $query->whereDate('tanggal_input', '>=', $tanggalMulai);
+    }
+    if ($tanggalAkhir) {
+        $query->whereDate('tanggal_input', '<=', $tanggalAkhir);
+    }
+
+    // --- LOGIKA EXPORT TAMBAHAN ---
+    if ($exportType === 'pdf') {
+        $data = $query->orderBy('tanggal_input', 'desc')->get();
+        // Pastikan Anda sudah install Barryvdh\DomPDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('material-history.pdf_view', compact('data'));
+        return $pdf->download('Riwayat_Penambahan_Material_' . date('d_m_Y') . '.pdf');
+    }
+
+    if ($exportType === 'excel') {
+        // Pastikan Anda sudah install Maatwebsite\Excel dan membuat class MaterialHistoryExport
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\MaterialHistoryExport($query->orderBy('tanggal_input', 'desc')->get()), 
+            'Riwayat_Penambahan_Material_' . date('d_m_Y') . '.xlsx'
+        );
+    }
+    // ------------------------------
+
+    $histories = $query->orderBy('tanggal_input', 'desc')->paginate(10);
+
+    return view('material-history.index', compact('histories'));
+}
 
     // 2. Export PDF
     public function exportPDF(Request $request)

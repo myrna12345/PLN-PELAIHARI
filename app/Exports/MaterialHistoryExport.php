@@ -2,39 +2,26 @@
 
 namespace App\Exports;
 
-use App\Models\MaterialHistory;
-use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Carbon\Carbon;
 
-class MaterialHistoryExport implements FromQuery, WithMapping, WithHeadings
+class MaterialHistoryExport implements FromCollection, WithMapping, WithHeadings
 {
-    protected $request;
+    protected $data;
 
-    public function __construct($request)
+    // Menerima koleksi data hasil filter dari Controller
+    public function __construct($data)
     {
-        $this->request = $request;
+        $this->data = $data;
     }
 
-    public function query()
+    public function collection()
     {
-        $query = MaterialHistory::query();
-
-        if ($this->request->filled('search')) {
-            $query->where('nama_material', 'like', "%{$this->request->search}%");
-        }
-        if ($this->request->filled('tanggal_mulai')) {
-            $query->whereDate('tanggal_input', '>=', $this->request->tanggal_mulai);
-        }
-        if ($this->request->filled('tanggal_akhir')) {
-            $query->whereDate('tanggal_input', '<=', $this->request->tanggal_akhir);
-        }
-
-        return $query->orderBy('tanggal_input', 'desc');
+        return $this->data;
     }
 
-    // Header Kolom di Excel
     public function headings(): array
     {
         return [
@@ -42,11 +29,10 @@ class MaterialHistoryExport implements FromQuery, WithMapping, WithHeadings
             'Nama Material',
             'Jumlah',
             'Satuan',
-            'Tanggal (WITA)'
+            'Tanggal Input (WITA)'
         ];
     }
 
-    // Mapping Data (Memecah kolom jumlah & satuan)
     public function map($item): array
     {
         static $no = 0;
@@ -55,7 +41,7 @@ class MaterialHistoryExport implements FromQuery, WithMapping, WithHeadings
         return [
             $no,
             strtoupper($item->nama_material),
-            ltrim($item->jumlah, '+ '), // Hapus tanda +
+            ltrim($item->jumlah, '+ '), // Menghapus tanda + agar menjadi angka murni
             strtoupper($item->satuan),
             Carbon::parse($item->tanggal_input)->format('d/m/Y H:i')
         ];

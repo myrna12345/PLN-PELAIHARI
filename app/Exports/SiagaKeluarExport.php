@@ -34,14 +34,11 @@ class SiagaKeluarExport implements FromQuery, WithHeadings, WithMapping, ShouldA
     {
         return [
             'No',
-            // KEKAL: Nama Material & Nomor Meter (Gabungan)
             'Nama Material & Nomor Meter', 
             'Nama Petugas',
-            'Stand Meter', // PERBAIKAN: Ditampilkan kembali sebagai kolom terpisah
-            // DIHAPUS: 'Jumlah Siaga Keluar', 
-            // DIHAPUS: 'Jumlah Siaga Masuk',
+            'Stand Meter', 
             'Status',
-            'Keterangan', // TAMBAHAN: Kolom Keterangan ditambahkan di sini
+            'Keterangan', 
             'Tanggal (WITA)',
         ];
     }
@@ -50,22 +47,24 @@ class SiagaKeluarExport implements FromQuery, WithHeadings, WithMapping, ShouldA
     {
         $this->rowNumber++;
         
-        // PERBAIKAN: Menggabungkan Nama Material dan NOMOR METER (field: nomor_unit)
-        $namaMaterialNomorMeter = $item->material->nama_material ?? 'N/A';
-        if ($item->nomor_unit) { // Menggunakan nomor_unit untuk Nomor Meter
-            // HILANGKAN KATA 'UNIT'
-            $namaMaterialNomorMeter .= ' - ' . $item->nomor_unit;
-        }
+        // --- PERBAIKAN DI SINI ---
+        // Mengambil nama material dari relasi atau field nama_material_lengkap
+        $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? 'N/A');
+        
+        // Pastikan memanggil field 'nomor_meter' sesuai dengan yang disimpan di database
+        $nomorMeter = $item->nomor_meter; 
+        
+        // Gabungkan Nama Material dan Nomor Meter
+        $namaMaterialNomorMeter = $namaMaterial . ($nomorMeter ? ' - ' . $nomorMeter : '');
+        // -------------------------
         
         return [
             $this->rowNumber,
-            $namaMaterialNomorMeter, // Data gabungan
+            $namaMaterialNomorMeter,
             $item->nama_petugas,
-            $item->stand_meter ?? '-', // KEKAL: Stand Meter sebagai kolom terpisah
-            // DIHAPUS: $item->jumlah_siaga_keluar,
-            // DIHAPUS: $item->jumlah_siaga_masuk ?? 0,
+            $item->stand_meter ?? '-',
             $item->status,
-            $item->keterangan, // TAMBAHAN: Data Keterangan dari database
+            $item->keterangan,
             Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i'),
         ];
     }
@@ -73,7 +72,7 @@ class SiagaKeluarExport implements FromQuery, WithHeadings, WithMapping, ShouldA
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => ['font' => ['bold' => true]], // Header tebal
+            1 => ['font' => ['bold' => true]], 
         ];
     }
 }
