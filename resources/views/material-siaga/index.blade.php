@@ -5,67 +5,185 @@
 @section('content')
 
 <style>
-    .modal-overlay-custom {
-        display: none;
-        position: absolute;
-        z-index: 50;
-        inset: 0;
-        background: rgba(0,0,0,0.7);
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(4px);
-    }
 
-    .modal-content-custom {
-        max-width: 85%;
-        max-height: 85%;
-        border: 4px solid white;
-        border-radius: 12px;
-        box-shadow: 0 15px 50px rgba(0,0,0,.7);
-        animation: zoomIn .3s ease-out;
-    }
+/* 1. Layout Dasar Tombol */
+.btn-pdf, 
+.btn-excel, 
+.btn-foto-download, 
+.btn-edit, 
+.btn-hapus {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
 
-    @keyframes zoomIn {
-        from { transform: scale(.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
+/* Icons inherit color */
+.btn-pdf i, .btn-excel i, .btn-foto-download i, .btn-edit i, .btn-hapus i {
+    color: inherit !important;
+}
 
-    .close-btn-custom {
-        position: absolute;
-        top: 25px;
-        right: 35px;
-        font-size: 45px;
-        color: white;
-        cursor: pointer;
-        font-weight: bold;
-    }
+/* 2. Tombol PDF, Excel, & Download Foto (BIRU SOFT) */
+.btn-pdf, 
+.btn-excel,
+.btn-foto-download {
+    background-color: #5a8dee !important;
+    color: white !important;
+}
+.btn-pdf:hover, 
+.btn-excel:hover,
+.btn-foto-download:hover {
+    background-color: #4a77ce !important; 
+}
 
-    .btn-download-custom {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #89c6d3;
-        color: #1a3a4a;
-        padding: 6px 14px;
-        border-radius: 8px;
-        font-size: 12px;
-        text-decoration: none;
-        margin-top: 5px;
-    }
+/* 3. Tombol Edit (HIJAU PASTEL AGAK GELAP) */
+.btn-edit {
+    background-color: #76b596 !important; 
+    color: #333333 !important; 
+}
+.btn-edit:hover {
+    background-color: #62a384 !important; 
+}
 
-    .card-new { position: relative; }
+/* 4. Tombol Hapus (MERAH PASTEL AGAK GELAP) */
+.btn-hapus {
+    background-color: #cc6666 !important; 
+    color: white !important; 
+}
+.btn-hapus:hover {
+    background-color: #b35555 !important; 
+}
+
+/* 5. TOMBOL CARI & RESET (ABU-ABU) */
+.search-form .btn-primary,
+.search-form .btn-secondary {
+    min-width: 80px !important;
+    height: 40px !important;     
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 15px !important;
+    border-radius: 10px !important; 
+    font-size: 14px !important;
+    border: none !important;
+    outline: none !important;
+    background-color: #6c757d !important; 
+    color: white !important;
+    text-decoration: none !important;
+}
+.search-form .btn-primary:hover,
+.search-form .btn-secondary:hover {
+    background-color: #5a6268 !important; 
+}
+
+/* 6. INPUT SEARCH & TANGGAL */
+.search-bar {
+    position: relative;
+    height: 40px !important;         
+    border: 1px solid #d1d5db;       
+    border-radius: 10px;             
+    background-color: white;
+    box-sizing: border-box;
+    width: auto;
+    min-width: 200px;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 14px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.search-bar input {
+    border: none !important;
+    height: 100%;
+    width: 100%;
+    outline: none;
+    padding-left: 35px !important;
+    padding-right: 10px;
+    font-size: 14px;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.form-control-tanggal {
+    height: 40px !important;         
+    border: 1px solid #d1d5db;       
+    border-radius: 10px;             
+    padding: 0 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+    outline: none;
+}
+
+/* 7. LAYOUT AKSI */
+.table-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.table-foto {
+    max-width: 80px; 
+    display: block; 
+    margin: 0 auto 5px; 
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border: 1px solid #ddd;
+}
+
+/* MODAL STYLE */
+.image-modal {
+    display: none; 
+    position: fixed; 
+    z-index: 9999; 
+    left: 0; top: 0; width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.85); 
+    justify-content: center; align-items: center;
+}
+.image-modal-content {
+    max-width: 90%; max-height: 90vh; border-radius: 4px;
+}
+.close-modal {
+    position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;
+}
 </style>
 
 <div class="card-new">
-
     {{-- HEADER + FILTER --}}
     <div class="index-header">
-        <h2 style="font-weight:bold;">LAPORAN MATERIAL SIAGA STAND BY</h2>
+        <h2>LAPORAN MATERIAL SIAGA STAND BY</h2>
 
         <form action="{{ route('material-siaga.index') }}" method="GET" class="search-form">
-            <input type="text" name="search" placeholder="Cari Nama / Nomor Meter" value="{{ request('search') }}">
-            <input type="date" name="start_date" value="{{ request('start_date') }}">
-            <input type="date" name="end_date" value="{{ request('end_date') }}">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
+            </div>
+            <div class="form-group-tanggal-filter">
+                <input type="date" name="start_date" class="form-control-tanggal" value="{{ request('start_date') }}" title="Tanggal Mulai">
+            </div>
+            <div class="form-group-tanggal-filter">
+                <input type="date" name="end_date" class="form-control-tanggal" value="{{ request('end_date') }}" title="Tanggal Akhir">
+            </div>
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
             <a href="{{ route('material-siaga.index') }}" class="btn btn-secondary btn-sm">Reset</a>
         </form>
@@ -73,17 +191,17 @@
 
     {{-- TABEL --}}
     <div class="table-container">
-        <table class="table" style="width:100%; background:white;">
+        <table class="table">
             <thead>
                 <tr>
-                    <th width="5%">No</th>
-                    <th width="25%">Nama Material & Nomor Meter</th>
-                    <th width="10%">Stand Meter</th>
-                    <th width="15%">Tanggal(WITA)</th>
-                    <th width="10%">Status</th>
-                    <th width="15%">Foto</th>
+                    <th>No</th>
+                    <th>Nama Material & Nomor Meter</th>
+                    <th>Stand Meter</th>
+                    <th>Tanggal (WITA)</th>
+                    <th>Status</th>
+                    <th>Foto</th>
                     @if(strtolower(auth()->user()->role) !== 'satpam')
-                    <th width="20%">Aksi</th>
+                    <th style="min-width: 150px; text-align: center;">Aksi</th>
                     @endif
                 </tr>
             </thead>
@@ -92,160 +210,113 @@
                 @forelse ($dataSiaga as $data)
                 <tr>
                     <td align="center">{{ $loop->iteration + ($dataSiaga->firstItem() - 1) }}</td>
-
                     <td>{{ strtoupper($data->nama_material) }} - {{ $data->nomor_meter }}</td>
-
                     <td align="center">{{ $data->stand_meter }}</td>
-
+                    <td align="center">{{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y, H:i') }}</td>
                     <td align="center">
-                        {{ \Carbon\Carbon::parse($data->tanggal)->format('d M Y H:i') }}
+                        <span style="font-weight:bold; color: {{ $data->status === 'Ready' ? '#2e7d32' : '#c62828' }}">
+                            {{ strtoupper($data->status) }}
+                        </span>
                     </td>
 
-                    {{-- STATUS --}}
-                    <td align="center">
-                        @if($data->status === 'Ready')
-                            <span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;">
-                                READY
-                            </span>
-                        @elseif($data->status === 'Terpakai')
-                            <span style="background:#ffebee;color:#c62828;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;">
-                                TERPAKAI
-                            </span>
-                        @endif
-                    </td>
-
-                    {{-- FOTO --}}
-                    <td align="center">
+                    <td style="text-align: center;">
                         @if($data->unggah_foto && Storage::disk('public')->exists($data->unggah_foto))
                             <img src="{{ route('material-siaga.show-foto', $data->id) }}"
-                                 width="70"
-                                 style="cursor:pointer;border-radius:4px;border:1px solid #ddd"
-                                 onclick="bukaFotoModal(this.src)">
-                            <br>
+                                 class="table-foto"
+                                 onclick="openModal(this)"
+                                 alt="Foto Material">
+                            
                             @if(strtolower(auth()->user()->role) !== 'satpam')
-                            <a href="{{ route('material-siaga.download-foto', $data->id) }}" class="btn-download-custom">
-                                Download
+                            <a href="{{ route('material-siaga.download-foto', $data->id) }}" class="btn-foto-download">
+                                <i class="fas fa-download"></i> Download
                             </a>
                             @endif
                         @else
-                            <span style="font-size:11px;color:#aaa;">Tidak ada foto</span>
+                            <span style="font-size:11px;color:#aaa;">-</span>
                         @endif
                     </td>
 
-                    {{-- AKSI (Sembunyikan dari Satpam) --}}
                     @if(strtolower(auth()->user()->role) !== 'satpam')
-                    <td align="center">
-                        <a href="{{ route('material-siaga.edit', $data->id) }}"
-                           style="background:#82c49e;color:white;padding:5px 10px;border-radius:4px;font-size:12px; text-decoration: none;">
-                           Edit
-                        </a>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{{ route('material-siaga.edit', $data->id) }}" class="btn btn-edit">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
 
-                        <form action="{{ route('material-siaga.destroy', $data->id) }}"
-                              method="POST" style="display:inline"
-                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini??')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    style="background:#e57373;color:white;border:none;padding:5px 10px;border-radius:4px;font-size:12px;">
-                                Hapus
-                            </button>
-                        </form>
+                            <form action="{{ route('material-siaga.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-hapus">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
                     </td>
                     @endif
                 </tr>
                 @empty
-            <tr>
-                <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 7 : 6 }}" class="text-center" style="text-align: center; vertical-align: middle; padding: 40px 0; font-weight: 500; color: #6b7280;">
-                    Data tidak ditemukan.
-                </td>
-            </tr>
-        @endforelse
+                <tr>
+                    {{-- PERBAIKAN: Posisi teks di tengah vertikal (padding) dan horizontal (text-align) --}}
+                    <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 7 : 6 }}" 
+                        style="text-align: center; vertical-align: middle; padding: 100px 0; color: #6b7280; font-weight: 500; font-size: 16px;">
+                        Data tidak ditemukan.
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
-   {{-- FOOTER EXPORT (Sembunyikan dari Satpam) --}}
-@if(strtolower(auth()->user()->role) !== 'satpam')
-<div
-    class="index-footer-form"
-    style="margin-top:35px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;"
->
-    <form
-        action="{{ route('material-siaga.export') }}"
-        method="GET"
-        style="display:flex; align-items:flex-end; gap:15px;"
-    >
-        <div style="display:flex; flex-direction:column; gap:5px;">
-            <label style="font-size:13px; font-weight:bold; color:#444;">
-                Dari Tanggal:
-            </label>
-            <input
-                type="date"
-                name="start_date"
-                class="form-control"
-                style="width:160px;"
-                value="{{ request('start_date') }}"
-                required
-            >
-        </div>
+    <div style="margin-top: 20px;">
+        {{ $dataSiaga->appends(request()->query())->links() }}
+    </div>
 
-        <div style="display:flex; flex-direction:column; gap:5px;">
-            <label style="font-size:13px; font-weight:bold; color:#444;">
-                Sampai Tanggal:
-            </label>
-            <input
-                type="date"
-                name="end_date"
-                class="form-control"
-                style="width:160px;"
-                value="{{ request('end_date') }}"
-                required
-            >
-        </div>
+    {{-- FOOTER EXPORT --}}
+    @if(strtolower(auth()->user()->role) !== 'satpam')
+    <div class="index-footer-form" style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e7eb;">
+        <form action="{{ route('material-siaga.export') }}" method="GET" style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-weight:600;">Dari Tanggal:</label>
+                <input type="date" name="start_date" class="form-control-tanggal" value="{{ request('start_date') }}" required>
+            </div>
 
-        <div style="display:flex; gap:10px;">
-            <button
-                type="submit"
-                name="export"
-                value="pdf"
-                style="background-color:#fce4e4;color:#c62828;border:1px solid #f9cccc;
-                       padding:8px 18px;border-radius:4px;font-weight:bold;
-                       display:flex;align-items:center;gap:8px;font-size:13px;height:38px;"
-            >
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-weight:600;">Sampai Tanggal:</label>
+                <input type="date" name="end_date" class="form-control-tanggal" value="{{ request('end_date') }}" required>
+            </div>
+
+            <button type="submit" name="export" value="pdf" class="btn btn-pdf">
                 <i class="fas fa-file-pdf"></i> Unduh Pdf
             </button>
 
-            <button
-                type="submit"
-                name="export"
-                value="excel"
-                style="background-color:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;
-                       padding:8px 18px;border-radius:4px;font-weight:bold;
-                       display:flex;align-items:center;gap:8px;font-size:13px;height:38px;"
-            >
+            <button type="submit" name="export" value="excel" class="btn btn-excel">
                 <i class="fas fa-file-excel"></i> Unduh Excel
             </button>
-        </div>
-    </form>
-</div>
-@endif
-
+        </form>
+    </div>
+    @endif
 </div>
 
-
-{{-- MODAL FOTO --}}
-<div id="modalContainer" class="modal-overlay-custom" onclick="tutupFotoModal()">
-    <span class="close-btn-custom">&times;</span>
-    <img id="fotoBesar" class="modal-content-custom" onclick="event.stopPropagation()">
+{{-- MODAL POP-UP IMAGE --}}
+<div id="imageModal" class="image-modal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="image-modal-content" id="img01">
 </div>
 
 <script>
-    function bukaFotoModal(src) {
-        document.getElementById('fotoBesar').src = src;
-        document.getElementById('modalContainer').style.display = 'flex';
+    function openModal(element) {
+        var modal = document.getElementById("imageModal");
+        var modalImg = document.getElementById("img01");
+        modal.style.display = "flex"; 
+        modalImg.src = element.src;   
     }
-    function tutupFotoModal() {
-        document.getElementById('modalContainer').style.display = 'none';
+
+    function closeModal() {
+        document.getElementById("imageModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("imageModal");
+        if (event.target == modal) { modal.style.display = "none"; }
     }
 </script>
 

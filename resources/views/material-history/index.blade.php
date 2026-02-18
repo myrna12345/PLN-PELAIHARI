@@ -1,127 +1,282 @@
 @extends('layouts.app')
 
+@section('title', 'Riwayat Penambahan Material - SIMAS-PLN')
+
 @section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-    .report-card { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; padding: 24px; }
-    .img-frame { width: 80px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #dee2e6; }
-    .table th { background-color: #f1f5f9; vertical-align: middle; font-size: 0.9rem; color: #334155; }
-    .table td { vertical-align: middle; }
 
-    .filter-row-top { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: nowrap; margin-bottom: 12px; }
-    .search-wrapper-custom { position: relative; width: 300px; flex-shrink: 0; }
-    .search-wrapper-custom i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-    .search-wrapper-custom input { padding-left: 35px; height: 38px; border-radius: 10px; border: 1px solid #cbd5e1; }
-    .input-date-custom { height: 38px; border-radius: 10px; border: 1px solid #cbd5e1; width: 150px; }
-    .btn-action-custom { height: 38px; border-radius: 10px; font-weight: 600; padding: 0 18px; display: flex; align-items: center; justify-content: center; }
-    .btn-cari-outline { background-color: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
-    .btn-reset-grey { background-color: #64748b; color: #ffffff; border: none; }
+/* 1. Layout Dasar Tombol */
+.btn-pdf, 
+.btn-excel, 
+.btn-foto-download, 
+.btn-edit, 
+.btn-hapus {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
 
-    .bottom-action-row { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: nowrap; }
-    .bottom-action-row label { font-size: 0.85rem; font-weight: 600; margin-bottom: 0; white-space: nowrap; }
-    .bottom-action-row input { height: 34px; width: 140px; border-radius: 8px; border: 1px solid #cbd5e1; }
-    .btn-pdf { background-color: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; font-weight: 600; white-space: nowrap; }
-    .btn-excel { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; font-weight: 600; white-space: nowrap; }
+/* Icons inherit color */
+.btn-pdf i, .btn-excel i, .btn-foto-download i, .btn-edit i, .btn-hapus i {
+    color: inherit !important;
+}
 
-    .custom-pagination { display: flex; justify-content: flex-start; align-items: center; gap: 4px; margin-top: 10px; margin-bottom: 10px; }
-    .page-btn { padding: 4px 10px; border: 1px solid #dee2e6; background: white; color: #00467f; text-decoration: none; border-radius: 5px; font-size: 0.75rem; font-weight: 600; }
-    .page-btn:hover { background-color: #f8fafc; }
-    .page-btn.active { background-color: #00467f; color: white; border-color: #00467f; }
-    .page-btn.disabled { color: #ccc; pointer-events: none; background-color: #f9f9f9; }
+/* 2. Tombol PDF, Excel, & Download Foto (BIRU SOFT) */
+.btn-pdf, 
+.btn-excel,
+.btn-foto-download {
+    background-color: #5a8dee !important;
+    color: white !important;
+}
+.btn-pdf:hover, 
+.btn-excel:hover,
+.btn-foto-download:hover {
+    background-color: #4a77ce !important; 
+}
+
+/* 3. Tombol Edit (HIJAU PASTEL AGAK GELAP) */
+.btn-edit {
+    background-color: #76b596 !important; 
+    color: #333333 !important; 
+}
+.btn-edit:hover {
+    background-color: #62a384 !important; 
+}
+
+/* 4. Tombol Hapus (MERAH PASTEL AGAK GELAP) */
+.btn-hapus {
+    background-color: #cc6666 !important; 
+    color: white !important; 
+}
+.btn-hapus:hover {
+    background-color: #b35555 !important; 
+}
+
+/* 5. TOMBOL CARI & RESET (ABU-ABU) */
+.search-form .btn-primary,
+.search-form .btn-secondary {
+    min-width: 80px !important;
+    height: 40px !important;     
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 15px !important;
+    border-radius: 10px !important; 
+    font-size: 14px !important;
+    border: none !important;
+    outline: none !important;
+    background-color: #6c757d !important; 
+    color: white !important;
+    text-decoration: none !important;
+}
+.search-form .btn-primary:hover,
+.search-form .btn-secondary:hover {
+    background-color: #5a6268 !important; 
+}
+
+/* 6. INPUT SEARCH & TANGGAL */
+.search-bar {
+    position: relative;
+    height: 40px !important;         
+    border: 1px solid #d1d5db;       
+    border-radius: 10px;             
+    background-color: white;
+    box-sizing: border-box;
+    width: auto;
+    min-width: 200px;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 14px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.search-bar input {
+    border: none !important;
+    height: 100%;
+    width: 100%;
+    outline: none;
+    padding-left: 35px !important;
+    padding-right: 10px;
+    font-size: 14px;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.form-control-tanggal {
+    height: 40px !important;         
+    border: 1px solid #d1d5db;       
+    border-radius: 10px;             
+    padding: 0 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+    outline: none;
+}
+
+/* 7. LAYOUT AKSI */
+.table-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.table-foto {
+    max-width: 80px; 
+    display: block; 
+    margin: 0 auto 5px; 
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border: 1px solid #ddd;
+}
+
+/* MODAL STYLE */
+.image-modal {
+    display: none; 
+    position: fixed; 
+    z-index: 9999; 
+    left: 0; top: 0; width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.85); 
+    justify-content: center; align-items: center;
+}
+.image-modal-content {
+    max-width: 90%; max-height: 90vh; border-radius: 4px;
+}
+.close-modal {
+    position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;
+}
 </style>
 
-<div class="container py-3">
-    <div class="report-card">
-        <h3 class="fw-bold text-dark text-uppercase">Riwayat Penambahan Material</h3>
+<div class="card-new">
+    {{-- HEADER --}}
+    <div class="index-header">
+        <h2>RIWAYAT PENAMBAHAN MATERIAL</h2>
 
         {{-- FILTER ATAS --}}
-        <form action="{{ route('material-history.index') }}" method="GET" class="filter-row-top">
-            <div class="search-wrapper-custom">
+        <form action="{{ route('material-history.index') }}" method="GET" class="search-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" class="form-control" placeholder="Cari Nama Material..." value="{{ request('search') }}">
+                <input type="text" name="search" placeholder="Cari Nama Material..." value="{{ request('search') }}">
             </div>
-            <input type="date" name="tanggal_mulai" class="form-control input-date-custom" value="{{ request('tanggal_mulai') }}">
-            <input type="date" name="tanggal_akhir" class="form-control input-date-custom" value="{{ request('tanggal_akhir') }}">
-            <button type="submit" class="btn btn-action-custom btn-cari-outline">Cari</button>
-            <a href="{{ route('material-history.index') }}" class="btn btn-action-custom btn-reset-grey text-decoration-none">Reset</a>
+            
+            <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
+            <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
+            
+            <button type="submit" class="btn btn-primary">Cari</button>
+            <a href="{{ route('material-history.index') }}" class="btn btn-secondary">Reset</a>
         </form>
+    </div>
 
-        {{-- TABLE --}}
-        <div class="table-responsive">
-            <table class="table table-hover table-bordered mb-0">
-                <thead class="text-center">
-                    <tr>
-                        <th width="50">No</th>
-                        <th class="text-start">Nama Material</th>
-                        <th width="100">Jumlah</th> {{-- Kolom Dipisah --}}
-                        <th width="100">Satuan</th> {{-- Kolom Dipisah --}}
-                        <th>Tanggal (WITA)</th>
-                        <th width="120">Foto Bukti</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($histories as $index => $h)
-                        <tr>
-                            <td class="text-center">{{ $histories->firstItem() + $index }}</td>
-                            <td class="fw-bold text-uppercase">{{ $h->nama_material }}</td>
-                            {{-- Menghapus tanda + --}}
-                            <td class="text-center">{{ ltrim($h->jumlah, '+ ') }}</td>
-                            <td class="text-center text-uppercase">{{ $h->satuan }}</td>
-                            <td class="text-center">{{ \Carbon\Carbon::parse($h->tanggal_input)->format('d/m/Y H:i') }} WITA</td>
-                            <td class="text-center">
-                                @if($h->foto_path)
-                                    <img src="{{ asset('uploads/material_stand_by/' . $h->foto_path) }}" class="img-frame">
-                                @else
-                                    <div class="img-frame bg-light d-flex align-items-center justify-content-center mx-auto text-muted"><small>No Photo</small></div>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        {{-- Colspan diubah menjadi 6 --}}
-                        <tr><td colspan="6" class="text-center py-4 text-muted">Data tidak ditemukan.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+    {{-- TABEL --}}
+    <div class="table-container" style="margin-top: 20px;">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="50">No</th>
+                    <th style="text-align: left; padding-left: 15px;">Nama Material</th>
+                    <th width="100">Jumlah</th>
+                    <th width="100">Satuan</th>
+                    <th width="180">Tanggal (WITA)</th>
+                    <th width="120">Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($histories as $index => $h)
+                <tr>
+                    <td align="center">{{ $histories->firstItem() + $index }}</td>
+                    <td style="font-weight:600; text-transform:uppercase; padding-left: 15px;">{{ $h->nama_material }}</td>
+                    <td align="center">{{ ltrim($h->jumlah, '+ ') }}</td>
+                    <td align="center" style="text-transform:uppercase;">{{ $h->satuan }}</td>
+                    <td align="center">{{ \Carbon\Carbon::parse($h->tanggal_input)->format('d/m/Y H:i') }}</td>
+                    <td align="center">
+                        @if($h->foto_path)
+                            <img src="{{ asset('uploads/material_stand_by/' . $h->foto_path) }}" 
+                                 class="table-foto" 
+                                 onclick="openModal(this)">
+                        @else
+                            <span style="font-size:11px;color:#aaa;">-</span>
+                        @endif
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    {{-- DATA TIDAK DITEMUKAN POSISI TENGAH TOTAL --}}
+                    <td colspan="6" style="text-align: center; vertical-align: middle; padding: 100px 0; color: #6b7280; font-weight: 500; font-size: 16px;">
+                        Data tidak ditemukan.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-        {{-- INFO DATA --}}
-        <div class="mt-2 small text-muted">
-            Menampilkan {{ $histories->firstItem() ?? 0 }} sampai {{ $histories->lastItem() ?? 0 }} dari {{ $histories->total() }} data
-        </div>
+    {{-- FOOTER EXPORT --}}
+    <div class="index-footer-form" style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
+        <form action="{{ route('material-history.index') }}" method="GET" style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label style="font-weight:700; font-size: 13px;">Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}">
+            </div>
 
-        {{-- PAGINATION MANUAL --}}
-        <div class="custom-pagination">
-            @if ($histories->onFirstPage())
-                <span class="page-btn disabled">« Previous</span>
-            @else
-                <a href="{{ $histories->previousPageUrl() }}" class="page-btn">« Previous</a>
-            @endif
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label style="font-weight:700; font-size: 13px;">Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}">
+            </div>
 
-            @foreach ($histories->getUrlRange(1, $histories->lastPage()) as $page => $url)
-                <a href="{{ $url }}" class="page-btn {{ $page == $histories->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-            @endforeach
+            <button type="submit" name="export" value="pdf" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Unduh Pdf
+            </button>
 
-            @if ($histories->hasMorePages())
-                <a href="{{ $histories->nextPageUrl() }}" class="page-btn">Next »</a>
-            @else
-                <span class="page-btn disabled">Next »</span>
-            @endif
-        </div>
-
-        {{-- TOOLBAR BAWAH --}}
-        <div class="p-2 bg-light rounded-3 border mt-3">
-            <form action="{{ route('material-history.index') }}" method="GET" class="bottom-action-row">
-                <label>Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai" class="form-control" value="{{ request('tanggal_mulai') }}">
-                <label>Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir" class="form-control" value="{{ request('tanggal_akhir') }}">
-                <a href="{{ route('material-history.pdf', request()->query()) }}" class="btn btn-pdf btn-sm d-flex align-items-center px-3 text-decoration-none"><i class="fas fa-file-pdf me-2"></i> Unduh PDF</a>
-                <a href="{{ route('material-history.excel', request()->query()) }}" class="btn btn-excel btn-sm d-flex align-items-center px-3 text-decoration-none"><i class="fas fa-file-excel me-2"></i> Unduh Excel</a>
-            </form>
-        </div>
+            <button type="submit" name="export" value="excel" class="btn btn-excel">
+                <i class="fas fa-file-excel"></i> Unduh Excel
+            </button>
+        </form>
     </div>
 </div>
+
+{{-- MODAL POP-UP IMAGE --}}
+<div id="imageModal" class="image-modal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="image-modal-content" id="img01">
+</div>
+
+<script>
+    function openModal(element) {
+        var modal = document.getElementById("imageModal");
+        var modalImg = document.getElementById("img01");
+        modal.style.display = "flex"; 
+        modalImg.src = element.src;   
+    }
+
+    function closeModal() {
+        document.getElementById("imageModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("imageModal");
+        if (event.target == modal) { modal.style.display = "none"; }
+    }
+</script>
+
 @endsection
