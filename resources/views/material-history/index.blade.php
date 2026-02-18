@@ -177,7 +177,7 @@
         <form action="{{ route('material-history.index') }}" method="GET" class="search-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Cari Nama Material..." value="{{ request('search') }}">
+                <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             
             <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">

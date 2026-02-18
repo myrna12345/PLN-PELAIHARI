@@ -236,7 +236,7 @@
         <form action="{{ route('siaga-kembali.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Cari Material/Petugas" value="{{ request('search') }}">
+                <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             
             <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">

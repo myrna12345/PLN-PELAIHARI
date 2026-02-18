@@ -172,7 +172,7 @@
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" 
-                       placeholder="Cari Nama Material / Petugas..." 
+                       placeholder="Cari Nama Material" 
                        value="{{ request('search') }}">
             </div>
 
