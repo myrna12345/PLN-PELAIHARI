@@ -83,15 +83,14 @@ class MaterialSiagaStandByController extends Controller
     
     // --- 4. EDIT ---
     public function edit($id)
-    {
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
-        }
+{
+    // Cari data berdasarkan ID
+    $materialSiaga = MaterialSiagaStandBy::findOrFail($id);
 
-        $material = MaterialSiagaStandBy::findOrFail($id);
-        return view('material-siaga.edit', compact('material'));
-    }
-
+    // Pastikan nama variabel di dalam compact('materialSiaga') 
+    // sama dengan yang dipanggil di Blade
+    return view('material-siaga.edit', compact('materialSiaga'));
+}
     // --- 5. UPDATE ---
     public function update(Request $request, $id)
     {
