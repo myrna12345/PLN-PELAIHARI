@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Intervention\Image\Laravel\Facades\Image;
 
 class MaterialSiagaStandByController extends Controller
 {
@@ -50,8 +51,12 @@ class MaterialSiagaStandByController extends Controller
     }
 
     // --- 3. STORE ---
+   // --- 3. STORE ---
     public function store(Request $request)
     {
+        // 1. Alokasikan memori sementara 1GB agar sanggup memproses file 20MB++
+        ini_set('memory_limit', '1024M'); 
+
         $validatedData = $request->validate([
             'nama_material'         => 'required|string',
             'nomor_meter'           => 'required|string|max:50',
@@ -59,12 +64,22 @@ class MaterialSiagaStandByController extends Controller
             'tanggal'               => 'required|date',
             'nama_petugas'          => 'nullable|string|max:255',
             'jumlah_siaga_standby'  => 'nullable|integer|min:0', 
-            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:5120', 
+            // 2. Batas validasi ditingkatkan ke 25MB agar file Anda tidak ditolak di awal
+            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg,png|max:25600', 
         ]);
         
         $path = null;
         if ($request->hasFile('unggah_foto')) {
-            $path = $request->file('unggah_foto')->store('foto_siaga', 'public');
+            $image = $request->file('unggah_foto');
+            $filename = time() . '.jpg'; // Simpan sebagai JPG agar lebih ringan
+            $path = 'foto_siaga/' . $filename;
+            
+            // --- 3. PROSES KOMPRESI OTOMATIS (Intervention Image v3) ---
+            $img = Image::read($image); 
+            $img->scale(width: 1200);    // Kecilkan resolusi ke lebar 1200px
+            $encoded = $img->toJpeg(60); // Kompres kualitas hingga 60%
+            
+            Storage::disk('public')->put($path, (string) $encoded);
         }
 
         MaterialSiagaStandBy::create([
@@ -78,7 +93,54 @@ class MaterialSiagaStandByController extends Controller
             'status'                => 'Ready',
         ]);
 
-        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil disimpan!');
+        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil dikompres dan disimpan!');
+    }
+
+    // --- 5. UPDATE ---
+    public function update(Request $request, $id)
+    {
+        // 1. Alokasikan memori sementara 1GB
+        ini_set('memory_limit', '1024M');
+
+        $data = MaterialSiagaStandBy::findOrFail($id);
+
+        $request->validate([
+            'nama_material' => 'required',
+            'nomor_meter'   => 'required',
+            'stand_meter'   => 'required',
+            'status'        => 'required|in:Ready,Terpakai,READY,TERPAKAI',
+            'unggah_foto'   => 'nullable|image|mimes:jpeg,png,jpg|max:25600', 
+        ]);
+
+        $path = $data->unggah_foto;
+
+        if ($request->hasFile('unggah_foto')) {
+            // Hapus foto lama untuk menghemat storage
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+
+            $image = $request->file('unggah_foto');
+            $filename = time() . '.jpg';
+            $path = 'foto_siaga/' . $filename;
+
+            // --- 3. PROSES KOMPRESI OTOMATIS ---
+            $img = Image::read($image);
+            $img->scale(width: 1200); 
+            $encoded = $img->toJpeg(60); 
+
+            Storage::disk('public')->put($path, (string) $encoded);
+        }
+
+        $data->update([
+            'nama_material' => $request->nama_material,
+            'nomor_meter'   => $request->nomor_meter,
+            'stand_meter'   => $request->stand_meter,
+            'status'        => ucwords(strtolower($request->status)),
+            'unggah_foto'   => $path,
+        ]);
+
+        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil dikompres dan diperbarui!');
     }
     
     // --- 4. EDIT ---
@@ -91,46 +153,6 @@ class MaterialSiagaStandByController extends Controller
     // sama dengan yang dipanggil di Blade
     return view('material-siaga.edit', compact('materialSiaga'));
 }
-    // --- 5. UPDATE ---
-    public function update(Request $request, $id)
-    {
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
-        }
-
-        $data = MaterialSiagaStandBy::findOrFail($id);
-
-        $request->validate([
-            'nama_material'         => 'required|string',
-            'nomor_meter'           => 'required|string|max:50',
-            'stand_meter'           => 'required|string|max:100',
-            'tanggal'               => 'required|date',
-            'status'                => 'required|in:Ready,Terpakai',
-            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-        ]);
-
-        $path = $data->unggah_foto; 
-
-        if ($request->hasFile('unggah_foto')) {
-            if ($path && Storage::disk('public')->exists($path)) { 
-                Storage::disk('public')->delete($path); 
-            }
-            $path = $request->file('unggah_foto')->store('foto_siaga', 'public');
-        }
-
-        $data->update([
-            'nama_material'         => $request->nama_material,
-            'nomor_meter'           => $request->nomor_meter,
-            'stand_meter'           => $request->stand_meter,
-            'tanggal'               => $request->tanggal,
-            'status'                => $request->status,
-            'nama_petugas'          => $request->nama_petugas,
-            'jumlah_siaga_standby'  => $request->jumlah_siaga_standby,
-            'unggah_foto'           => $path,
-        ]);
-
-        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil diperbarui!');
-    }
 
    public function showFoto($id) 
     {

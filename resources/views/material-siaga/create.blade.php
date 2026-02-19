@@ -61,7 +61,7 @@
                 @error('unggah_foto')
                     <span style="color: red; font-size: 12px; display: block;">{{ $message }}</span>
                 @else
-                    <small style="color: #666; display: block; margin-top: 5px; font-style: italic;">*Unggah foto material adalah wajib.</small>
+                    <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Unggah foto material adalah wajib.</small>
                 @enderror
             </div>
 

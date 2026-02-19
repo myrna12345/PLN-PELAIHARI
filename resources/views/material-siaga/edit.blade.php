@@ -83,7 +83,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    opacity: 0; /* Sembunyikan input asli */
+    opacity: 0; 
     cursor: pointer;
     z-index: 2;
 }
@@ -148,6 +148,17 @@
     max-width: 250px;
     border-radius: 8px;
 }
+
+/* 8. PESAN ERROR VALIDASI */
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    border: 1px solid #f5c6cb;
+    font-size: 14px;
+}
 </style>
 
 <div class="page-title-container">
@@ -155,6 +166,18 @@
 </div>
 
 <div class="card-edit-container">
+    {{-- Menampilkan pesan error jika validasi gagal --}}
+    @if ($errors->any())
+        <div class="alert-error">
+            <strong>Gagal Memperbarui:</strong>
+            <ul style="margin-top: 5px; margin-left: 20px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('material-siaga.update', $materialSiaga->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
@@ -180,6 +203,7 @@
         <div class="form-group-new">
             <label for="status">Status</label>
             <select name="status" id="status" class="form-control-new" required>
+                {{-- Value disesuaikan dengan validasi di Controller (Case Sensitive) --}}
                 <option value="Ready" {{ old('status', $materialSiaga->status) == 'Ready' ? 'selected' : '' }}>READY</option>
                 <option value="Terpakai" {{ old('status', $materialSiaga->status) == 'Terpakai' ? 'selected' : '' }}>TERPAKAI</option>
             </select>
@@ -202,6 +226,7 @@
                 </div>
             @endif
             <div style="margin-top: 15px;">
+                <label style="font-size: 13px; color: #666;">Unggah Foto Material Baru(Opsional)</label>
                 <div class="file-input-wrapper">
                     <input type="file" name="unggah_foto" id="unggah_foto" onchange="updateFileName(this)">
                     <div class="file-custom-text" id="file-name-text">No file chosen</div>
@@ -217,15 +242,16 @@
 </div>
 
 <script>
-    // Fungsi JavaScript untuk mengambil nama file dan menampilkannya
     function updateFileName(input) {
         const textDisplay = document.getElementById('file-name-text');
         if (input.files && input.files.length > 0) {
             textDisplay.innerText = input.files[0].name;
-            textDisplay.style.color = "#333"; // Ubah warna jadi gelap saat ada file
+            textDisplay.style.color = "#333";
+            textDisplay.style.fontWeight = "500";
         } else {
-            textDisplay.innerText = "No file chosen";
+            textDisplay.innerText = "Klik untuk memilih foto baru...";
             textDisplay.style.color = "#666";
+            textDisplay.style.fontWeight = "400";
         }
     }
 </script>
