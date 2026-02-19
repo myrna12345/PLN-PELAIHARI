@@ -74,8 +74,8 @@ class MaterialKeluarController extends Controller
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
             'keterangan' => 'required|string|max:1000',
-            'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:5120',
-            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'foto' => 'required|image|mimes:jpg,jpeg,png,gif',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
@@ -134,8 +134,8 @@ class MaterialKeluarController extends Controller
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
             'keterangan' => 'required|string|max:1000',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
-            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif',
+            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png,',
         ]);
 
         $manager = new ImageManager(new Driver());

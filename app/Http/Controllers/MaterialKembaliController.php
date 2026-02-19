@@ -97,8 +97,8 @@ class MaterialKembaliController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
             'satuan' => 'required|string|in:Buah,Meter',
-            'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:5120',
-            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'foto' => 'required|image|mimes:jpg,jpeg,png,gif',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
@@ -163,8 +163,8 @@ class MaterialKembaliController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
             'satuan' => 'required|string|in:Buah,Meter',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
-            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif',
+            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png',
         ]);
 
         $manager = new ImageManager(new Driver());
@@ -173,21 +173,35 @@ class MaterialKembaliController extends Controller
         $materialIdBaru = $validated['material_id'];
         $jumlahBaru = $validated['jumlah_material'];
 
-        if ($materialIdBaru == $materialIdLama) {
-            $stokSelisih = $jumlahBaru - $jumlahLama;
-            if ($stokSelisih !== 0) {
-                $materialStok = MaterialStandBy::where('material_id', $materialIdBaru)->first();
-                if ($materialStok) {
-                    $stokSelisih > 0 ? $materialStok->increment('jumlah', $stokSelisih) : $materialStok->decrement('jumlah', abs($stokSelisih));
+        // --- LOGIKA PENGECEKAN STOK (SAMA SEPERTI MATERIAL KELUAR) ---
+        if ($materialIdBaru != $materialIdLama) {
+            // 1. Kembalikan stok material lama (dikurangi karena batal kembali)
+            $stokLama = MaterialStandBy::where('material_id', $materialIdLama)->first();
+            if ($stokLama) {
+                if ($stokLama->jumlah < $jumlahLama) {
+                    return redirect()->back()->with('error', 'Stok tidak mencukupi untuk membatalkan data lama.')->withInput();
                 }
+                $stokLama->decrement('jumlah', $jumlahLama);
+            }
+            
+            // 2. Tambah stok material baru
+            $stokBaru = MaterialStandBy::where('material_id', $materialIdBaru)->first();
+            if ($stokBaru) {
+                $stokBaru->increment('jumlah', $jumlahBaru);
+            } else {
+                return redirect()->back()->with('error', 'Stok tidak mencukupi.')->withInput();
             }
         } else {
-            $materialStokLama = MaterialStandBy::where('material_id', $materialIdLama)->first();
-            if ($materialStokLama) $materialStokLama->decrement('jumlah', $jumlahLama);
-
-            $materialStokBaru = MaterialStandBy::where('material_id', $materialIdBaru)->first();
-            if ($materialStokBaru) {
-                $materialStokBaru->increment('jumlah', $jumlahBaru);
+            // Jika material sama, hitung selisihnya
+            $selisih = $jumlahBaru - $jumlahLama;
+            $stok = MaterialStandBy::where('material_id', $materialIdBaru)->first();
+            
+            if ($stok) {
+                // Jika jumlah baru lebih kecil, artinya kita harus mengurangi stok stand by
+                if ($selisih < 0 && $stok->jumlah < abs($selisih)) {
+                    return redirect()->back()->with('error', 'Stok tidak mencukupi.')->withInput();
+                }
+                $selisih > 0 ? $stok->increment('jumlah', $selisih) : $stok->decrement('jumlah', abs($selisih));
             }
         }
 

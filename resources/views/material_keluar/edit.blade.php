@@ -114,35 +114,39 @@
             <input type="hidden" name="tanggal"
                 value="{{ \Carbon\Carbon::parse($data->tanggal)->format('Y-m-d H:i:s') }}">
 
+            {{-- FOTO MATERIAL --}}
             <div class="form-group-new">
                 <label for="foto">Foto Material</label>
                 @if($data->foto)
                     <div style="margin-bottom: 10px;">
                         <img src="{{ route('material_keluar.show-foto', $data->id) }}" 
-                            alt="Foto Material Lama" 
-                            class="table-foto"
-                            style="max-width: 150px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
+                            alt="Foto Material" 
+                            style="max-width:150px; border-radius: 8px; border:1px solid #ddd; padding:5px;">
                     </div>
                 @endif
                 <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
-                <small style="color: #777;">*Upload ulang jika ingin mengganti foto material.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Upload ulang jika ingin mengganti foto material
+                </small>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
 
+            {{-- FOTO PETUGAS --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Foto Petugas</label>
                 @if($data->foto_petugas)
                     <div style="margin-bottom: 10px;">
                         <img src="{{ route('material_keluar.show-foto-petugas', $data->id) }}"
-                            alt="Foto Petugas Lama"
-                            class="table-foto"
-                            style="max-width: 150px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
+                            alt="Foto Petugas"
+                            style="max-width:150px; border-radius: 8px; border:1px solid #ddd; padding:5px;">
                     </div>
                 @endif
                 <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*">
-                <small style="color: #777;">*Upload ulang jika ingin mengganti foto petugas.</small>
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Upload ulang jika ingin mengganti foto petugas
+                </small>
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
