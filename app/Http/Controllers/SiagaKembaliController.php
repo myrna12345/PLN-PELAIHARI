@@ -137,7 +137,7 @@ class SiagaKembaliController extends Controller
 
         return redirect()
             ->route('siaga-kembali.index')
-            ->with('success', 'Material berhasil dikembalikan. Stand meter master telah diperbarui ke: ' . $validated['stand_meter']);
+            ->with('success', 'Material berhasil dikembalikan. Stand meter telah diperbarui ke: ' . $validated['stand_meter']);
     }
 
     public function edit(SiagaKembali $siagaKembali)

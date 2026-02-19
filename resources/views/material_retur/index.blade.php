@@ -61,7 +61,7 @@
     background-color: #b35555 !important; 
 }
 
-/* 5. KHUSUS TOMBOL CARI & RESET (ABU-ABU) */
+/* 5. KHUSUS TOMBOL CARI & RESET (SAMAKAN UKURAN & WARNA ABU-ABU) */
 .search-form .btn-primary,
 .search-form .btn-secondary {
     min-width: 80px !important;
@@ -77,6 +77,7 @@
     background-color: #6c757d !important; 
     color: white !important;
     text-decoration: none !important;
+    box-sizing: border-box !important;
 }
 .search-form .btn-primary:hover,
 .search-form .btn-secondary:hover {
@@ -86,7 +87,7 @@
 /* 6. INPUT SEARCH & TANGGAL */
 .search-bar {
     position: relative;
-    height: 40px !important;         
+    height: 40px !important;          
     border: 1px solid #d1d5db;       
     border-radius: 10px;             
     background-color: white;
@@ -121,14 +122,28 @@
 .search-bar input::-webkit-search-results-decoration {
     display: none;
 }
+
+/* CSS PERBAIKAN: Sembunyikan label manual di HP karena app.blade sudah punya otomatis */
+@media (max-width: 991.98px) {
+    .form-group-tanggal-filter label {
+        display: none !important;
+    }
+}
+
+/* Sembunyikan label manual di desktop secara default */
+.form-group-tanggal-filter label {
+    display: none;
+}
+
 .form-control-tanggal {
-    height: 40px !important;         
+    height: 40px !important;          
     border: 1px solid #d1d5db;       
     border-radius: 10px;             
     padding: 0 12px;
     box-sizing: border-box;
     font-size: 14px;
     outline: none;
+    width: 100%;
 }
 
 /* 7. LAYOUT TOMBOL AKSI BERSEBELAHAN */
@@ -226,15 +241,20 @@
                 <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             
-            <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}">
-            <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}">
+            <div class="form-group-tanggal-filter">
+                <label>Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}">
+            </div>
+
+            <div class="form-group-tanggal-filter">
+                <label>Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}">
+            </div>
             
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
             <a href="{{ route('material-retur.index') }}" class="btn btn-secondary btn-sm">Reset</a>
         </form>
     </div>
-
-    {{-- KETERANGAN: Baris alert sukses/error di sini dihapus agar tidak double dengan layout utama --}}
 
     <div class="table-container">
         <table class="table">

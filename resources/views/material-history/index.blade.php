@@ -171,7 +171,7 @@
 <div class="card-new">
     {{-- HEADER --}}
     <div class="index-header">
-        <h2>RIWAYAT PENAMBAHAN MATERIAL</h2>
+        <h2>HISTORY MATERIAL STANDBY</h2>
 
         {{-- FILTER ATAS --}}
         <form action="{{ route('material-history.index') }}" method="GET" class="search-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">

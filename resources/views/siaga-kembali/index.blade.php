@@ -77,11 +77,10 @@
     font-size: 14px !important;
     border: none !important;
     outline: none !important;
-    
-    /* WARNA KEDUANYA ABU-ABU */
     background-color: #6c757d !important; 
     color: white !important;
     text-decoration: none !important;
+    box-sizing: border-box !important;
 }
 .search-form .btn-primary:hover,
 .search-form .btn-secondary:hover {
@@ -91,7 +90,7 @@
 /* 6. INPUT SEARCH & TANGGAL (STYLE) */
 .search-bar {
     position: relative;
-    height: 40px !important;         
+    height: 40px !important;          
     border: 1px solid #d1d5db;       
     border-radius: 10px;             
     background-color: white;
@@ -123,7 +122,6 @@
     box-sizing: border-box;
 }
 
-/* Hide default browser search icons */
 .search-bar input::-webkit-search-decoration,
 .search-bar input::-webkit-search-cancel-button,
 .search-bar input::-webkit-search-results-button,
@@ -131,15 +129,27 @@
     display: none;
 }
 
-/* Style Input Tanggal */
+/* Perbaikan CSS: Sembunyikan label manual di HP agar tidak double dengan content CSS app.blade */
+@media (max-width: 991.98px) {
+    .form-group-tanggal-filter label {
+        display: none !important;
+    }
+}
+
+/* Sembunyikan label manual di desktop secara default */
+.form-group-tanggal-filter label {
+    display: none;
+}
+
 .form-control-tanggal {
-    height: 40px !important;         
+    height: 40px !important;          
     border: 1px solid #d1d5db;       
     border-radius: 10px;             
     padding: 0 12px;
     box-sizing: border-box;
     font-size: 14px;
     outline: none;
+    width: 100%;
 }
 
 /* 7. LAYOUT TOMBOL AKSI BERSEBELAHAN */
@@ -239,8 +249,15 @@
                 <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             
-            <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
-            <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
+            <div class="form-group-tanggal-filter">
+                <label>Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}" title="Tanggal Mulai">
+            </div>
+
+            <div class="form-group-tanggal-filter">
+                <label>Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}" title="Tanggal Akhir">
+            </div>
             
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
             <a href="{{ route('siaga-kembali.index') }}" class="btn btn-secondary btn-sm">Reset</a>
@@ -374,13 +391,11 @@
 
 </div>
 
-{{-- MODAL POP-UP IMAGE (ID UNIK: imageModalSiagaKembali) --}}
 <div id="imageModalSiagaKembali">
     <span class="close-modal" onclick="closeModalSiagaKembali()">&times;</span>
     <img class="image-modal-content" id="img01SiagaKembali">
 </div>
 
-{{-- SCRIPT JAVASCRIPT --}}
 <script>
     function openModalSiagaKembali(element) {
         var modal = document.getElementById("imageModalSiagaKembali");

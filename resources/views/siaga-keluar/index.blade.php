@@ -5,7 +5,7 @@
 @section('content')
 
 <style>
-/* ===== STYLE TOMBOL & INPUT (SAMA DENGAN HALAMAN LAIN) ===== */
+/* ===== STYLE TOMBOL & INPUT (STANDARISASI) ===== */
 
 /* 1. Layout Dasar Tombol */
 .btn-pdf, 
@@ -65,6 +65,7 @@
 }
 
 /* 5. KHUSUS TOMBOL CARI & RESET (ABU-ABU & UKURAN SAMA) */
+/* PERBAIKAN: Menambahkan box-sizing agar ukuran identik di tampilan HP */
 .search-form .btn-primary,
 .search-form .btn-secondary {
     min-width: 80px !important;
@@ -82,6 +83,7 @@
     background-color: #6c757d !important; 
     color: white !important;
     text-decoration: none !important;
+    box-sizing: border-box !important; /* PENTING: Menyamakan perilaku lebar elemen link dan button di mobile */
 }
 .search-form .btn-primary:hover,
 .search-form .btn-secondary:hover {
@@ -91,7 +93,7 @@
 /* 6. INPUT SEARCH & TANGGAL (STYLE) */
 .search-bar {
     position: relative;
-    height: 40px !important;         
+    height: 40px !important;          
     border: 1px solid #d1d5db;       
     border-radius: 10px;             
     background-color: white;
@@ -133,7 +135,7 @@
 
 /* Style Input Tanggal */
 .form-control-tanggal {
-    height: 40px !important;         
+    height: 40px !important;          
     border: 1px solid #d1d5db;       
     border-radius: 10px;             
     padding: 0 12px;
@@ -231,7 +233,7 @@
 <div class="card-new">
 
     <div class="index-header">
-        <h2>LAPORAN MATERIAL SIAGA KELUAR</h2>
+        <h2>LAPORAN SIAGA KELUAR</h2>
         
         <form action="{{ route('siaga-keluar.index') }}" method="GET" class="search-form">
             <div class="search-bar">
@@ -264,7 +266,7 @@
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
-                    {{-- Sembunyikan Header Aksi dari Satpam --}}
+                    {{-- Header Aksi untuk Admin --}}
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
                     @endif
@@ -296,7 +298,7 @@
                                      onclick="openModal(this)"
                                      alt="Foto Material">
                                 
-                                {{-- Sembunyikan Download Foto dari Satpam --}}
+                                {{-- Tombol Download Foto untuk Admin --}}
                                 @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
@@ -315,7 +317,7 @@
                                      onclick="openModal(this)"
                                      alt="Foto Petugas">
                                 
-                                {{-- Sembunyikan Download Foto Petugas dari Satpam --}}
+                                {{-- Tombol Download Foto Petugas untuk Admin --}}
                                 @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-keluar.download-foto-petugas', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
@@ -326,7 +328,7 @@
                             @endif
                         </td>
 
-                        {{-- Sembunyikan Tombol Aksi dari Satpam --}}
+                        {{-- Kolom Aksi (Edit/Hapus) untuk Admin --}}
                         @if(strtolower(auth()->user()->role) !== 'satpam')
                         <td>
                             <div class="table-actions">
@@ -335,7 +337,7 @@
                                 </a>
                                 <form action="{{ route('siaga-keluar.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-hapus">
+                                    <button type="submit" class="btn-hapus">
                                         <i class="fas fa-trash"></i> Hapus
                                     </button>
                                 </form>
@@ -358,7 +360,7 @@
         {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>
 
-    {{-- Sembunyikan Form Download Laporan dari Satpam --}}
+    {{-- Footer Download Laporan untuk Admin --}}
     @if(strtolower(auth()->user()->role) !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('siaga-keluar.download-report') }}" method="GET" class="form-download">
@@ -388,7 +390,6 @@
     <img class="image-modal-content" id="img01">
 </div>
 
-{{-- SCRIPT JAVASCRIPT --}}
 <script>
     function openModal(element) {
         var modal = document.getElementById("imageModal");
