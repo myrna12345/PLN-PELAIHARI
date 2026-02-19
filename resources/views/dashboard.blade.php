@@ -5,7 +5,7 @@
 <style>
     body, html { 
         margin: 0; padding: 0; min-height: 100vh; 
-        overflow-x: auto; overflow-y: auto; background-color: #f1f5f9;
+        background-color: #f1f5f9;
     }
     .main-content { padding: 0 !important; }
     .dashboard-wrapper {
@@ -17,19 +17,37 @@
         border: 1px solid #e2e8f0; border-top: none; text-align: center; margin-bottom: 0.5rem;
     }
     .main-title-box h2 { font-weight: 800; font-size: 0.9rem; color: #00467f; margin: 0; text-transform: uppercase; }
+    
     .section-header { 
         font-size: 0.65rem; font-weight: 800; color: #00467f; margin: 0.5rem 0 0.3rem 0; 
         display: flex; align-items: center; gap: 8px; text-transform: uppercase; 
     }
     .section-header::after { content: ""; height: 1px; flex: 1; background: #cbd5e1; }
-    .stats-grid, .siaga-grid { display: grid; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .stats-grid { grid-template-columns: repeat(4, 1fr); }
-    .siaga-grid { grid-template-columns: repeat(3, 1fr); }
+
+    /* --- PERBAIKAN RESPONSIVE GRID --- */
+    .stats-grid { 
+        display: grid; 
+        gap: 0.5rem; 
+        margin-bottom: 0.5rem;
+        /* Di Laptop tampil 4 kolom, di HP otomatis menyesuaikan */
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    }
+    
+    .siaga-grid { 
+        display: grid; 
+        gap: 0.5rem; 
+        margin-bottom: 0.5rem;
+        /* Di Laptop tampil 3 kolom, di HP otomatis menumpuk */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    }
+
     .executive-card { 
         background: white; border-radius: 10px; padding: 0.6rem; 
         border: 1px solid #e2e8f0; border-left: 4px solid #00467f; 
         display: flex; flex-direction: column; min-height: 140px;
+        transition: transform 0.2s;
     }
+
     .label-caps { font-size: 0.55rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
     .material-list { flex: 1; max-height: 120px; overflow-y: auto; font-size: 0.58rem; padding-right: 5px; }
     .material-item { 
@@ -38,15 +56,37 @@
     }
     .material-name { color: #475569; font-weight: 600; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
     .material-qty { font-weight: 800; color: #0f172a; white-space: nowrap; }
+    
     .retur-split { 
         display: flex; justify-content: space-between; font-size: 0.55rem; 
         font-weight: 700; border-top: 1px solid #f1f5f9; padding-top: 4px; margin-top: auto; 
     }
-    .chart-section { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; min-height: 200px; }
-    .chart-panel { background: white; border-radius: 12px; padding: 0.5rem; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-    .chart-wrapper { height: 180px; position: relative; width: 100%; }
+
+    /* --- PERBAIKAN RESPONSIVE CHART --- */
+    .chart-section { 
+        display: grid; 
+        /* Di HP tampil 1 kolom (tumpuk), di laptop 2 kolom (berjajar) */
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 0.5rem; 
+        margin-top: 0.5rem; 
+    }
+    
+    .chart-panel { 
+        background: white; border-radius: 12px; padding: 0.8rem; 
+        border: 1px solid #e2e8f0; display: flex; flex-direction: column; 
+    }
+    .chart-wrapper { height: 200px; position: relative; width: 100%; }
+
+    /* Scrollbar Styling */
     .material-list::-webkit-scrollbar { width: 4px; }
     .material-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+    /* Media Query Tambahan untuk Layar Sangat Kecil (HP) */
+    @media (max-width: 480px) {
+        .dashboard-wrapper { padding: 0.5rem; }
+        .main-title-box h2 { font-size: 0.75rem; }
+        .executive-card { min-height: 120px; }
+    }
 </style>
 
 <div class="dashboard-wrapper">
