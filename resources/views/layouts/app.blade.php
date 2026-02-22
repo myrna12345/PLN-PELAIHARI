@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SIMAS-PLN')</title>
+    <title>@yield('title', 'SIMAKSI')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -279,7 +279,7 @@
         <div class="sidebar-header">
             <div class="logo-section">
                 <img src="{{ asset('images/logo-pln.png') }}" alt="Logo" class="sidebar-logo">
-                <h1>SIMAS-PLN</h1>
+                <h1>SIMAKSI</h1>
             </div>
             <button class="sidebar-close-btn" id="sidebarCloseBtn">&times;</button>
         </div>
@@ -373,7 +373,7 @@
     <main class="main-content">
         <header class="top-header">
             <button class="toggle-sidebar-btn" id="toggleSidebarBtn"><i class="fas fa-bars"></i></button>
-            <h2 class="page-title">@yield('title', 'SIMAS-PLN')</h2>
+            <h2 class="page-title">@yield('title', 'SIMAKSI')</h2>
         </header>
         <div class="main-content-inner">
             @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif

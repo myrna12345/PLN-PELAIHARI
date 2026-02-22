@@ -1,16 +1,45 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Material Kembali - SIMAS-PLN')
-
 @section('content')
+<style>
+    .form-group-new {
+        margin-bottom: 15px;
+        width: 100%;
+        display: flex;
+        flex-direction: column; /* Label tetap di atas */
+    }
+
+    .form-group-new label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .d-flex-group-form {
+        display: flex;
+        gap: 15px;
+        width: 100%; /* Memenuhi seluruh lebar container */
+        align-items: stretch;
+    }
+
+    .d-flex-group-form > div {
+        display: flex;
+    }
+
+    .form-control-new {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    @media (max-width: 768px) {
+        .d-flex-group-form {
+            gap: 10px; /* Jarak lebih kecil di HP agar tidak sempit */
+        }
+    }
+</style>
+
 <div class="card-form-container mx-auto">
     <div class="card-form-header">
         <h2>Tambah Material Kembali</h2>
-        
-        {{-- Tampilkan error dari controller --}}
-        @if(session('error'))
-            <div class="alert alert-danger text-center mb-3 mt-3">{{ session('error') }}</div>
-        @endif
     </div>
 
     <div class="card-form-body">
@@ -39,41 +68,38 @@
                 @enderror
             </div>
             
-            {{-- Group Jumlah dan Satuan Material --}}
-            <div class="d-flex-group-form">
-                
-                {{-- Jumlah Material Kembali --}}
-                <div class="form-group-new half-width">
-                    <label for="jumlah_material">Jumlah Material Kembali</label>
-                    <input type="number" 
-                        name="jumlah_material" 
-                        id="jumlah_material" 
-                        class="form-control-new @error('jumlah_material') is-invalid @enderror" 
-                        placeholder="Masukkan jumlah material" 
-                        value="{{ old('jumlah_material') }}"
-                        min="1"
-                        required>
-                    @error('jumlah_material')
-                        <small style="color:red;">{{ $message }}</small>
-                    @enderror
-                </div>
+            {{-- Gabungan Jumlah dan Satuan --}}
+            <div class="form-group-new">
+                <label>Jumlah dan Satuan</label>
+                <div class="d-flex-group-form">
+                    {{-- Input Jumlah --}}
+                    <div style="flex: 3;"> {{-- Lebih lebar untuk angka --}}
+                        <input type="number" 
+                            name="jumlah_material" 
+                            id="jumlah_material" 
+                            class="form-control-new @error('jumlah_material') is-invalid @enderror" 
+                            placeholder="Jumlah" 
+                            value="{{ old('jumlah_material') }}"
+                            min="1"
+                            required>
+                    </div>
 
-                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
-                <div class="form-group-new half-width">
-                    <label for="satuan">Satuan Material</label>
-                    <input type="text" 
-                        name="satuan" 
-                        id="satuan" 
-                        class="form-control-new @error('satuan') is-invalid @enderror" 
-                        style="background-color: #f8f9fa; cursor: not-allowed;"
-                        value="{{ old('satuan') }}" 
-                        placeholder="Satuan"
-                        readonly 
-                        required>
-                    @error('satuan')
-                        <small style="color:red;">{{ $message }}</small>
-                    @enderror
+                    {{-- Input Satuan --}}
+                    <div style="flex: 1;"> {{-- Rata kanan dan mengikuti sisa ruang --}}
+                        <input type="text" 
+                            name="satuan" 
+                            id="satuan" 
+                            class="form-control-new @error('satuan') is-invalid @enderror" 
+                            style="background-color: #f8f9fa; cursor: not-allowed;"
+                            value="{{ old('satuan') }}" 
+                            placeholder="Satuan"
+                            readonly 
+                            required>
+                    </div>
                 </div>
+                @error('jumlah_material')
+                    <small style="color:red; display:block;">{{ $message }}</small>
+                @enderror
             </div>
 
             {{-- Nama Petugas --}}
@@ -176,19 +202,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-{{-- CSS untuk tata letak bersebelahan --}}
-<style>
-    .d-flex-group-form {
-        display: flex;
-        gap: 20px;
-    }
-    .d-flex-group-form .half-width {
-        flex: 1;
-    }
-    .is-invalid {
-        border-color: red !important;
-    }
-</style>
 
 @endsection

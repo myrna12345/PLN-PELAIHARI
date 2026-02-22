@@ -1,8 +1,41 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Material Keluar - SIMAS-PLN')
-
 @section('content')
+<style>
+    .form-group-new {
+        margin-bottom: 15px;
+        width: 100%;
+        display: flex;
+        flex-direction: column; /* Memastikan label di atas, input di bawah */
+    }
+
+    .form-group-new label {
+        display: block;
+        margin-bottom: 8px; /* Jarak antara judul dan kotak input */
+    }
+
+    .d-flex-group-form {
+        display: flex;
+        gap: 15px;
+        width: 100%; /* Memastikan baris input memenuhi lebar kolom */
+        align-items: stretch;
+    }
+
+    .d-flex-group-form > div {
+        display: flex;
+    }
+
+    .form-control-new {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    @media (max-width: 768px) {
+        .d-flex-group-form {
+            gap: 10px;
+        }
+    }
+</style>
 <div class="card-form-container mx-auto">
     <div class="card-form-header">
         <h2>Tambah Material Keluar</h2>
@@ -44,35 +77,35 @@
             </div>
             
             <div class="d-flex-group-form">
-                {{-- Jumlah Material Keluar --}}
-                <div class="form-group-new half-width">
-                    <label for="jumlah_material">Jumlah Material Keluar</label>
-                    <input type="number" 
-                        name="jumlah_material" 
-                        id="jumlah_material" 
-                        class="form-control-new" 
-                        placeholder="Masukkan jumlah material" 
-                        value="{{ old('jumlah_material') }}"
-                        min="1"
-                        required>
-                    @error('jumlah_material')
-                        <small style="color:red;">{{ $message }}</small>
-                    @enderror
-                </div>
+                {{-- Gabungan Jumlah dan Satuan --}}
+                <div class="form-group-new">
+                    <label>Jumlah dan Satuan</label>
+                    <div class="d-flex-group-form">
+                        {{-- Input Jumlah --}}
+                        <div style="flex: 2;"> {{-- Flex 2 agar kolom jumlah lebih lebar --}}
+                            <input type="number" 
+                                name="jumlah_material" 
+                                id="jumlah_material" 
+                                class="form-control-new" 
+                                placeholder="Jumlah" 
+                                value="{{ old('jumlah_material') }}"
+                                min="1"
+                                required>
+                        </div>
 
-                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
-                <div class="form-group-new half-width">
-                    <label for="satuan_material">Satuan Material</label>
-                    {{-- Menggunakan input readonly agar user tidak bisa mengubah, tapi data tetap terkirim ke server --}}
-                    <input type="text" 
-                        name="satuan_material" 
-                        id="satuan_material" 
-                        class="form-control-new" 
-                        style="background-color: #f8f9fa; cursor: not-allowed;"
-                        value="{{ old('satuan_material') }}" 
-                        placeholder="Satuan"
-                        readonly 
-                        required>
+                        {{-- Input Satuan --}}
+                        <div style="flex: 1;"> {{-- Flex 1 agar kolom satuan lebih kecil --}}
+                            <input type="text" 
+                                name="satuan_material" 
+                                id="satuan_material" 
+                                class="form-control-new" 
+                                style="background-color: #f8f9fa; cursor: not-allowed;"
+                                value="{{ old('satuan_material') }}" 
+                                placeholder="Satuan"
+                                readonly 
+                                required>
+                        </div>
+                    </div>
                     @error('satuan_material')
                         <small style="color:red;">{{ $message }}</small>
                     @enderror
@@ -197,15 +230,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<style>
-    .d-flex-group-form {
-        display: flex;
-        gap: 20px;
-    }
-    .d-flex-group-form .half-width {
-        flex: 1;
-    }
-</style>
 
 @endsection

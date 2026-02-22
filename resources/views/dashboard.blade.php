@@ -91,7 +91,7 @@
 
 <div class="dashboard-wrapper">
     <div class="main-title-box">
-        <h2>SISTEM INFORMASI PENGELOLAAN MATERIAL STAND BY - PLN</h2>
+        <h2>SISTEM INFORMASI MATERIAL DAN KWH SIAGA</h2>
     </div>
 
     <div class="section-header">Statistik Inventaris Gudang</div>

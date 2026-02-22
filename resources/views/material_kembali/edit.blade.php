@@ -1,8 +1,48 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Material Kembali - SIMAS-PLN')
 
 @section('content')
+<style>
+    .form-group-new {
+        margin-bottom: 15px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group-new label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .d-flex-group-form {
+        display: flex;
+        gap: 15px;
+        width: 100%;
+        align-items: stretch;
+    }
+
+    /* Penyesuaian agar input Jumlah lebih lebar dari Satuan */
+    .flex-jumlah {
+        flex: 3;
+    }
+
+    .flex-satuan {
+        flex: 1;
+    }
+
+    .form-control-new {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    @media (max-width: 768px) {
+        .d-flex-group-form {
+            gap: 10px;
+        }
+    }
+</style>
+
 <div class="card-form-container mx-auto">
     <div class="card-form-header">
         <h2>Edit Material Kembali</h2>
@@ -39,38 +79,38 @@
                 @enderror
             </div>
             
-            {{-- Group Jumlah dan Satuan Material --}}
-            <div class="d-flex-group-form">
-                {{-- Jumlah Material Kembali --}}
-                <div class="form-group-new half-width">
-                    <label for="jumlah_material">Jumlah Material Kembali</label>
-                    <input type="number" 
-                        name="jumlah_material" 
-                        id="jumlah_material" 
-                        class="form-control-new"
-                        min="1"
-                        value="{{ old('jumlah_material', $materialKembali->jumlah_material) }}" 
-                        required>
-                    @error('jumlah_material')
-                        <small style="color:red;">{{ $message }}</small>
-                    @enderror
-                </div>
+           {{-- Group Jumlah dan Satuan Material --}}
+            <div class="form-group-new">
+                <label>Jumlah dan Satuan</label>
+                <div class="d-flex-group-form">
+                    {{-- Input Jumlah --}}
+                    <div class="flex-jumlah">
+                        <input type="number" 
+                            name="jumlah_material" 
+                            id="jumlah_material" 
+                            class="form-control-new"
+                            min="1"
+                            placeholder="Jumlah"
+                            value="{{ old('jumlah_material', $materialKembali->jumlah_material) }}" 
+                            required>
+                    </div>
 
-                {{-- Satuan Material (DIKUNCI / AUTOMATIC) --}}
-                <div class="form-group-new half-width">
-                    <label for="satuan">Satuan Material</label>
-                    <input type="text" 
-                        name="satuan" 
-                        id="satuan" 
-                        class="form-control-new" 
-                        style="background-color: #f8f9fa; cursor: not-allowed;"
-                        value="{{ old('satuan', $materialKembali->satuan) }}" 
-                        readonly 
-                        required>
-                    @error('satuan')
-                        <small style="color:red;">{{ $message }}</small>
-                    @enderror
+                    {{-- Input Satuan (Rata Kanan) --}}
+                    <div class="flex-satuan">
+                        <input type="text" 
+                            name="satuan" 
+                            id="satuan" 
+                            class="form-control-new" 
+                            style="background-color: #f8f9fa; cursor: not-allowed;"
+                            value="{{ old('satuan', $materialKembali->satuan) }}" 
+                            placeholder="Satuan"
+                            readonly 
+                            required>
+                    </div>
                 </div>
+                @error('jumlah_material')
+                    <small style="color:red; display:block; margin-top:5px;">{{ $message }}</small>
+                @enderror
             </div>
 
             {{-- Nama Petugas --}}
@@ -170,15 +210,5 @@ Swal.fire({
 });
 @endif
 </script>
-
-<style>
-    .d-flex-group-form {
-        display: flex;
-        gap: 20px;
-    }
-    .d-flex-group-form .half-width {
-        flex: 1;
-    }
-</style>
 
 @endsection

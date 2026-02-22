@@ -129,14 +129,33 @@ class MaterialKembaliController extends Controller
         }
 
         $materialId = $validated['material_id'];
+        // --- LOGIKA VALIDASI MATERIAL KEMBALI ---
         $jumlahKembali = $validated['jumlah_material'];
-        $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
 
-        if ($materialStok) {
-            $materialStok->increment('jumlah', $jumlahKembali);
-        } else {
-            return redirect()->back()->with('error', 'Gagal: Stok Material Stand By belum tercatat.')->withInput();
+        // 1. Hitung total yang PERNAH KELUAR untuk material ini
+        $totalKeluar = \App\Models\MaterialKeluar::where('material_id', $materialId)->sum('jumlah_material');
+
+        // 2. Hitung total yang SUDAH PERNAH DIKEMBALIKAN sebelumnya
+        $totalSudahKembali = MaterialKembali::where('material_id', $materialId)->sum('jumlah_material');
+
+        // 3. Hitung sisa material yang masih "di lapangan" (yang boleh dikembalikan)
+        $maksimalKembali = $totalKeluar - $totalSudahKembali;
+
+        if ($totalKeluar <= 0) {
+            return redirect()->back()->with('error', 'Gagal: Material ini belum pernah tercatat pada material keluar.')->withInput();
         }
+
+        if ($jumlahKembali > $maksimalKembali) {
+            return redirect()->back()->with('error', 'Gagal: Jumlah kembali melebihi jumlah material yang keluar. Maksimal yang bisa dikembalikan: ' . $maksimalKembali . ' ' . $validated['satuan'])->withInput();
+        }
+        // --- END LOGIKA VALIDASI ---
+        // UPDATE SALDO DI MATERIAL STAND BY
+    $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
+    if ($materialStok) {
+        $materialStok->increment('jumlah', $jumlahKembali);
+    } else {
+        return redirect()->back()->with('error', 'Gagal: Stok Material Stand By tidak ditemukan.')->withInput();
+    }
 
         MaterialKembali::create($validated);
 

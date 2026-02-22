@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('title', 'Saldo Material Siaga - SIMAS-PLN')
-
 @section('content')
 
 <style>
@@ -24,10 +22,9 @@
     font-size: 13px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
-    white-space: nowrap;
 }
 
-/* Icons inherit color */
+/* Ensure icons inherit color */
 .btn-pdf i, .btn-excel i, .btn-foto-download i, .btn-edit i, .btn-hapus i {
     color: inherit !important;
 }
@@ -39,6 +36,7 @@
     background-color: #5a8dee !important;
     color: white !important;
 }
+
 .btn-pdf:hover, 
 .btn-excel:hover,
 .btn-foto-download:hover {
@@ -67,7 +65,7 @@
 .search-form .btn-primary,
 .search-form .btn-secondary {
     min-width: 80px !important;
-    height: 40px !important;     
+    height: 40px !important; 
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -76,36 +74,49 @@
     font-size: 14px !important;
     border: none !important;
     outline: none !important;
+    box-sizing: border-box !important;
     background-color: #6c757d !important; 
     color: white !important;
     text-decoration: none !important;
 }
+
 .search-form .btn-primary:hover,
 .search-form .btn-secondary:hover {
     background-color: #5a6268 !important; 
 }
-
 /* 6. INPUT SEARCH & TANGGAL */
 .search-bar {
-    position: relative;
-    height: 40px !important;         
-    border: 1px solid #d1d5db;       
-    border-radius: 10px;             
+    position: relative; 
+    height: 40px !important; 
+    border: 1px solid #d1d5db; 
+    border-radius: 10px; 
     background-color: white;
     box-sizing: border-box;
-    width: auto;
-    min-width: 200px;
+    width: auto; 
+    min-width: 200px; 
 }
 
 .search-bar i {
     position: absolute;
-    left: 12px;
+    left: 12px; 
     top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
+    transform: translateY(-50%); 
+    color: #6c757d; 
     font-size: 14px;
     z-index: 10;
-    pointer-events: none;
+    pointer-events: none; 
+}
+
+/* CSS PERBAIKAN: Sembunyikan label manual di HP karena app.blade sudah punya otomatis */
+@media (max-width: 991.98px) {
+    .form-group-tanggal-filter label {
+        display: none !important;
+    }
+}
+
+/* Sembunyikan label manual di desktop secara default */
+.form-group-tanggal-filter label {
+    display: none;
 }
 
 .search-bar input {
@@ -113,21 +124,29 @@
     height: 100%;
     width: 100%;
     outline: none;
-    padding-left: 35px !important;
+    padding-left: 35px !important; 
     padding-right: 10px;
     font-size: 14px;
     background: transparent;
     box-sizing: border-box;
 }
 
+.search-bar input::-webkit-search-decoration,
+.search-bar input::-webkit-search-cancel-button,
+.search-bar input::-webkit-search-results-button,
+.search-bar input::-webkit-search-results-decoration {
+    display: none;
+}
+
 .form-control-tanggal {
-    height: 40px !important;         
-    border: 1px solid #d1d5db;       
-    border-radius: 10px;             
+    height: 40px !important; 
+    border: 1px solid #d1d5db; 
+    border-radius: 10px; 
     padding: 0 12px;
     box-sizing: border-box;
     font-size: 14px;
     outline: none;
+    width: 100%;
 }
 
 /* 7. LAYOUT AKSI */
@@ -271,24 +290,32 @@
     </div>
 
     {{-- FOOTER EXPORT --}}
-    @if(strtolower(auth()->user()->role) !== 'satpam')
-    <div class="index-footer-form" style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e7eb;">
-        <form action="{{ route('material-siaga.export') }}" method="GET" style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-weight:600;">Dari Tanggal:</label>
-                <input type="date" name="start_date" class="form-control-tanggal" value="{{ request('start_date') }}" required>
+   @if(auth()->user()->role !== 'satpam')
+    <div class="index-footer-form">
+        <form action="{{ route('material-stand-by.pdf') }}"
+              method="POST"
+              class="form-download">
+            @csrf
+
+            <div class="form-group-tanggal">
+                <label>Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai"
+                       class="form-control-tanggal" required>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-weight:600;">Sampai Tanggal:</label>
-                <input type="date" name="end_date" class="form-control-tanggal" value="{{ request('end_date') }}" required>
+            <div class="form-group-tanggal">
+                <label>Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir"
+                       class="form-control-tanggal" required>
             </div>
 
-            <button type="submit" name="export" value="pdf" class="btn btn-pdf">
-                <i class="fas fa-file-pdf"></i> Unduh Pdf
+            <button type="submit" class="btn-pdf">
+                <i class="fas fa-file-pdf"></i> Unduh PDF
             </button>
 
-            <button type="submit" name="export" value="excel" class="btn btn-excel">
+            <button type="submit"
+                    formaction="{{ route('material-stand-by.excel') }}"
+                    class="btn-excel">
                 <i class="fas fa-file-excel"></i> Unduh Excel
             </button>
         </form>
