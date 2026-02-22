@@ -259,27 +259,42 @@
     </div>
 
     {{-- FOOTER EXPORT --}}
-    <div class="index-footer-form" style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
-        <form action="{{ route('material-history.index') }}" method="GET" style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
-            <div style="display:flex; flex-direction:column; gap:5px;">
-                <label style="font-weight:700; font-size: 13px;">Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai" class="form-control-tanggal" value="{{ request('tanggal_mulai') }}">
-            </div>
+<div class="index-footer-form">
+    {{-- Ubah ke GET agar masuk ke fungsi index() di controller --}}
+    <form action="{{ route('material-history.index') }}" 
+          method="GET" 
+          class="form-download">
+        
+        {{-- Input hidden ini kunci agar controller menjalankan logika export --}}
+        <input type="hidden" name="export" id="export_type" value="">
 
-            <div style="display:flex; flex-direction:column; gap:5px;">
-                <label style="font-weight:700; font-size: 13px;">Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir" class="form-control-tanggal" value="{{ request('tanggal_akhir') }}">
-            </div>
+        <div class="form-group-tanggal">
+            <label>Dari Tanggal:</label>
+            <input type="date" name="tanggal_mulai"
+                   class="form-control-tanggal" required>
+        </div>
 
-            <button type="submit" name="export" value="pdf" class="btn btn-pdf">
-                <i class="fas fa-file-pdf"></i> Unduh Pdf
-            </button>
+        <div class="form-group-tanggal">
+            <label>Sampai Tanggal:</label>
+            <input type="date" name="tanggal_akhir"
+                   class="form-control-tanggal" required>
+        </div>
 
-            <button type="submit" name="export" value="excel" class="btn btn-excel">
-                <i class="fas fa-file-excel"></i> Unduh Excel
-            </button>
-        </form>
-    </div>
+        {{-- Tombol PDF --}}
+        <button type="submit" 
+                onclick="document.getElementById('export_type').value='pdf'" 
+                class="btn-pdf">
+            <i class="fas fa-file-pdf"></i> Unduh PDF
+        </button>
+
+        {{-- Tombol Excel --}}
+        <button type="submit" 
+                onclick="document.getElementById('export_type').value='excel'" 
+                class="btn-excel">
+            <i class="fas fa-file-excel"></i> Unduh Excel
+        </button>
+    </form>
+</div>
 </div>
 
 {{-- MODAL POP-UP IMAGE --}}

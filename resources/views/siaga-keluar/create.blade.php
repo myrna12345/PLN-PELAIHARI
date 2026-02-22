@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Siaga Keluar')
 
 @section('content')
 <div class="card-form-container">

@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Material Siaga Standby')
 
 @section('content')
 <div class="card-form-container">
@@ -56,7 +55,7 @@
             </div>
 
             <div class="form-group-new">
-                <label for="unggah_foto">Unggah Foto</label> 
+                <label for="unggah_foto">Unggah Foto Material</label> 
                 <input type="file" name="unggah_foto" id="unggah_foto" class="form-control-new-file @error('unggah_foto') is-invalid @enderror" accept="image/*" required> 
                 @error('unggah_foto')
                     <span style="color: red; font-size: 12px; display: block;">{{ $message }}</span>
