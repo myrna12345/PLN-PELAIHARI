@@ -69,7 +69,8 @@ class MaterialStandByController extends Controller
             'material_id' => 'required|exists:materials,id',
             'jumlah'      => 'required|integer|min:1',
             'satuan'      => 'required|string',
-            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:10240',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:15360',
         ]);
 
         $path = public_path($this->uploadFolder);
@@ -157,7 +158,8 @@ class MaterialStandByController extends Controller
 
         $validated = $request->validate([
             'jumlah' => 'required|integer|min:0',
-            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:15360',
         ]);
 
         if ($request->hasFile('foto')) {

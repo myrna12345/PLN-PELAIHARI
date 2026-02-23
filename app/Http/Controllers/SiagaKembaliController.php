@@ -64,8 +64,9 @@ class SiagaKembaliController extends Controller
             'nama_petugas'  => 'required|string|max:255',
             'stand_meter'   => 'required|numeric|min:0', // Validasi angka agar bisa dibandingkan
             'keterangan'    => 'nullable|string',
-            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto'          => 'required|image|mimes:jpeg,png,jpg,gif|max:15360',
+            'foto_petugas'  => 'required|image|mimes:jpeg,png,jpg,gif|max:15360',
         ]);
 
         /* ============================================================ */
@@ -170,8 +171,9 @@ class SiagaKembaliController extends Controller
             'stand_meter' => 'required|numeric|min:0',
             'status' => 'nullable|string',
             'keterangan' => 'nullable|string', 
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:15360',
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:15360',
         ]);
 
         $destinationPath = public_path($this->uploadFolder);

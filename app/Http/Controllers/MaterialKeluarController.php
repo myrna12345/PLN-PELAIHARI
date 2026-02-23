@@ -56,7 +56,7 @@ class MaterialKeluarController extends Controller
     {
         $materialList = Material::where(function ($query) {
                                     $query->where('kategori', '!=', 'siaga')
-                                        ->orWhereNull('kategori');
+                                         ->orWhereNull('kategori');
                                 })
                                 ->orderBy('nama_material', 'asc')
                                 ->get();
@@ -74,8 +74,9 @@ class MaterialKeluarController extends Controller
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
             'keterangan' => 'required|string|max:1000',
-            'foto' => 'required|image|mimes:jpg,jpeg,png,gif',
-            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:15360',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png|max:15360',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
@@ -134,8 +135,9 @@ class MaterialKeluarController extends Controller
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
             'keterangan' => 'required|string|max:1000',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif',
-            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png,',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:15360',
+            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png|max:15360',
         ]);
 
         $manager = new ImageManager(new Driver());

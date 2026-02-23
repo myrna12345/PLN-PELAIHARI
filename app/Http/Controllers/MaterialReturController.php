@@ -55,8 +55,9 @@ class MaterialReturController extends Controller
             'satuan' => 'required|in:Buah,Meter',
             'status' => 'required|in:bekas_andal,rusak,baik', 
             'keterangan' => 'required|string',
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
-            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240' // Max 10MB
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:15360', 
+            'foto_petugas' => 'required|image|mimes:jpeg,png,jpg,gif|max:15360' 
         ]);
 
         // Buat folder jika belum ada
@@ -124,8 +125,9 @@ class MaterialReturController extends Controller
             'satuan' => 'required|in:Buah,Meter',
             'status' => 'required|in:bekas_andal,rusak,baik', 
             'keterangan' => 'required|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:15360',
+            'foto_petugas' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:15360'
         ]);
 
         $data = [

@@ -97,8 +97,9 @@ class MaterialKembaliController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
             'satuan' => 'required|string|in:Buah,Meter',
-            'foto' => 'required|image|mimes:jpg,jpeg,png,gif',
-            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:15360',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png|max:15360',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
@@ -182,8 +183,9 @@ class MaterialKembaliController extends Controller
             'nama_petugas' => 'required|string|max:255',
             'jumlah_material' => 'required|numeric|min:1',
             'satuan' => 'required|string|in:Buah,Meter',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif',
-            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png',
+            // Batas upload diubah menjadi 15MB (15360 KB)
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:15360',
+            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png|max:15360',
         ]);
 
         $manager = new ImageManager(new Driver());
