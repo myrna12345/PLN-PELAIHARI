@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
-
 @section('content')
 
 <style>
@@ -129,29 +128,6 @@
     color: #ffffff !important;
 }
 
-/* Tombol Edit & Hapus Pastel Style */
-.btn-edit { 
-    background-color: #76b596 !important; 
-    color: #333333 !important; 
-    padding: 8px 12px; 
-    border-radius: 5px; 
-    text-decoration: none; 
-    font-size: 13px; 
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-}
-.btn-hapus { 
-    background-color: #cc6666 !important; 
-    color: white !important; 
-    border: none; 
-    padding: 8px 12px; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    font-size: 13px; 
-    font-weight: 500;
-}
-
 /* MODAL FOTO */
 .image-modal {
     display: none;
@@ -210,7 +186,8 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
-            <a href="{{ route('material-stand-by.index') }}"
+            {{-- PERBAIKAN: Tombol Reset tetap di halaman history --}}
+            <a href="{{ route('material-history.index') }}"
                class="btn btn-secondary btn-sm">Reset</a>
         </form>
     </div>
@@ -240,7 +217,8 @@
                         @if($h->foto_path)
                             <img src="{{ asset('uploads/material_stand_by/' . $h->foto_path) }}" 
                                  class="table-foto" 
-                                 onclick="openModal(this)">
+                                 onclick="openModal(this)"
+                                 style="max-width: 80px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px;">
                         @else
                             <span style="font-size:11px;color:#aaa;">-</span>
                         @endif
@@ -248,7 +226,6 @@
                 </tr>
                 @empty
                 <tr>
-                    {{-- DATA TIDAK DITEMUKAN POSISI TENGAH TOTAL --}}
                     <td colspan="6" style="text-align: center; vertical-align: middle; padding: 100px 0; color: #6b7280; font-weight: 500; font-size: 16px;">
                         Data tidak ditemukan.
                     </td>
@@ -258,43 +235,43 @@
         </table>
     </div>
 
+    <div style="margin-top: 20px;">
+        {{ $histories->appends(request()->query())->links() }}
+    </div>
+
     {{-- FOOTER EXPORT --}}
-<div class="index-footer-form">
-    {{-- Ubah ke GET agar masuk ke fungsi index() di controller --}}
-    <form action="{{ route('material-history.index') }}" 
-          method="GET" 
-          class="form-download">
-        
-        {{-- Input hidden ini kunci agar controller menjalankan logika export --}}
-        <input type="hidden" name="export" id="export_type" value="">
+    <div class="index-footer-form">
+        <form action="{{ route('material-history.index') }}" 
+              method="GET" 
+              class="form-download">
+            
+            <input type="hidden" name="export" id="export_type" value="">
 
-        <div class="form-group-tanggal">
-            <label>Dari Tanggal:</label>
-            <input type="date" name="tanggal_mulai"
-                   class="form-control-tanggal" required>
-        </div>
+            <div class="form-group-tanggal">
+                <label>Dari Tanggal:</label>
+                <input type="date" name="tanggal_mulai"
+                       class="form-control-tanggal" required>
+            </div>
 
-        <div class="form-group-tanggal">
-            <label>Sampai Tanggal:</label>
-            <input type="date" name="tanggal_akhir"
-                   class="form-control-tanggal" required>
-        </div>
+            <div class="form-group-tanggal">
+                <label>Sampai Tanggal:</label>
+                <input type="date" name="tanggal_akhir"
+                       class="form-control-tanggal" required>
+            </div>
 
-        {{-- Tombol PDF --}}
-        <button type="submit" 
-                onclick="document.getElementById('export_type').value='pdf'" 
-                class="btn-pdf">
-            <i class="fas fa-file-pdf"></i> Unduh PDF
-        </button>
+            <button type="submit" 
+                    onclick="document.getElementById('export_type').value='pdf'" 
+                    class="btn-pdf">
+                <i class="fas fa-file-pdf"></i> Unduh PDF
+            </button>
 
-        {{-- Tombol Excel --}}
-        <button type="submit" 
-                onclick="document.getElementById('export_type').value='excel'" 
-                class="btn-excel">
-            <i class="fas fa-file-excel"></i> Unduh Excel
-        </button>
-    </form>
-</div>
+            <button type="submit" 
+                    onclick="document.getElementById('export_type').value='excel'" 
+                    class="btn-excel">
+                <i class="fas fa-file-excel"></i> Unduh Excel
+            </button>
+        </form>
+    </div>
 </div>
 
 {{-- MODAL POP-UP IMAGE --}}

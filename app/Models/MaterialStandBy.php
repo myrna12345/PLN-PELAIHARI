@@ -15,8 +15,7 @@ class MaterialStandBy extends Model
         'material_id',
         'jumlah',
         'satuan',
-        'foto_path', // Wajib ada
-        // 'foto_petugas' DIHAPUS
+        'foto_path', 
         'tanggal',
     ];
 

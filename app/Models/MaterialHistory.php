@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MaterialHistory extends Model
 {
     protected $fillable = [
-        'nama_material', // Masukkan di sini
+        'nama_material', 
         'jumlah',
         'satuan',
         'foto_path',
