@@ -2,6 +2,16 @@
 
 
 @section('content')
+<style>
+    /* Perbaikan untuk menghilangkan tanda panah/dropdown pada textarea dan input agar bersih */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Tambah Material Retur</h2>
@@ -76,13 +86,17 @@
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label> 
-                <input type="file" name="foto" id="foto" class="form-control-new-file" required>
+                {{-- KODE KETAT: Memaksa kamera langsung dengan capture dan onfocus reset --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file" 
+                       accept="image/*" capture="environment" onfocus="this.value=''" required>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi</small>
             </div>
 
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label> 
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" required>
+                {{-- KODE KETAT: Memaksa kamera langsung dengan capture dan onfocus reset --}}
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" 
+                       accept="image/*" capture="environment" onfocus="this.value=''" required>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi</small>
             </div>
 

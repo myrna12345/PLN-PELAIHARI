@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Perbaikan untuk tampilan input yang bersih dan simetris di berbagai perangkat */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Tambah Material Stand By</h2>
@@ -45,7 +55,9 @@
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label> 
-                <input type="file" name="foto" id="foto" class="form-control-new-file" required>
+                {{-- KODE KETAT: Menambahkan capture="environment" dan onfocus untuk memicu kamera langsung --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file" 
+                       accept="image/*" capture="environment" onfocus="this.value=''" required>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">
                     *foto material wajib diisi
                 </small>
@@ -67,10 +79,8 @@
 
         if (materialSelect && satuanInput) {
             function updateSatuan() {
-                // Ambil teks nama material dan ubah ke huruf besar
                 const selectedText = materialSelect.options[materialSelect.selectedIndex].text.toUpperCase();
 
-                // LOGIKA BARU: Cek KWH/MCB/Komponen "Buah" Terlebih Dahulu (Prioritas Utama)
                 if (selectedText.includes('KWH') || 
                     selectedText.includes('MCB') || 
                     selectedText.includes('AMPERE') || 
@@ -84,7 +94,6 @@
                     
                     satuanInput.value = 'Buah';
                 
-                // Baru kemudian cek Kabel (Meter)
                 } else if (selectedText.includes('KABEL') || 
                            selectedText.includes('TWISTED') || 
                            selectedText.includes('SR') || 
@@ -94,12 +103,9 @@
                     satuanInput.value = 'Meter';
                 
                 } else {
-                    // Default jika tidak dikenali
                     satuanInput.value = 'Buah'; 
                 }
             }
-
-            // Jalankan fungsi saat dropdown material berubah
             materialSelect.addEventListener('change', updateSatuan);
         }
     });

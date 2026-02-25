@@ -2,6 +2,16 @@
 
 
 @section('content')
+<style>
+    /* Perbaikan untuk menghilangkan tanda panah/dropdown pada textarea */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Tambah Material Siaga Keluar</h2>
@@ -54,14 +64,18 @@
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label> 
-                <input type="file" name="foto" id="foto" class="form-control-new-file @error('foto') is-invalid @enderror" accept="image/*" required> 
-                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto material wajib diisi.</small>
+                {{-- KODE KETAT: Menambahkan capture="environment" dan onfocus untuk memicu kamera secara paksa --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file @error('foto') is-invalid @enderror" 
+                       accept="image/*" capture="environment" onfocus="this.value=''" required> 
+                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto material wajib diisi (Ambil Foto Kamera).</small>
             </div>
 
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label> 
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file @error('foto_petugas') is-invalid @enderror" accept="image/*" required> 
-                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto petugas wajib diisi.</small>
+                {{-- KODE KETAT: Menambahkan capture="environment" dan onfocus untuk memicu kamera secara paksa --}}
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file @error('foto_petugas') is-invalid @enderror" 
+                       accept="image/*" capture="environment" onfocus="this.value=''" required> 
+                <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Foto petugas wajib diisi (Ambil Foto Kamera).</small>
             </div>
             
             <div class="form-group-new">

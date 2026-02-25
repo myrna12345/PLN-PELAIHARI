@@ -28,6 +28,11 @@
     .form-control-new {
         width: 100% !important;
         box-sizing: border-box;
+        /* Perbaikan untuk tampilan input yang bersih */
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
     }
 
     @media (max-width: 768px) {
@@ -133,11 +138,14 @@
             {{-- Upload Foto Material --}}
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label>
+                {{-- KODE KETAT: Memaksa kamera langsung dengan capture dan onfocus --}}
                 <input type="file" 
                     name="foto" 
                     id="foto" 
                     class="form-control-new-file @error('foto') is-invalid @enderror" 
                     accept="image/*"
+                    capture="environment"
+                    onfocus="this.value=''"
                     required>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
@@ -148,11 +156,14 @@
             {{-- Upload Foto Petugas --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label>
+                {{-- KODE KETAT: Memaksa kamera langsung dengan capture dan onfocus --}}
                 <input type="file" 
                     name="foto_petugas" 
                     id="foto_petugas" 
                     class="form-control-new-file @error('foto_petugas') is-invalid @enderror" 
                     accept="image/*"
+                    capture="environment"
+                    onfocus="this.value=''"
                     required>
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>

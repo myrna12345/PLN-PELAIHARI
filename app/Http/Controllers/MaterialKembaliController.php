@@ -62,10 +62,12 @@ class MaterialKembaliController extends Controller
 
     public function create()
     {
+        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar seperti Material Retur
         $materialList = Material::where('kategori', '!=', 'siaga')
                                    ->orWhereNull('kategori')
-                                   ->orderBy('nama_material')
-                                   ->get();
+                                   ->get()
+                                   ->sortBy('nama_material', SORT_NATURAL);
+
         $satuanList = ['Buah', 'Meter'];
 
         return view('material_kembali.create', compact('materialList', 'satuanList'));
@@ -80,10 +82,11 @@ class MaterialKembaliController extends Controller
 
         $materialKembali = MaterialKembali::findOrFail($id);
 
+        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar seperti Material Retur
         $materialList = Material::where('kategori', '!=', 'siaga')
                                 ->orWhereNull('kategori')
-                                ->orderBy('nama_material')
-                                ->get();
+                                ->get()
+                                ->sortBy('nama_material', SORT_NATURAL);
 
         $satuanList = ['Buah', 'Meter'];
 
@@ -150,13 +153,14 @@ class MaterialKembaliController extends Controller
             return redirect()->back()->with('error', 'Gagal: Jumlah kembali melebihi jumlah material yang keluar. Maksimal yang bisa dikembalikan: ' . $maksimalKembali . ' ' . $validated['satuan'])->withInput();
         }
         // --- END LOGIKA VALIDASI ---
+        
         // UPDATE SALDO DI MATERIAL STAND BY
-    $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
-    if ($materialStok) {
-        $materialStok->increment('jumlah', $jumlahKembali);
-    } else {
-        return redirect()->back()->with('error', 'Gagal: Stok Material Stand By tidak ditemukan.')->withInput();
-    }
+        $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
+        if ($materialStok) {
+            $materialStok->increment('jumlah', $jumlahKembali);
+        } else {
+            return redirect()->back()->with('error', 'Gagal: Stok Material Stand By tidak ditemukan.')->withInput();
+        }
 
         MaterialKembali::create($validated);
 

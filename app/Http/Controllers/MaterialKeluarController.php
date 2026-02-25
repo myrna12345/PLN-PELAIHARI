@@ -54,12 +54,13 @@ class MaterialKeluarController extends Controller
 
     public function create()
     {
+        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar
         $materialList = Material::where(function ($query) {
                                     $query->where('kategori', '!=', 'siaga')
                                          ->orWhereNull('kategori');
                                 })
-                                ->orderBy('nama_material', 'asc')
-                                ->get();
+                                ->get()
+                                ->sortBy('nama_material', SORT_NATURAL);
 
         $satuanList = ['Buah', 'Meter'];
 
@@ -76,7 +77,7 @@ class MaterialKeluarController extends Controller
             'keterangan' => 'required|string|max:1000',
             // Batas upload diubah menjadi 15MB (15360 KB)
             'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:15360',
-            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png|max:15360',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png,max:15360',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
@@ -210,7 +211,12 @@ class MaterialKeluarController extends Controller
         }
 
         $data = MaterialKeluar::findOrFail($id);
-        $materialList = Material::where('kategori', '!=', 'siaga')->orWhereNull('kategori')->orderBy('nama_material', 'asc')->get();
+        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL
+        $materialList = Material::where('kategori', '!=', 'siaga')
+                                ->orWhereNull('kategori')
+                                ->get()
+                                ->sortBy('nama_material', SORT_NATURAL);
+
         $satuanList = ['Buah', 'Meter'];
         return view('material_keluar.edit', compact('data', 'materialList', 'satuanList'));
     }

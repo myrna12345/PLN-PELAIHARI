@@ -52,10 +52,10 @@ class MaterialStandByController extends Controller
     // ===============================
     public function create()
     {
-        // FILTER: Hanya ambil material kategori 'teknik' (Bukan Siaga)
+        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar
         $materials = Material::where('kategori', 'teknik')
-                             ->orderBy('nama_material')
-                             ->get();
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
                              
         return view('material_stand_by.create', compact('materials'));
     }
@@ -136,9 +136,10 @@ class MaterialStandByController extends Controller
 
         $item = MaterialStandBy::findOrFail($id);
         
+        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar
         $materials = Material::where('kategori', 'teknik')
-                             ->orderBy('nama_material')
-                             ->get();
+                             ->get()
+                             ->sortBy('nama_material', SORT_NATURAL);
 
         return view('material_stand_by.edit', compact('item', 'materials'));
     }
@@ -208,8 +209,6 @@ class MaterialStandByController extends Controller
         $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
 
         // --- LOGIKA PENGHAPUSAN HISTORY TOTAL ---
-        // Menghapus SEMUA baris di history yang memiliki nama material dan satuan yang sama
-        // Ini akan menghapus baris input pertama, kedua, dan seterusnya yang tadinya digabung
         if ($namaMaterial) {
             MaterialHistory::where('nama_material', $namaMaterial)
                 ->where('satuan', $item->satuan)
@@ -296,7 +295,6 @@ class MaterialStandByController extends Controller
 
     public function showFoto($id)
     {
-        // Ini untuk melihat foto di browser (bukan download), jadi Satpam boleh akses
         $item = MaterialStandBy::findOrFail($id);
         return view('material_stand_by.show_foto', compact('item'));
     }

@@ -6,18 +6,18 @@
         margin-bottom: 15px;
         width: 100%;
         display: flex;
-        flex-direction: column; /* Memastikan label di atas, input di bawah */
+        flex-direction: column; /* Label tetap di atas */
     }
 
     .form-group-new label {
         display: block;
-        margin-bottom: 8px; /* Jarak antara judul dan kotak input */
+        margin-bottom: 8px;
     }
 
     .d-flex-group-form {
         display: flex;
         gap: 15px;
-        width: 100%; /* Memastikan baris input memenuhi lebar kolom */
+        width: 100%; /* Memenuhi seluruh lebar container */
         align-items: stretch;
     }
 
@@ -28,22 +28,23 @@
     .form-control-new {
         width: 100% !important;
         box-sizing: border-box;
+        /* Perbaikan untuk tampilan input yang bersih */
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
     }
 
     @media (max-width: 768px) {
         .d-flex-group-form {
-            gap: 10px;
+            gap: 10px; /* Jarak lebih kecil di HP agar tidak sempit */
         }
     }
 </style>
+
 <div class="card-form-container mx-auto">
     <div class="card-form-header">
         <h2>Tambah Material Keluar</h2>
-        
-        {{-- Tampilkan error dari controller, misalnya stok tidak cukup --}}
-        @if(session('error'))
-            <div class="alert alert-danger text-center mb-3 mt-3">{{ session('error') }}</div>
-        @endif
     </div>
 
     <div class="card-form-body">
@@ -53,16 +54,12 @@
             {{-- Nama Material (Select) --}}
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                <select name="material_id" id="material_id" class="form-control-new" required>
+                <select name="material_id" id="material_id" class="form-control-new @error('material_id') is-invalid @enderror" required>
                     <option value="">Pilih Material</option>
                     @foreach($materialList as $material)
                         @php
                             $namaMaterial = strtoupper($material->nama_material);
-                            $satuanOtomatis = 'Buah'; // Default untuk MCB, KWH, dll
-                            
-                            if (str_contains($namaMaterial, 'KABEL')) {
-                                $satuanOtomatis = 'Meter';
-                            }
+                            $satuanOtomatis = str_contains($namaMaterial, 'KABEL') ? 'Meter' : 'Buah';
                         @endphp
                         <option value="{{ $material->id }}" 
                                 data-satuan="{{ $satuanOtomatis }}"
@@ -71,45 +68,43 @@
                         </option>
                     @endforeach
                 </select>
-                @error('material_id')
+                @error('material_id') 
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
             </div>
             
-            <div class="d-flex-group-form">
-                {{-- Gabungan Jumlah dan Satuan --}}
-                <div class="form-group-new">
-                    <label>Jumlah dan Satuan</label>
-                    <div class="d-flex-group-form">
-                        {{-- Input Jumlah --}}
-                        <div style="flex: 2;"> {{-- Flex 2 agar kolom jumlah lebih lebar --}}
-                            <input type="number" 
-                                name="jumlah_material" 
-                                id="jumlah_material" 
-                                class="form-control-new" 
-                                placeholder="Jumlah" 
-                                value="{{ old('jumlah_material') }}"
-                                min="1"
-                                required>
-                        </div>
-
-                        {{-- Input Satuan --}}
-                        <div style="flex: 1;"> {{-- Flex 1 agar kolom satuan lebih kecil --}}
-                            <input type="text" 
-                                name="satuan_material" 
-                                id="satuan_material" 
-                                class="form-control-new" 
-                                style="background-color: #f8f9fa; cursor: not-allowed;"
-                                value="{{ old('satuan_material') }}" 
-                                placeholder="Satuan"
-                                readonly 
-                                required>
-                        </div>
+            {{-- Gabungan Jumlah dan Satuan --}}
+            <div class="form-group-new">
+                <label>Jumlah dan Satuan</label>
+                <div class="d-flex-group-form">
+                    {{-- Input Jumlah --}}
+                    <div style="flex: 3;"> {{-- Lebih lebar untuk angka --}}
+                        <input type="number" 
+                            name="jumlah_material" 
+                            id="jumlah_material" 
+                            class="form-control-new @error('jumlah_material') is-invalid @enderror" 
+                            placeholder="Jumlah" 
+                            value="{{ old('jumlah_material') }}"
+                            min="1"
+                            required>
                     </div>
-                    @error('satuan_material')
-                        <small style="color:red;">{{ $message }}</small>
-                    @enderror
+
+                    {{-- Input Satuan --}}
+                    <div style="flex: 1;"> {{-- Rata kanan dan mengikuti sisa ruang --}}
+                        <input type="text" 
+                            name="satuan_material" 
+                            id="satuan_material" 
+                            class="form-control-new @error('satuan_material') is-invalid @enderror" 
+                            style="background-color: #f8f9fa; cursor: not-allowed;"
+                            value="{{ old('satuan_material') }}" 
+                            placeholder="Satuan"
+                            readonly 
+                            required>
+                    </div>
                 </div>
+                @error('jumlah_material')
+                    <small style="color:red; display:block;">{{ $message }}</small>
+                @enderror
             </div>
 
             {{-- Nama Petugas --}}
@@ -118,7 +113,7 @@
                 <input type="text" 
                     name="nama_petugas" 
                     id="nama_petugas" 
-                    class="form-control-new" 
+                    class="form-control-new @error('nama_petugas') is-invalid @enderror" 
                     placeholder="Masukkan nama petugas" 
                     value="{{ old('nama_petugas') }}"
                     required>
@@ -142,7 +137,7 @@
                 <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*keterangan wajib diisi.</small>
             </div>
 
-            {{-- Tanggal dan Waktu --}}
+            {{-- Tanggal dan Waktu (hanya tampil) --}}
             <div class="form-group-new">
                 <label for="tanggal_display">Tanggal dan Waktu</label>
                 <input type="text" 
@@ -155,34 +150,40 @@
                 </small>
             </div>
 
-            {{-- Upload Foto Material--}}
+            {{-- Upload Foto Material --}}
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label>
+                {{-- KODE KETAT: Memicu kamera langsung dengan capture="environment" dan reset value --}}
                 <input type="file" 
                     name="foto" 
                     id="foto" 
-                    class="form-control-new-file" 
+                    class="form-control-new-file @error('foto') is-invalid @enderror" 
                     accept="image/*"
+                    capture="environment"
+                    onfocus="this.value=''"
                     required>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
                 @enderror
-                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
+                <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi.</small>
             </div>
 
             {{-- Upload Foto Petugas --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label>
+                {{-- KODE KETAT: Memicu kamera langsung dengan capture="environment" dan reset value --}}
                 <input type="file" 
                     name="foto_petugas" 
                     id="foto_petugas" 
-                    class="form-control-new-file" 
+                    class="form-control-new-file @error('foto_petugas') is-invalid @enderror" 
                     accept="image/*"
+                    capture="environment"
+                    onfocus="this.value=''"
                     required>
                 @error('foto_petugas')
-                    <small style="color: red;">{{ $message }}</small>
+                    <small style="color:red;">{{ $message }}</small>
                 @enderror
-                <small style="color: red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
+                <small style="color:red;display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi.</small>
             </div>
 
             {{-- Tombol Aksi --}}
@@ -216,10 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const satuanInput = document.getElementById('satuan_material');
 
     materialSelect.addEventListener('change', function() {
-        // Ambil opsi yang dipilih
         const selectedOption = this.options[this.selectedIndex];
-        
-        // Ambil atribut data-satuan
         const satuanOtomatis = selectedOption.getAttribute('data-satuan');
 
         if (satuanOtomatis) {

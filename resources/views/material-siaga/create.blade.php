@@ -2,6 +2,16 @@
 
 
 @section('content')
+<style>
+    /* Perbaikan untuk tampilan input agar bersih dan menghilangkan dropdown otomatis browser */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Tambah Material Siaga Standby</h2>
@@ -56,11 +66,13 @@
 
             <div class="form-group-new">
                 <label for="unggah_foto">Unggah Foto Material</label> 
-                <input type="file" name="unggah_foto" id="unggah_foto" class="form-control-new-file @error('unggah_foto') is-invalid @enderror" accept="image/*" required> 
+                {{-- KODE KETAT: Menambahkan capture="environment" dan onfocus untuk memicu kamera secara paksa --}}
+                <input type="file" name="unggah_foto" id="unggah_foto" class="form-control-new-file @error('unggah_foto') is-invalid @enderror" 
+                       accept="image/*" capture="environment" onfocus="this.value=''" required> 
                 @error('unggah_foto')
                     <span style="color: red; font-size: 12px; display: block;">{{ $message }}</span>
                 @else
-                    <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Unggah foto material adalah wajib.</small>
+                    <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Unggah foto material adalah wajib (Ambil Foto Kamera).</small>
                 @enderror
             </div>
 
