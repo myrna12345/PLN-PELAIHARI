@@ -34,6 +34,11 @@
     .form-control-new {
         width: 100% !important;
         box-sizing: border-box;
+        /* Perbaikan untuk tampilan input yang bersih */
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
     }
 
     @media (max-width: 768px) {
@@ -149,9 +154,10 @@
                             style="max-width:150px; border-radius: 8px; border:1px solid #ddd; padding:5px;">
                     </div>
                 @endif
-                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*">
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*" capture="environment" onclick="this.value=null">
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    *Upload ulang jika ingin mengganti foto material
+                    *Klik untuk mengambil foto baru menggunakan kamera
                 </small>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
@@ -168,9 +174,10 @@
                             style="max-width:150px; border-radius: 8px; border:1px solid #ddd; padding:5px;">
                     </div>
                 @endif
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*">
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*" capture="environment" onclick="this.value=null">
                 <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
-                    *Upload ulang jika ingin mengganti foto petugas
+                    *Klik untuk mengambil foto baru menggunakan kamera
                 </small>
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>
@@ -179,7 +186,7 @@
 
             {{-- Tombol --}}
             <div class="form-actions">
-                <a href="{{ route('material_kembali.index') }}" class="btn-batal">Batal</a>
+                <a href="{{ route('material_kembali.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-right: 10px;">Batal</a>
                 <button type="submit" class="btn-simpan">Update</button>
             </div>
         </form>

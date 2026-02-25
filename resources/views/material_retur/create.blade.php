@@ -86,17 +86,17 @@
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label> 
-                {{-- KODE KETAT: Memaksa kamera langsung dengan capture dan onfocus reset --}}
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar file tidak terhapus otomatis setelah diambil --}}
                 <input type="file" name="foto" id="foto" class="form-control-new-file" 
-                       accept="image/*" capture="environment" onfocus="this.value=''" required>
+                       accept="image/*" capture="environment" onclick="this.value=null" required>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*foto material wajib diisi</small>
             </div>
 
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label> 
-                {{-- KODE KETAT: Memaksa kamera langsung dengan capture dan onfocus reset --}}
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar file tidak terhapus otomatis setelah diambil --}}
                 <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" 
-                       accept="image/*" capture="environment" onfocus="this.value=''" required>
+                       accept="image/*" capture="environment" onclick="this.value=null" required>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*foto petugas wajib diisi</small>
             </div>
 

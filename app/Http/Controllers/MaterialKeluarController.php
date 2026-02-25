@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 // Import Standar Intervention Image v3
@@ -54,7 +55,6 @@ class MaterialKeluarController extends Controller
 
     public function create()
     {
-        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar
         $materialList = Material::where(function ($query) {
                                     $query->where('kategori', '!=', 'siaga')
                                          ->orWhereNull('kategori');
@@ -75,9 +75,9 @@ class MaterialKeluarController extends Controller
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
             'keterangan' => 'required|string|max:1000',
-            // Batas upload diubah menjadi 15MB (15360 KB)
-            'foto' => 'required|image|mimes:jpg,jpeg,png,gif|max:15360',
-            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png,max:15360',
+            // Tambah support heic/webp
+            'foto' => 'required|image|mimes:jpg,jpeg,png,gif,heic,webp|max:15360',
+            'foto_petugas' => 'required|image|mimes:jpg,jpeg,png,heic,webp|max:15360',
         ]);
 
         $validated['tanggal'] = now('Asia/Makassar');
@@ -89,35 +89,39 @@ class MaterialKeluarController extends Controller
             File::makeDirectory($path, 0755, true, true);
         }
 
-        if ($request->hasFile('foto')) {
-            $fileName = time() . '_foto_' . $request->file('foto')->getClientOriginalName();
-            $manager->read($request->file('foto'))->scale(width: 800)->toJpeg(70)->save($path . '/' . $fileName);
-            $validated['foto'] = 'uploads/material_keluar/' . $fileName;
-        }
-
-        if ($request->hasFile('foto_petugas')) {
-            $fileNamePetugas = time() . '_petugas_' . $request->file('foto_petugas')->getClientOriginalName();
-            $manager->read($request->file('foto_petugas'))->scale(width: 800)->toJpeg(70)->save($path . '/' . $fileNamePetugas);
-            $validated['foto_petugas'] = 'uploads/material_keluar/' . $fileNamePetugas;
-        }
-
-        $materialId = $validated['material_id'];
-        $jumlahKeluar = $validated['jumlah_material'];
-        $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
-
-        if ($materialStok && $materialStok->jumlah >= $jumlahKeluar) {
-            $materialStok->decrement('jumlah', $jumlahKeluar);
-            MaterialKeluar::create($validated);
-
-            // LOGIKA PENGALIHAN BARU UNTUK SATPAM
-            if (strtolower(auth()->user()->role) === 'satpam') {
-                return redirect()->route('dashboard')->with('success', 'Data berhasil disimpan!');
+        try {
+            if ($request->hasFile('foto')) {
+                $fileName = time() . '_foto_' . $request->file('foto')->getClientOriginalName();
+                $manager->read($request->file('foto'))->scale(width: 800)->toJpeg(70)->save($path . '/' . $fileName);
+                $validated['foto'] = 'uploads/material_keluar/' . $fileName;
             }
 
-            return redirect()->route('material_keluar.index')->with('success', 'Data berhasil disimpan!');
-        }
+            if ($request->hasFile('foto_petugas')) {
+                $fileNamePetugas = time() . '_petugas_' . $request->file('foto_petugas')->getClientOriginalName();
+                $manager->read($request->file('foto_petugas'))->scale(width: 800)->toJpeg(70)->save($path . '/' . $fileNamePetugas);
+                $validated['foto_petugas'] = 'uploads/material_keluar/' . $fileNamePetugas;
+            }
 
-        return redirect()->back()->with('error', 'Gagal: Stok tidak mencukupi.')->withInput();
+            $materialId = $validated['material_id'];
+            $jumlahKeluar = $validated['jumlah_material'];
+            $materialStok = MaterialStandBy::where('material_id', $materialId)->first();
+
+            if ($materialStok && $materialStok->jumlah >= $jumlahKeluar) {
+                $materialStok->decrement('jumlah', $jumlahKeluar);
+                MaterialKeluar::create($validated);
+
+                if (strtolower(auth()->user()->role) === 'satpam') {
+                    return redirect()->route('dashboard')->with('success', 'Data berhasil disimpan!');
+                }
+                return redirect()->route('material_keluar.index')->with('success', 'Data berhasil disimpan!');
+            }
+
+            return redirect()->back()->with('error', 'Gagal: Stok tidak mencukupi.')->withInput();
+
+        } catch (\Exception $e) {
+            Log::error("Store Material Keluar Error: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses foto.')->withInput();
+        }
     }
 
     public function update(Request $request, $id)
@@ -136,9 +140,8 @@ class MaterialKeluarController extends Controller
             'jumlah_material' => 'required|numeric|min:1',
             'satuan_material' => 'required|string|in:Buah,Meter',
             'keterangan' => 'required|string|max:1000',
-            // Batas upload diubah menjadi 15MB (15360 KB)
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:15360',
-            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png|max:15360',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,gif,heic,webp|max:15360',
+            'foto_petugas' => 'nullable|image|mimes:jpg,jpeg,png,heic,webp|max:15360',
         ]);
 
         $manager = new ImageManager(new Driver());
@@ -147,6 +150,7 @@ class MaterialKeluarController extends Controller
         $jumlahBaru = $validated['jumlah_material'];
         $materialIdBaru = $validated['material_id'];
         
+        // Logika Stok
         if ($materialIdBaru != $materialIdLama) {
             $stokLama = MaterialStandBy::where('material_id', $materialIdLama)->first();
             if ($stokLama) $stokLama->increment('jumlah', $jumlahLama);
@@ -165,22 +169,28 @@ class MaterialKeluarController extends Controller
             }
         }
 
-        if ($request->hasFile('foto')) {
-            if ($data->foto && File::exists(public_path($data->foto))) File::delete(public_path($data->foto));
-            $fileName = time() . '_foto_' . $request->file('foto')->getClientOriginalName();
-            $manager->read($request->file('foto'))->scale(width: 800)->toJpeg(70)->save($path.'/'.$fileName);
-            $validated['foto'] = 'uploads/material_keluar/' . $fileName;
-        }
+        try {
+            if ($request->hasFile('foto')) {
+                if ($data->foto && File::exists(public_path($data->foto))) File::delete(public_path($data->foto));
+                $fileName = time() . '_foto_' . $request->file('foto')->getClientOriginalName();
+                $manager->read($request->file('foto'))->scale(width: 800)->toJpeg(70)->save($path.'/'.$fileName);
+                $validated['foto'] = 'uploads/material_keluar/' . $fileName;
+            }
 
-        if ($request->hasFile('foto_petugas')) {
-            if ($data->foto_petugas && File::exists(public_path($data->foto_petugas))) File::delete(public_path($data->foto_petugas));
-            $fileNamePetugas = time() . '_petugas_' . $request->file('foto_petugas')->getClientOriginalName();
-            $manager->read($request->file('foto_petugas'))->scale(width: 800)->toJpeg(70)->save($path.'/'.$fileNamePetugas);
-            $validated['foto_petugas'] = 'uploads/material_keluar/' . $fileNamePetugas;
-        }
+            if ($request->hasFile('foto_petugas')) {
+                if ($data->foto_petugas && File::exists(public_path($data->foto_petugas))) File::delete(public_path($data->foto_petugas));
+                $fileNamePetugas = time() . '_petugas_' . $request->file('foto_petugas')->getClientOriginalName();
+                $manager->read($request->file('foto_petugas'))->scale(width: 800)->toJpeg(70)->save($path.'/'.$fileNamePetugas);
+                $validated['foto_petugas'] = 'uploads/material_keluar/' . $fileNamePetugas;
+            }
 
-        $data->update($validated);
-        return redirect()->route('material_keluar.index')->with('success', 'Data diperbarui!');
+            $data->update($validated);
+            return redirect()->route('material_keluar.index')->with('success', 'Data diperbarui!');
+
+        } catch (\Exception $e) {
+            Log::error("Update Material Keluar Error: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memproses foto baru.');
+        }
     }
 
     public function destroy($id)
@@ -211,7 +221,6 @@ class MaterialKeluarController extends Controller
         }
 
         $data = MaterialKeluar::findOrFail($id);
-        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL
         $materialList = Material::where('kategori', '!=', 'siaga')
                                 ->orWhereNull('kategori')
                                 ->get()
@@ -235,64 +244,31 @@ class MaterialKeluarController extends Controller
 
     public function downloadFoto($id)
     {
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->back()->with('error', 'Akses ditolak.');
-        }
-
+        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses ditolak.'); }
         $item = MaterialKeluar::findOrFail($id);
         $filePath = public_path($item->foto);
-        if ($item->foto && File::exists($filePath)) {
-            return response()->download($filePath);
-        }
-        return redirect()->back()->with('error', 'Foto tidak ditemukan.');
+        return ($item->foto && File::exists($filePath)) ? response()->download($filePath) : redirect()->back()->with('error', 'Foto tidak ditemukan.');
     }
 
     public function downloadFotoPetugas($id)
     {
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->back()->with('error', 'Akses ditolak.');
-        }
-
+        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses ditolak.'); }
         $item = MaterialKeluar::findOrFail($id);
         $filePath = public_path($item->foto_petugas);
-        if ($item->foto_petugas && File::exists($filePath)) {
-            return response()->download($filePath);
-        }
-        return redirect()->back()->with('error', 'Foto petugas tidak ditemukan.');
+        return ($item->foto_petugas && File::exists($filePath)) ? response()->download($filePath) : redirect()->back()->with('error', 'Foto petugas tidak ditemukan.');
     }
 
     public function downloadReport(Request $request)
     {
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->back()->with('error', 'Akses ditolak.');
-        }
-
-        $request->validate([
-            'tanggal_mulai' => 'required|date',
-            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
-        ]);
-
+        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses ditolak.'); }
+        $request->validate(['tanggal_mulai' => 'required|date', 'tanggal_akhir' => 'required|date']);
         $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
-
-        $items = MaterialKeluar::with('material')
-            ->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])
-            ->get();
-
-        $items->each(function ($item) {
-            $materialStok = \App\Models\MaterialStandBy::where('material_id', $item->material_id)->first();
-            $item->stok_saat_ini = $materialStok 
-                ? $materialStok->jumlah . ' ' . $materialStok->satuan 
-                : '0';
-        });
+        $items = MaterialKeluar::with('material')->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])->get();
 
         if ($request->has('submit_pdf')) {
-            $pdf = Pdf::loadView('material_keluar.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'))
-                      ->setPaper('a4', 'portrait'); 
-            
-            return $pdf->download('laporan_keluar.pdf');
+            return Pdf::loadView('material_keluar.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'))->setPaper('a4', 'portrait')->download('laporan_keluar.pdf');
         }
-
         return Excel::download(new MaterialKeluarExport($tanggal_mulai, $tanggal_akhir), 'laporan_keluar.xlsx');
     }
 }

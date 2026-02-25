@@ -55,9 +55,9 @@
 
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label> 
-                {{-- KODE KETAT: Menambahkan capture="environment" dan onfocus untuk memicu kamera langsung --}}
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
                 <input type="file" name="foto" id="foto" class="form-control-new-file" 
-                       accept="image/*" capture="environment" onfocus="this.value=''" required>
+                       accept="image/*" capture="environment" onclick="this.value=null" required>
                 <small style="color: red; display: block; margin-top: 5px; font-style: italic;">
                     *foto material wajib diisi
                 </small>

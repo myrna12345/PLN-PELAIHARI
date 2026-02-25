@@ -66,9 +66,9 @@
 
             <div class="form-group-new">
                 <label for="unggah_foto">Unggah Foto Material</label> 
-                {{-- KODE KETAT: Menambahkan capture="environment" dan onfocus untuk memicu kamera secara paksa --}}
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar file tidak terhapus otomatis setelah diambil --}}
                 <input type="file" name="unggah_foto" id="unggah_foto" class="form-control-new-file @error('unggah_foto') is-invalid @enderror" 
-                       accept="image/*" capture="environment" onfocus="this.value=''" required> 
+                       accept="image/*" capture="environment" onclick="this.value=null" required> 
                 @error('unggah_foto')
                     <span style="color: red; font-size: 12px; display: block;">{{ $message }}</span>
                 @else

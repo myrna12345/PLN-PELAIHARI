@@ -3,6 +3,16 @@
 @section('title', 'Edit Material Retur')
 
 @section('content')
+<style>
+    /* Perbaikan untuk tampilan input agar bersih dan menghilangkan dropdown otomatis browser */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Edit Material Retur</h2>
@@ -19,14 +29,12 @@
     @endif
 
     <div class="card-form-body">
-        
         <form action="{{ route('material-retur.update', $item->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             
             <div class="form-group-new">
                 <label for="material_id">Nama Material</label>
-                {{-- ID material_id digunakan oleh script JavaScript --}}
                 <select name="material_id" id="material_id" class="form-control-new" required>
                     @foreach($materials as $material)
                         <option value="{{ $material->id }}" {{ old('material_id', $item->material_id) == $material->id ? 'selected' : '' }}>
@@ -44,12 +52,9 @@
             <div class="form-group-new">
                 <label for="jumlah">Jumlah dan Satuan</label>
                 <div style="display: flex; gap: 10px;">
-                    {{-- Input Jumlah --}}
                     <input type="number" name="jumlah" id="jumlah" class="form-control-new" 
                            value="{{ old('jumlah', $item->jumlah) }}" placeholder="Jumlah" style="flex: 2;" required min="1">
                     
-                    {{-- Input Satuan (Teks Readonly, Otomatis) --}}
-                    {{-- Value default diambil dari database ($item->satuan) --}}
                     <input type="text" name="satuan" id="satuan" class="form-control-new" 
                            value="{{ old('satuan', $item->satuan) }}"
                            style="flex: 1; background-color: #e9ecef; cursor: not-allowed;" 
@@ -60,8 +65,9 @@
             <div class="form-group-new">
                 <label for="status">Status Material</label>
                 <select name="status" id="status" class="form-control-new" required>
-                    <option value="bekas_andal" {{ old('status', $item->status) == 'bekas_andal' || old('status', $item->status) == 'Baik' ? 'selected' : '' }}>Bekas Andal</option>
+                    <option value="bekas_andal" {{ old('status', $item->status) == 'bekas_andal' ? 'selected' : '' }}>Bekas Andal</option>
                     <option value="rusak" {{ old('status', $item->status) == 'rusak' ? 'selected' : '' }}>Rusak</option>
+                    <option value="baik" {{ old('status', $item->status) == 'baik' ? 'selected' : '' }}>Baik</option>
                 </select>
             </div>
             
@@ -81,14 +87,17 @@
                 <label>Foto Material</label>
                 @if ($item->foto_path)
                     <div style="margin-bottom: 10px;">
-                        {{-- Preview langsung dari folder public --}}
                         <img src="{{ asset('uploads/material_retur/' . $item->foto_path) }}" 
                              alt="Foto Material Saat Ini" 
                              style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
                     </div>
                 @endif
                 <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Material Baru (Opsional)</label>
-                <input type="file" name="foto" id="foto" class="form-control-new-file"> 
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*" capture="environment" onclick="this.value=null"> 
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Klik untuk mengambil foto baru menggunakan kamera.
+                </small>
             </div>
 
             {{-- --- BAGIAN FOTO PETUGAS --- --}}
@@ -96,14 +105,17 @@
                 <label>Foto Petugas</label>
                 @if ($item->foto_petugas)
                     <div style="margin-bottom: 10px;">
-                        {{-- Preview langsung dari folder public --}}
                         <img src="{{ asset('uploads/material_retur/' . $item->foto_petugas) }}" 
                              alt="Foto Petugas Saat Ini" 
                              style="max-width: 200px; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px; display: block;">
                     </div>
                 @endif
                 <label for="foto_petugas" style="display: block; margin-top: 10px;">Unggah Foto Petugas Baru (Opsional)</label>
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file"> 
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis --}}
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*" capture="environment" onclick="this.value=null"> 
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Klik untuk mengambil foto baru menggunakan kamera.
+                </small>
             </div>
 
             <div class="form-actions">
@@ -114,7 +126,6 @@
     </div>
 </div>
 
-{{-- SCRIPT OTOMATISASI SATUAN --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const materialSelect = document.getElementById('material_id');
@@ -122,39 +133,19 @@
 
         if (materialSelect && satuanInput) {
             function updateSatuan() {
-                // Ambil teks nama material dan ubah ke huruf besar
                 const selectedText = materialSelect.options[materialSelect.selectedIndex].text.toUpperCase();
-
-                // LOGIKA: Prioritas Buah (KWH/MCB), sisanya Meter (Kabel)
-                if (selectedText.includes('KWH') || 
-                    selectedText.includes('MCB') || 
-                    selectedText.includes('AMPERE') || 
-                    selectedText.includes('TRAFO') || 
-                    selectedText.includes('FUSE') || 
-                    selectedText.includes('NH') ||
-                    selectedText.includes('CONNECTOR') ||
-                    selectedText.includes('ISOLATOR') ||
-                    selectedText.includes('LBS') ||
+                if (selectedText.includes('KWH') || selectedText.includes('MCB') || selectedText.includes('AMPERE') || 
+                    selectedText.includes('TRAFO') || selectedText.includes('FUSE') || selectedText.includes('NH') ||
+                    selectedText.includes('CONNECTOR') || selectedText.includes('ISOLATOR') || selectedText.includes('LBS') ||
                     selectedText.includes('FCO')) {
-                    
                     satuanInput.value = 'Buah';
-                
-                } else if (selectedText.includes('KABEL') || 
-                           selectedText.includes('TWISTED') || 
-                           selectedText.includes('SR') || 
-                           selectedText.includes('NYY') || 
-                           selectedText.includes('NYM') ||
-                           selectedText.includes('METER')) {
-                    
+                } else if (selectedText.includes('KABEL') || selectedText.includes('TWISTED') || selectedText.includes('SR') || 
+                           selectedText.includes('NYY') || selectedText.includes('NYM') || selectedText.includes('METER')) {
                     satuanInput.value = 'Meter';
-                
                 } else {
-                    // Default jika tidak dikenali
                     satuanInput.value = 'Buah'; 
                 }
             }
-
-            // Jalankan fungsi saat dropdown material berubah (jika user mengganti material)
             materialSelect.addEventListener('change', updateSatuan);
         }
     });

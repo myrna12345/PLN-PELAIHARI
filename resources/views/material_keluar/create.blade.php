@@ -153,14 +153,14 @@
             {{-- Upload Foto Material --}}
             <div class="form-group-new">
                 <label for="foto">Unggah Foto Material</label>
-                {{-- KODE KETAT: Memicu kamera langsung dengan capture="environment" dan reset value --}}
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar file tidak terhapus otomatis --}}
                 <input type="file" 
                     name="foto" 
                     id="foto" 
                     class="form-control-new-file @error('foto') is-invalid @enderror" 
                     accept="image/*"
                     capture="environment"
-                    onfocus="this.value=''"
+                    onclick="this.value=null"
                     required>
                 @error('foto')
                     <small style="color:red;">{{ $message }}</small>
@@ -171,14 +171,14 @@
             {{-- Upload Foto Petugas --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Unggah Foto Petugas</label>
-                {{-- KODE KETAT: Memicu kamera langsung dengan capture="environment" dan reset value --}}
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar file tidak terhapus otomatis --}}
                 <input type="file" 
                     name="foto_petugas" 
                     id="foto_petugas" 
                     class="form-control-new-file @error('foto_petugas') is-invalid @enderror" 
                     accept="image/*"
                     capture="environment"
-                    onfocus="this.value=''"
+                    onclick="this.value=null"
                     required>
                 @error('foto_petugas')
                     <small style="color:red;">{{ $message }}</small>

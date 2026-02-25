@@ -7,6 +7,7 @@ use App\Models\MaterialStandBy;
 use App\Models\MaterialHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\MaterialStandByExport;
@@ -52,7 +53,6 @@ class MaterialStandByController extends Controller
     // ===============================
     public function create()
     {
-        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar
         $materials = Material::where('kategori', 'teknik')
                              ->get()
                              ->sortBy('nama_material', SORT_NATURAL);
@@ -61,7 +61,7 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 3. STORE (SEMUA BISA AKSES - Redirect ke Index)
+    // 3. STORE (SEMUA BISA AKSES)
     // ===============================
     public function store(Request $request)
     {
@@ -69,74 +69,69 @@ class MaterialStandByController extends Controller
             'material_id' => 'required|exists:materials,id',
             'jumlah'      => 'required|integer|min:1',
             'satuan'      => 'required|string',
-            // Batas upload diubah menjadi 15MB (15360 KB)
-            'foto'        => 'required|image|mimes:jpg,jpeg,png|max:15360',
+            'foto'        => 'required|image|mimes:jpg,jpeg,png,heic,webp|max:15360',
         ]);
 
-        $path = public_path($this->uploadFolder);
-        if (!File::exists($path)) {
-            File::makeDirectory($path, 0755, true);
-        }
+        try {
+            $path = public_path($this->uploadFolder);
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
 
-        // --- KOMPRESI FOTO ---
-        $fotoName = time() . '_' . uniqid() . '.jpg';
-        
-        $image = Image::read($request->file('foto'));
-        $image->scale(width: 800);
-        $encoded = $image->toJpeg(60);
-        $encoded->save($path . '/' . $fotoName);
-        // ----------------------------------
+            $fotoName = time() . '_' . uniqid() . '.jpg';
+            
+            $image = Image::read($request->file('foto'));
+            $image->scale(width: 800);
+            $encoded = $image->toJpeg(60);
+            $encoded->save($path . '/' . $fotoName);
 
-        $material = Material::findOrFail($validated['material_id']);
+            $material = Material::findOrFail($validated['material_id']);
 
-        // Cek apakah material sudah ada (Merge Data)
-        $item = MaterialStandBy::where('material_id', $validated['material_id'])
-            ->where('satuan', $validated['satuan'])
-            ->first();
+            $item = MaterialStandBy::where('material_id', $validated['material_id'])
+                ->where('satuan', $validated['satuan'])
+                ->first();
 
-        if ($item) {
-            $item->jumlah += $validated['jumlah'];
-            $item->foto_path = $fotoName;
-            $item->tanggal = now('Asia/Makassar');
-            $item->save();
-        } else {
-            MaterialStandBy::create([
-                'material_id' => $validated['material_id'],
-                'nama_material_lengkap' => $material->nama_material,
+            if ($item) {
+                $item->jumlah += $validated['jumlah'];
+                $item->foto_path = $fotoName;
+                $item->tanggal = now('Asia/Makassar');
+                $item->save();
+            } else {
+                MaterialStandBy::create([
+                    'material_id' => $validated['material_id'],
+                    'nama_material_lengkap' => $material->nama_material,
+                    'jumlah' => $validated['jumlah'],
+                    'satuan' => $validated['satuan'],
+                    'foto_path' => $fotoName,
+                    'tanggal' => now('Asia/Makassar'),
+                ]);
+            }
+
+            MaterialHistory::create([
+                'nama_material' => $material->nama_material,
                 'jumlah' => $validated['jumlah'],
                 'satuan' => $validated['satuan'],
                 'foto_path' => $fotoName,
-                'tanggal' => now('Asia/Makassar'),
+                'tanggal_input' => now('Asia/Makassar'),
             ]);
+
+            return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil disimpan');
+        } catch (\Exception $e) {
+            Log::error("Store Error: " . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan data.')->withInput();
         }
-
-        // Simpan History
-        MaterialHistory::create([
-            'nama_material' => $material->nama_material,
-            'jumlah' => $validated['jumlah'],
-            'satuan' => $validated['satuan'],
-            'foto_path' => $fotoName,
-            'tanggal_input' => now('Asia/Makassar'),
-        ]);
-
-        return redirect()->route('material-stand-by.index')
-            ->with('success', 'Data berhasil disimpan');
     }
 
     // ===============================
-    // 4. EDIT (DILARANG UNTUK SATPAM)
+    // 4. EDIT
     // ===============================
     public function edit($id)
     {
-        // [SECURITY CHECK]
         if (auth()->user()->role === 'satpam') {
-            return redirect()->route('material-stand-by.index')
-                ->with('error', 'Akses Ditolak. Satpam tidak boleh mengedit data.');
+            return redirect()->route('material-stand-by.index')->with('error', 'Akses Ditolak.');
         }
 
         $item = MaterialStandBy::findOrFail($id);
-        
-        // PERBAIKAN: Menggunakan sortBy dengan SORT_NATURAL agar urutan angka (Ampere) benar
         $materials = Material::where('kategori', 'teknik')
                              ->get()
                              ->sortBy('nama_material', SORT_NATURAL);
@@ -145,152 +140,85 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 5. UPDATE (DILARANG UNTUK SATPAM)
+    // 5. UPDATE
     // ===============================
     public function update(Request $request, $id)
     {
-        // [SECURITY CHECK]
         if (auth()->user()->role === 'satpam') {
-            return redirect()->route('material-stand-by.index')
-                ->with('error', 'Akses Ditolak. Satpam tidak boleh mengubah data.');
+            return redirect()->route('material-stand-by.index')->with('error', 'Akses Ditolak.');
         }
 
         $item = MaterialStandBy::findOrFail($id);
 
         $validated = $request->validate([
             'jumlah' => 'required|integer|min:0',
-            // Batas upload diubah menjadi 15MB (15360 KB)
-            'foto'   => 'nullable|image|mimes:jpg,jpeg,png|max:15360',
+            'foto'   => 'nullable|image|mimes:jpg,jpeg,png,heic,webp|max:15360',
         ]);
 
-        if ($request->hasFile('foto')) {
-            $path = public_path($this->uploadFolder);
+        try {
+            if ($request->hasFile('foto')) {
+                $path = public_path($this->uploadFolder);
 
-            // Hapus foto lama
-            if ($item->foto_path && File::exists($path . '/' . $item->foto_path)) {
-                File::delete($path . '/' . $item->foto_path);
+                // Hapus foto lama jika ada
+                if ($item->foto_path && File::exists($path . '/' . $item->foto_path)) {
+                    File::delete($path . '/' . $item->foto_path);
+                }
+
+                $fotoName = time() . '_' . uniqid() . '.jpg';
+                $image = Image::read($request->file('foto'));
+                $image->scale(width: 800);
+                $encoded = $image->toJpeg(60);
+                $encoded->save($path . '/' . $fotoName);
+
+                $item->foto_path = $fotoName;
             }
 
-            // --- KOMPRESI FOTO ---
-            $fotoName = time() . '_' . uniqid() . '.jpg';
-            
-            $image = Image::read($request->file('foto'));
-            $image->scale(width: 800);
-            $encoded = $image->toJpeg(60);
-            $encoded->save($path . '/' . $fotoName);
-            // ---------------------
+            $item->jumlah = $validated['jumlah'];
+            $item->tanggal = now('Asia/Makassar'); 
+            $item->save();
 
-            $item->foto_path = $fotoName;
+            return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil diperbarui');
+        } catch (\Exception $e) {
+            Log::error("Update Error: " . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui data.');
         }
-
-        $item->jumlah = $validated['jumlah'];
-        $item->tanggal = now('Asia/Makassar'); 
-        $item->save();
-
-        return redirect()->route('material-stand-by.index')
-            ->with('success', 'Data berhasil diperbarui');
     }
 
     // ===============================
-    // 6. DELETE (DILARANG UNTUK SATPAM)
+    // 6. DELETE
     // ===============================
     public function destroy($id)
     {
-        // [SECURITY CHECK]
         if (auth()->user()->role === 'satpam') {
-            return redirect()->route('material-stand-by.index')
-                ->with('error', 'Akses Ditolak. Satpam tidak boleh menghapus data.');
+            return redirect()->route('material-stand-by.index')->with('error', 'Akses Ditolak.');
         }
 
-        // Ambil data stand by beserta relasi materialnya
-        $item = MaterialStandBy::with('material')->findOrFail($id);
-
-        // Ambil nama material untuk kunci penghapusan riwayat
-        $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
-
-        // --- LOGIKA PENGHAPUSAN HISTORY TOTAL ---
-        if ($namaMaterial) {
-            MaterialHistory::where('nama_material', $namaMaterial)
-                ->where('satuan', $item->satuan)
-                ->delete();
-        }
-        // ------------------------------------------
-
-        // Hapus file fisik foto terakhir
+        $item = MaterialStandBy::findOrFail($id);
         $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+        
         if ($item->foto_path && File::exists($path)) {
             File::delete($path);
         }
 
-        // Hapus data utama di tabel stand by
         $item->delete();
-
-        return redirect()->route('material-stand-by.index')
-            ->with('success', 'Data Laporan dan seluruh Riwayat terkait material tersebut berhasil dihapus.');
+        return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil dihapus.');
     }
 
     // ===============================
-    // 7. DOWNLOAD PDF (DILARANG UNTUK SATPAM)
+    // 7. DOWNLOAD PDF & EXCEL & LAINNYA
     // ===============================
     public function downloadPdf(Request $request)
     {
-        // [SECURITY CHECK]
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->back()
-                ->with('error', 'Akses Ditolak. Satpam tidak memiliki izin download PDF.');
-        }
-
-        $request->validate([
-            'tanggal_mulai' => 'required|date',
-            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
-        ]);
-
-        $start = Carbon::parse($request->tanggal_mulai)->startOfDay();
-        $end   = Carbon::parse($request->tanggal_akhir)->endOfDay();
-
-        $items = MaterialStandBy::with('material')
-            ->whereBetween('tanggal', [$start, $end])
-            ->latest('tanggal')
-            ->get();
-
-        if ($items->isEmpty()) {
-            return back()->with('error', 'Data tidak ditemukan pada periode tersebut.');
-        }
-
-        $tanggal_mulai = $start->format('d M Y');
-        $tanggal_akhir = $end->format('d M Y');
-
-        $pdf = Pdf::loadView(
-            'material_stand_by.laporan_pdf',
-            compact('items', 'tanggal_mulai', 'tanggal_akhir')
-        );
-
-        return $pdf->download('Laporan_Material_Standby.pdf');
+        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses Ditolak.'); }
+        $request->validate(['tanggal_mulai' => 'required|date', 'tanggal_akhir' => 'required|date']);
+        $items = MaterialStandBy::whereBetween('tanggal', [Carbon::parse($request->tanggal_mulai)->startOfDay(), Carbon::parse($request->tanggal_akhir)->endOfDay()])->get();
+        return Pdf::loadView('material_stand_by.laporan_pdf', ['items' => $items, 'tanggal_mulai' => $request->tanggal_mulai, 'tanggal_akhir' => $request->tanggal_akhir])->download('Laporan_Material_Standby.pdf');
     }
 
-    // ===============================
-    // 8. DOWNLOAD EXCEL (DILARANG UNTUK SATPAM)
-    // ===============================
     public function downloadExcel(Request $request)
     {
-        // [SECURITY CHECK]
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->back()
-                ->with('error', 'Akses Ditolak. Satpam tidak memiliki izin download Excel.');
-        }
-
-        $request->validate([
-            'tanggal_mulai' => 'required|date',
-            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
-        ]);
-
-        return Excel::download(
-            new MaterialStandByExport(
-                $request->tanggal_mulai,
-                $request->tanggal_akhir
-            ),
-            'Laporan_Material_Standby.xlsx'
-        );
+        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses Ditolak.'); }
+        return Excel::download(new MaterialStandByExport($request->tanggal_mulai, $request->tanggal_akhir), 'Laporan_Material_Standby.xlsx');
     }
 
     public function showFoto($id)
@@ -301,24 +229,9 @@ class MaterialStandByController extends Controller
 
     public function downloadFoto($id)
     {
-        // [SECURITY CHECK]
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->back()
-                ->with('error', 'Akses Ditolak. Satpam tidak boleh mendownload file asli.');
-        }
-
+        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses Ditolak.'); }
         $item = MaterialStandBy::findOrFail($id);
-
-        if (!$item->foto_path) {
-            abort(404, 'Foto tidak ditemukan');
-        }
-
-        $path = public_path('uploads/material_stand_by/' . $item->foto_path);
-
-        if (!file_exists($path)) {
-            abort(404, 'File foto tidak ada di server');
-        }
-
-        return response()->download($path);
+        $path = public_path($this->uploadFolder . '/' . $item->foto_path);
+        return File::exists($path) ? response()->download($path) : abort(404);
     }
 }

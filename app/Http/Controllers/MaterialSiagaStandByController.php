@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Log;
 
 class MaterialSiagaStandByController extends Controller
 {
@@ -62,7 +63,7 @@ class MaterialSiagaStandByController extends Controller
             'tanggal'               => 'required|date',
             'nama_petugas'          => 'nullable|string|max:255',
             'jumlah_siaga_standby'  => 'nullable|integer|min:0', 
-            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:15360', 
+            'unggah_foto'           => 'nullable|image|mimes:jpeg,png,jpg,heic,webp|max:15360', 
         ]);
         
         $fotoName = null;
@@ -105,37 +106,45 @@ class MaterialSiagaStandByController extends Controller
             'nomor_meter'   => 'required',
             'stand_meter'   => 'required',
             'status'        => 'required|in:Ready,Terpakai,READY,TERPAKAI',
-            'unggah_foto'   => 'nullable|image|mimes:jpeg,png,jpg|max:15360', 
+            'unggah_foto'   => 'nullable|image|mimes:jpeg,png,jpg,heic,webp|max:15360', 
         ]);
 
         $fotoName = $data->unggah_foto;
 
-        if ($request->hasFile('unggah_foto')) {
-            $path = public_path($this->uploadFolder);
-            if ($fotoName && File::exists($path . '/' . $fotoName)) {
-                File::delete($path . '/' . $fotoName);
+        try {
+            if ($request->hasFile('unggah_foto')) {
+                $path = public_path($this->uploadFolder);
+                if ($fotoName && File::exists($path . '/' . $fotoName)) {
+                    File::delete($path . '/' . $fotoName);
+                }
+
+                $fotoName = time() . '_' . uniqid() . '.jpg';
+                $imageFile = $request->file('unggah_foto');
+                $img = Image::read($imageFile);
+                $img->scale(width: 1200); 
+                $img->toJpeg(60)->save($path . '/' . $fotoName);
             }
 
-            $fotoName = time() . '_' . uniqid() . '.jpg';
-            $imageFile = $request->file('unggah_foto');
-            $img = Image::read($imageFile);
-            $img->scale(width: 1200); 
-            $img->toJpeg(60)->save($path . '/' . $fotoName);
+            $data->update([
+                'nama_material' => $request->nama_material,
+                'nomor_meter'   => $request->nomor_meter,
+                'stand_meter'   => $request->stand_meter,
+                'status'        => ucwords(strtolower($request->status)),
+                'unggah_foto'   => $fotoName,
+            ]);
+
+            return redirect()->route('material-siaga.index')->with('success', 'Data berhasil diperbarui!');
+        } catch (\Exception $e) {
+            Log::error("Update Material Siaga Standby Error: " . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui data atau foto.');
         }
-
-        $data->update([
-            'nama_material' => $request->nama_material,
-            'nomor_meter'   => $request->nomor_meter,
-            'stand_meter'   => $request->stand_meter,
-            'status'        => ucwords(strtolower($request->status)),
-            'unggah_foto'   => $fotoName,
-        ]);
-
-        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil diperbarui!');
     }
     
     public function edit($id)
     {
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        }
         $materialSiaga = MaterialSiagaStandBy::findOrFail($id);
         return view('material-siaga.edit', compact('materialSiaga'));
     }

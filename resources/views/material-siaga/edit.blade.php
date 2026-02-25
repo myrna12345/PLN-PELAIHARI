@@ -59,6 +59,9 @@
     color: #333;
     display: flex;
     align-items: center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 .form-control-new:focus {
@@ -203,7 +206,6 @@
         <div class="form-group-new">
             <label for="status">Status</label>
             <select name="status" id="status" class="form-control-new" required>
-                {{-- Value disesuaikan dengan validasi di Controller (Case Sensitive) --}}
                 <option value="Ready" {{ old('status', $materialSiaga->status) == 'Ready' ? 'selected' : '' }}>READY</option>
                 <option value="Terpakai" {{ old('status', $materialSiaga->status) == 'Terpakai' ? 'selected' : '' }}>TERPAKAI</option>
             </select>
@@ -226,10 +228,11 @@
                 </div>
             @endif
             <div style="margin-top: 15px;">
-                <label style="font-size: 13px; color: #666;">Unggah Foto Material Baru(Opsional)</label>
+                <label style="font-size: 13px; color: #666;">Unggah Foto Material Baru (Opsional)</label>
                 <div class="file-input-wrapper">
-                    <input type="file" name="unggah_foto" id="unggah_foto" onchange="updateFileName(this)">
-                    <div class="file-custom-text" id="file-name-text">No file chosen</div>
+                    {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
+                    <input type="file" name="unggah_foto" id="unggah_foto" accept="image/*" capture="environment" onclick="this.value=null" onchange="updateFileName(this)">
+                    <div class="file-custom-text" id="file-name-text">Klik untuk mengambil foto baru...</div>
                 </div>
             </div>
         </div>
@@ -249,7 +252,7 @@
             textDisplay.style.color = "#333";
             textDisplay.style.fontWeight = "500";
         } else {
-            textDisplay.innerText = "Klik untuk memilih foto baru...";
+            textDisplay.innerText = "Klik untuk mengambil foto baru...";
             textDisplay.style.color = "#666";
             textDisplay.style.fontWeight = "400";
         }
