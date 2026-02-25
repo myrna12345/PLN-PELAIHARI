@@ -184,16 +184,29 @@ class MaterialStandByController extends Controller
         }
     }
 
-    // ===============================
-    // 6. DELETE
-    // ===============================
+    // ===========================================
+    // 6. DELETE (DENGAN LOGIKA HAPUS HISTORY)
+    // ===========================================
     public function destroy($id)
     {
         if (auth()->user()->role === 'satpam') {
             return redirect()->route('material-stand-by.index')->with('error', 'Akses Ditolak.');
         }
 
-        $item = MaterialStandBy::findOrFail($id);
+        // Ambil data beserta relasinya
+        $item = MaterialStandBy::with('material')->findOrFail($id);
+
+        // Ambil nama material untuk kunci penghapusan riwayat
+        $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
+
+        // --- LOGIKA PENGHAPUSAN HISTORY TOTAL ---
+        if ($namaMaterial) {
+            MaterialHistory::where('nama_material', $namaMaterial)
+                ->where('satuan', $item->satuan)
+                ->delete();
+        }
+
+        // Hapus file fisik foto terakhir
         $path = public_path($this->uploadFolder . '/' . $item->foto_path);
         
         if ($item->foto_path && File::exists($path)) {
@@ -201,7 +214,7 @@ class MaterialStandByController extends Controller
         }
 
         $item->delete();
-        return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil dihapus.');
+        return redirect()->route('material-stand-by.index')->with('success', 'Data Stok dan Riwayat berhasil dihapus.');
     }
 
     // ===============================
