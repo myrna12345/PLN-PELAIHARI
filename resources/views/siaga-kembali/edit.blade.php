@@ -10,6 +10,22 @@
         -moz-appearance: none;
         background-image: none !important;
     }
+
+    /* Penyesuaian class button agar sama dengan siaga keluar */
+    .btn-simpan {
+        background-color: #76b596 !important; 
+        color: #333 !important;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-simpan:hover {
+        opacity: 0.85;
+    }
 </style>
 
 <div class="card-form-container">
@@ -136,8 +152,9 @@
             </div>
             
             <div class="form-actions">
-                <button type="submit" class="btn-simpan" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Update</button>
-                <a href="{{ route('siaga-kembali.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
+                {{-- Tombol Update diperbaiki warnanya sesuai siaga keluar --}}
+                <button type="submit" class="btn-simpan">Update</button>
+                <a href="{{ route('siaga-kembali.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px; font-weight: 600;">Batal</a>
             </div>
         </form>
     </div>
