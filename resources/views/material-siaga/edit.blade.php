@@ -181,7 +181,8 @@
         </div>
     @endif
 
-    <form action="{{ route('material-siaga.update', $materialSiaga->id) }}" method="POST" enctype="multipart/form-data">
+    {{-- PERBAIKAN: Rute Update --}}
+    <form action="{{ route('material-siaga-stand-by.update', $materialSiaga->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
@@ -224,13 +225,13 @@
             <label>Foto Material Saat Ini</label>
             @if($materialSiaga->unggah_foto)
                 <div class="foto-preview-box">
-                    <img src="{{ route('material-siaga.show-foto', $materialSiaga->id) }}" alt="Foto Material">
+                    {{-- PERBAIKAN: Rute Show Foto --}}
+                    <img src="{{ route('material-siaga-stand-by.show-foto', $materialSiaga->id) }}" alt="Foto Material">
                 </div>
             @endif
             <div style="margin-top: 15px;">
                 <label style="font-size: 13px; color: #666;">Unggah Foto Material Baru (Opsional)</label>
                 <div class="file-input-wrapper">
-                    {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
                     <input type="file" name="unggah_foto" id="unggah_foto" accept="image/*" capture="environment" onclick="this.value=null" onchange="updateFileName(this)">
                     <div class="file-custom-text" id="file-name-text">Klik untuk mengambil foto baru...</div>
                 </div>
@@ -239,7 +240,8 @@
 
         <div class="form-actions">
             <button type="submit" class="btn-simpan">Update</button>
-            <a href="{{ route('material-siaga.index') }}" class="btn-batal">Batal</a>
+            {{-- PERBAIKAN: Rute Batal --}}
+            <a href="{{ route('material-siaga-stand-by.index') }}" class="btn-batal">Batal</a>
         </div>
     </form>
 </div>

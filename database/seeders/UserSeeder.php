@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -13,14 +14,13 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1. User Admin
-        // Menggunakan firstOrCreate: Cek email dulu. Jika ada, skip. Jika belum, buat baru.
         User::firstOrCreate(
-            ['email' => 'adm.plnpelaihari@gmail.com'], // Kunci pengecekan (unik)
+            ['email' => 'adm.plnpelaihari@gmail.com'],
             [
                 'name' => 'Admin',
-                'username' => 'admin', // Tambahan username
+                'username' => 'admin',
                 'role' => 'admin',
-                'password' => bcrypt('passwordadmin01')
+                'password' => Hash::make('passwordadmin01')
             ]
         );
 
@@ -29,9 +29,9 @@ class UserSeeder extends Seeder
             ['email' => 'satpam.plnpelaihari@gmail.com'], 
             [
                 'name' => 'Satpam',
-                'username' => 'satpam', // Tambahan username
+                'username' => 'satpam',
                 'role' => 'satpam',
-                'password' => bcrypt('satpampln')
+                'password' => Hash::make('satpampln')
             ]
         );
 
@@ -40,9 +40,20 @@ class UserSeeder extends Seeder
             ['email' => 'gudang.plnpelaihari@gmail.com'], 
             [
                 'name' => 'Gudang',
-                'username' => 'gudang', // Tambahan username
+                'username' => 'gudang',
                 'role' => 'gudang',
-                'password' => bcrypt('gudangpelaihari')
+                'password' => Hash::make('gudangpelaihari')
+            ]
+        );
+
+        // 4. User Harmet (Baru)
+        User::firstOrCreate(
+            ['email' => 'harmet.plnpelaihari@gmail.com'], 
+            [
+                'name' => 'harmet',
+                'username' => 'harmet',
+                'role' => 'harmet',
+                'password' => Hash::make('harmetplnplh')
             ]
         );
     }

@@ -73,7 +73,8 @@
     <div class="index-header">
         <h2>LAPORAN MATERIAL SIAGA STAND BY</h2>
 
-        <form action="{{ route('material-siaga.index') }}" method="GET" class="search-form">
+        {{-- PERBAIKAN: Rute diubah ke material-siaga-stand-by.index --}}
+        <form action="{{ route('material-siaga-stand-by.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
@@ -87,7 +88,7 @@
                 <input type="date" name="end_date" class="form-control-tanggal" value="{{ request('end_date') }}" title="Tanggal Akhir">
             </div>
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
-            <a href="{{ route('material-siaga.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+            <a href="{{ route('material-siaga-stand-by.index') }}" class="btn btn-secondary btn-sm">Reset</a>
         </form>
     </div>
 
@@ -128,7 +129,8 @@
                                  alt="Foto Material">
                             
                             @if(strtolower(auth()->user()->role) !== 'satpam')
-                            <a href="{{ route('material-siaga.download-foto', $data->id) }}" class="btn-foto-download">
+                            {{-- PERBAIKAN: Rute download foto --}}
+                            <a href="{{ route('material-siaga-stand-by.download-foto', $data->id) }}" class="btn-foto-download">
                                 <i class="fas fa-download"></i> Download
                             </a>
                             @endif
@@ -140,11 +142,13 @@
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <td>
                         <div class="table-actions">
-                            <a href="{{ route('material-siaga.edit', $data->id) }}" class="btn btn-edit">
+                            {{-- PERBAIKAN: Rute Edit --}}
+                            <a href="{{ route('material-siaga-stand-by.edit', $data->id) }}" class="btn btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
 
-                            <form action="{{ route('material-siaga.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                            {{-- PERBAIKAN: Rute Destroy --}}
+                            <form action="{{ route('material-siaga-stand-by.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-hapus">
                                     <i class="fas fa-trash"></i> Hapus
@@ -170,9 +174,10 @@
         {{ $dataSiaga->appends(request()->query())->links() }}
     </div>
 
-    @if(auth()->user()->role !== 'satpam')
+    @if(!in_array(strtolower(auth()->user()->role), ['satpam', 'harmet']))
     <div class="index-footer-form">
-        <form action="{{ route('material-siaga.export') }}" method="GET" class="form-download">
+        {{-- PERBAIKAN: Rute Export --}}
+        <form action="{{ route('material-siaga-stand-by.export') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
                 <label>Dari Tanggal:</label>
                 <input type="date" name="start_date" class="form-control-tanggal" required>

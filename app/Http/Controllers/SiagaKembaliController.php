@@ -21,6 +21,11 @@ class SiagaKembaliController extends Controller
 
     public function index(Request $request)
     {
+        // [PROTEKSI HARMET] Blokir akses ke halaman laporan
+        if (strtolower(auth()->user()->role) === 'harmet') {
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+        }
+
         $search = $request->query('search');
         $tanggalMulai = $request->query('tanggal_mulai');
         $tanggalAkhir = $request->query('tanggal_akhir');
@@ -38,8 +43,12 @@ class SiagaKembaliController extends Controller
             });
         }
         
-        if ($tanggalMulai) { $query->whereDate('tanggal', '>=', $tanggalMulai); }
-        if ($tanggalAkhir) { $query->whereDate('tanggal', '<=', $tanggalAkhir); }
+        if ($tanggalMulai) { 
+            $query->whereDate('tanggal', '>=', $tanggalMulai); 
+        }
+        if ($tanggalAkhir) { 
+            $query->whereDate('tanggal', '<=', $tanggalAkhir); 
+        }
 
         $items = $query->latest('tanggal')->paginate(10);
         
@@ -70,26 +79,21 @@ class SiagaKembaliController extends Controller
         ]);
 
         $materialMaster = Material::findOrFail($validated['material_id']);
-        
         $dataKeluar = SiagaKeluar::where('nomor_meter', $validated['nomor_meter'])
                                  ->where('nama_material_lengkap', $materialMaster->nama_material)
                                  ->first();
 
-        if (!$dataKeluar) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal: Material "' . $materialMaster->nama_material . '" belum pernah dikeluarkan atau tidak terdata di Siaga Keluar.');
+        if (!$dataKeluar) { 
+            return redirect()->back()->withInput()->with('error', 'Material belum pernah dikeluarkan.'); 
         }
 
-        if ($validated['stand_meter'] < $dataKeluar->stand_meter) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal: Stand meter kembali tidak boleh lebih kecil dari stand saat keluar.');
+        if ($validated['stand_meter'] < $dataKeluar->stand_meter) { 
+            return redirect()->back()->withInput()->with('error', 'Stand meter kembali tidak boleh lebih kecil dari stand keluar.'); 
         }
 
         $path = public_path($this->uploadFolder);
-        if (!File::isDirectory($path)) {
-            File::makeDirectory($path, 0755, true, true);
+        if (!File::isDirectory($path)) { 
+            File::makeDirectory($path, 0755, true, true); 
         }
 
         try {
@@ -115,39 +119,34 @@ class SiagaKembaliController extends Controller
             MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
                 ->update(['stand_meter' => $validated['stand_meter'], 'status' => 'Ready']);
 
-            if (strtolower(auth()->user()->role) === 'satpam') {
+            // [PROTEKSI HARMET & SATPAM] Redirect ke Dashboard
+            if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
                 return redirect()->route('dashboard')->with('success', 'Material berhasil dikembalikan.');
             }
 
             return redirect()->route('siaga-kembali.index')->with('success', 'Material berhasil dikembalikan.');
 
-        } catch (\Exception $e) {
-            Log::error("Store Siaga Kembali Error: " . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat memproses foto.')->withInput();
+        } catch (\Exception $e) { 
+            return back()->with('error', 'Gagal memproses data.'); 
         }
     }
 
-    public function edit(SiagaKembali $siagaKembali)
-    {
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.');
-        }
-
-        $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P'];
-        $materials = Material::where('kategori', 'siaga')
-                             ->whereIn('nama_material', $allowedMaterials)
-                             ->get()
-                             ->sortBy('nama_material', SORT_NATURAL);
-                             
-        return view('siaga-kembali.edit', ['item' => $siagaKembali, 'materials' => $materials]);
+    public function edit(SiagaKembali $siagaKembali) 
+    { 
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
+            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.'); 
+        } 
+        $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P']; 
+        $materials = Material::where('kategori', 'siaga')->whereIn('nama_material', $allowedMaterials)->get()->sortBy('nama_material', SORT_NATURAL); 
+        return view('siaga-kembali.edit', ['item' => $siagaKembali, 'materials' => $materials]); 
     }
 
-    public function update(Request $request, SiagaKembali $siagaKembali)
-    {
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.');
-        }
-
+    public function update(Request $request, SiagaKembali $siagaKembali) 
+    { 
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
+            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.'); 
+        } 
+        
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'nomor_meter' => 'required|string|max:255', 
@@ -163,16 +162,18 @@ class SiagaKembaliController extends Controller
 
         try {
             if ($request->hasFile('foto')) {
-                $oldFile = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
-                if ($siagaKembali->foto_path && File::exists($oldFile)) { File::delete($oldFile); }
+                if ($siagaKembali->foto_path && File::exists(public_path($this->uploadFolder . '/' . $siagaKembali->foto_path))) {
+                    File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_path));
+                }
                 $fotoName = time() . '_mat_' . uniqid() . '.jpg';
                 Image::read($request->file('foto'))->scale(width: 800)->toJpeg(60)->save($destinationPath . '/' . $fotoName);
                 $siagaKembali->foto_path = $fotoName;
             }
 
             if ($request->hasFile('foto_petugas')) {
-                $oldFilePetugas = public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas);
-                if ($siagaKembali->foto_petugas && File::exists($oldFilePetugas)) { File::delete($oldFilePetugas); }
+                if ($siagaKembali->foto_petugas && File::exists(public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas))) {
+                    File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas));
+                }
                 $fotoPetugasName = time() . '_pet_' . uniqid() . '.jpg';
                 Image::read($request->file('foto_petugas'))->scale(width: 800)->toJpeg(60)->save($destinationPath . '/' . $fotoPetugasName);
                 $siagaKembali->foto_petugas = $fotoPetugasName;
@@ -193,59 +194,58 @@ class SiagaKembaliController extends Controller
                 ->update(['stand_meter' => $validated['stand_meter']]);
 
             return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil diperbarui!');
-            
         } catch (\Exception $e) {
-            Log::error("Update Siaga Kembali Error: " . $e->getMessage());
-            return back()->with('error', 'Gagal memproses foto baru.');
+            return back()->with('error', 'Gagal memperbarui data.');
         }
     }
 
-    public function destroy(SiagaKembali $siagaKembali)
-    {
-        if (auth()->user()->role === 'satpam') {
-            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.');
-        }
-
-        if ($siagaKembali->foto_path && File::exists(public_path($this->uploadFolder . '/' . $siagaKembali->foto_path))) {
-            File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_path));
-        }
-        if ($siagaKembali->foto_petugas && File::exists(public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas))) {
-            File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas));
-        }
-
+    public function destroy(SiagaKembali $siagaKembali) 
+    { 
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
+            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.'); 
+        } 
+        if ($siagaKembali->foto_path) { File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_path)); }
+        if ($siagaKembali->foto_petugas) { File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas)); }
         $siagaKembali->delete();
-        return redirect()->route('siaga-kembali.index')->with('success', 'Data berhasil dihapus!');
+        return redirect()->route('siaga-kembali.index')->with('success', 'Data dihapus!');
     }
 
-    public function downloadFoto($id)
-    {
-        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses ditolak.'); }
+    public function downloadFoto($id) 
+    { 
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
+            return redirect()->back()->with('error', 'Akses ditolak.'); 
+        } 
         $item = SiagaKembali::findOrFail($id);
-        $path = public_path($this->uploadFolder . '/' . $item->foto_path);
-        return File::exists($path) ? response()->download($path) : back()->with('error', 'File tidak ditemukan.');
+        return response()->download(public_path($this->uploadFolder . '/' . $item->foto_path));
     }
 
-    public function downloadFotoPetugas($id)
-    {
-        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses ditolak.'); }
+    public function downloadFotoPetugas($id) 
+    { 
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
+            return redirect()->back()->with('error', 'Akses ditolak.'); 
+        } 
         $item = SiagaKembali::findOrFail($id);
-        $path = public_path($this->uploadFolder . '/' . $item->foto_petugas);
-        return File::exists($path) ? response()->download($path) : back()->with('error', 'File tidak ditemukan.');
+        return response()->download(public_path($this->uploadFolder . '/' . $item->foto_petugas));
     }
 
-    public function downloadReport(Request $request)
-    {
-        if (auth()->user()->role === 'satpam') { return redirect()->back()->with('error', 'Akses ditolak.'); }
+    public function downloadReport(Request $request) 
+    { 
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
+            return redirect()->back()->with('error', 'Akses ditolak.'); 
+        } 
         $request->validate(['tanggal_mulai' => 'required|date', 'tanggal_akhir' => 'required|date']);
         $tanggal_mulai = Carbon::parse($request->tanggal_mulai)->startOfDay();
         $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
-        
         $items = SiagaKembali::with('material')->whereBetween('tanggal', [$tanggal_mulai, $tanggal_akhir])->orderBy('tanggal', 'asc')->get();
+        return Pdf::loadView('siaga-kembali.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'))->download('laporan_siaga_kembali.pdf');
+    }
 
-        if ($request->has('submit_pdf')) {
-            return Pdf::loadView('siaga-kembali.laporan_pdf', compact('items', 'tanggal_mulai', 'tanggal_akhir'))->download('laporan_siaga_kembali.pdf');
+    public function showFoto(SiagaKembali $siagaKembali)
+    {
+        $path = public_path($this->uploadFolder . '/' . $siagaKembali->foto_path);
+        if (File::exists($path)) {
+            return response()->file($path);
         }
-        
-        return Excel::download(new SiagaKembaliExport($tanggal_mulai, $tanggal_akhir), 'laporan_siaga_kembali.xlsx');
+        abort(404);
     }
 }

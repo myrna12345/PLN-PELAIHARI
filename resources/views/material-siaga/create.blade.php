@@ -30,7 +30,8 @@
     @endif
 
     <div class="card-form-body">
-        <form action="{{ route('material-siaga.store') }}" method="POST" enctype="multipart/form-data">
+        {{-- PERBAIKAN: Nama rute diseragamkan menjadi material-siaga-stand-by.store untuk menghindari Error 500 --}}
+        <form action="{{ route('material-siaga-stand-by.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <div class="form-group-new">
@@ -91,7 +92,8 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>
-                <a href="{{ route('material-siaga.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
+                {{-- PERBAIKAN: Nama rute diseragamkan menjadi material-siaga-stand-by.index --}}
+                <a href="{{ route('material-siaga-stand-by.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
             </div>
         </form>
     </div>

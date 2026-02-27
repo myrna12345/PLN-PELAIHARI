@@ -19,6 +19,11 @@ class MaterialSiagaStandByController extends Controller
 
     public function index(Request $request)
     {
+        // Blokir akses Harmet ke halaman laporan
+        if (strtolower(auth()->user()->role) === 'harmet') {
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak. Anda tidak diperbolehkan melihat laporan.');
+        }
+
         $search = $request->input('search');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
@@ -44,8 +49,8 @@ class MaterialSiagaStandByController extends Controller
 
     public function create()
     {
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        if (in_array(strtolower(auth()->user()->role), ['satpam'])) {
+            return redirect()->route('material-siaga-stand-by.index')->with('error', 'Akses ditolak.');
         }
 
         $materials = Material::where('kategori', 'siaga')->get();
@@ -93,7 +98,11 @@ class MaterialSiagaStandByController extends Controller
             'status'                => 'Ready',
         ]);
 
-        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil disimpan!');
+        if (strtolower(auth()->user()->role) === 'harmet') {
+            return redirect()->route('dashboard')->with('success', 'Data berhasil disimpan!');
+        }
+
+        return redirect()->route('material-siaga-stand-by.index')->with('success', 'Data berhasil disimpan!');
     }
 
     public function update(Request $request, $id)
@@ -133,7 +142,7 @@ class MaterialSiagaStandByController extends Controller
                 'unggah_foto'   => $fotoName,
             ]);
 
-            return redirect()->route('material-siaga.index')->with('success', 'Data berhasil diperbarui!');
+            return redirect()->route('material-siaga-stand-by.index')->with('success', 'Data berhasil diperbarui!');
         } catch (\Exception $e) {
             Log::error("Update Material Siaga Standby Error: " . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui data atau foto.');
@@ -142,8 +151,8 @@ class MaterialSiagaStandByController extends Controller
     
     public function edit($id)
     {
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
+            return redirect()->route('material-siaga-stand-by.index')->with('error', 'Akses ditolak.');
         }
         $materialSiaga = MaterialSiagaStandBy::findOrFail($id);
         return view('material-siaga.edit', compact('materialSiaga'));
@@ -163,7 +172,7 @@ class MaterialSiagaStandByController extends Controller
 
     public function downloadFoto($id)
     {
-        if (strtolower(auth()->user()->role) === 'satpam') {
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }
 
@@ -179,8 +188,8 @@ class MaterialSiagaStandByController extends Controller
 
     public function destroy($id)
     {
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
+            return redirect()->route('material-siaga-stand-by.index')->with('error', 'Akses ditolak.');
         }
 
         $item = MaterialSiagaStandBy::findOrFail($id);
@@ -190,13 +199,13 @@ class MaterialSiagaStandByController extends Controller
         }
 
         $item->delete();
-        return redirect()->route('material-siaga.index')->with('success', 'Data berhasil dihapus!');
+        return redirect()->route('material-siaga-stand-by.index')->with('success', 'Data berhasil dihapus!');
     }
 
     public function updateStatus(Request $request, $id)
     {
-        if (strtolower(auth()->user()->role) === 'satpam') {
-            return redirect()->route('material-siaga.index')->with('error', 'Akses ditolak.');
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
+            return redirect()->route('material-siaga-stand-by.index')->with('error', 'Akses ditolak.');
         }
 
         $request->validate(['status' => 'required|in:Ready,Terpakai']);
@@ -208,7 +217,7 @@ class MaterialSiagaStandByController extends Controller
     
     public function export(Request $request)
     {
-        if (strtolower(auth()->user()->role) === 'satpam') {
+        if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }
 
