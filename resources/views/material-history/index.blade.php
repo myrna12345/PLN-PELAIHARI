@@ -128,7 +128,7 @@
     color: #ffffff !important;
 }
 
-/* MODAL FOTO */
+/* PERBAIKAN MODAL FOTO AGAR TIDAK ZOOM BANGET */
 .image-modal {
     display: none;
     position: fixed;
@@ -144,7 +144,10 @@
     margin: auto;
     display: block;
     max-width: 90%;
-    max-height: 90%;
+    max-height: 85vh; /* Batasi tinggi agar tidak meluap */
+    object-fit: contain; /* Memastikan gambar tetap proporsional dan tidak zoom */
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
 }
 
 .close-modal {
@@ -153,7 +156,9 @@
     right: 30px;
     color: white;
     font-size: 40px;
+    font-weight: bold;
     cursor: pointer;
+    z-index: 10000;
 }
 </style>
 
@@ -186,7 +191,6 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
-            {{-- PERBAIKAN: Tombol Reset tetap di halaman history --}}
             <a href="{{ route('material-history.index') }}"
                class="btn btn-secondary btn-sm">Reset</a>
         </form>
@@ -277,7 +281,7 @@
 {{-- MODAL POP-UP IMAGE --}}
 <div id="imageModal" class="image-modal">
     <span class="close-modal" onclick="closeModal()">&times;</span>
-    <img class="image-modal-content" id="img01">
+    <img class="modal-content" id="img01">
 </div>
 
 <script>

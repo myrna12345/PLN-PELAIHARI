@@ -140,7 +140,7 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 5. UPDATE
+    // 5. UPDATE (DIPERBAIKI UNTUK UPDATE FOTO HISTORY)
     // ===============================
     public function update(Request $request, $id)
     {
@@ -156,14 +156,12 @@ class MaterialStandByController extends Controller
         ]);
 
         try {
+            $fotoBaru = null;
+
             if ($request->hasFile('foto')) {
                 $path = public_path($this->uploadFolder);
 
-                // Hapus foto lama jika ada
-                if ($item->foto_path && File::exists($path . '/' . $item->foto_path)) {
-                    File::delete($path . '/' . $item->foto_path);
-                }
-
+                // Kita buat foto baru tanpa menghapus yang lama agar tidak crash
                 $fotoName = time() . '_' . uniqid() . '.jpg';
                 $image = Image::read($request->file('foto'));
                 $image->scale(width: 800);
@@ -171,11 +169,27 @@ class MaterialStandByController extends Controller
                 $encoded->save($path . '/' . $fotoName);
 
                 $item->foto_path = $fotoName;
+                $fotoBaru = $fotoName;
             }
 
             $item->jumlah = $validated['jumlah'];
             $item->tanggal = now('Asia/Makassar'); 
             $item->save();
+
+            // LOGIKA UPDATE FOTO DI HISTORY:
+            // Jika ada foto baru, update juga foto di tabel history yang terkait
+            if ($fotoBaru) {
+                $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
+                
+                if ($namaMaterial) {
+                    MaterialHistory::where('nama_material', $namaMaterial)
+                        ->where('satuan', $item->satuan)
+                        // Update history yang tanggalnya sama dengan data standby ini (opsional)
+                        // atau update history terakhir yang merujuk ke foto lama
+                        ->whereDate('tanggal_input', Carbon::parse($item->tanggal)->toDateString())
+                        ->update(['foto_path' => $fotoBaru]);
+                }
+            }
 
             return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil diperbarui');
         } catch (\Exception $e) {
@@ -193,22 +207,26 @@ class MaterialStandByController extends Controller
             return redirect()->route('material-stand-by.index')->with('error', 'Akses Ditolak.');
         }
 
-        // Ambil data beserta relasinya
         $item = MaterialStandBy::with('material')->findOrFail($id);
-
-        // Ambil nama material untuk kunci penghapusan riwayat
         $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
 
-        // --- LOGIKA PENGHAPUSAN HISTORY TOTAL ---
         if ($namaMaterial) {
+            $historyPhotos = MaterialHistory::where('nama_material', $namaMaterial)
+                ->where('satuan', $item->satuan)
+                ->pluck('foto_path');
+
+            foreach($historyPhotos as $photo) {
+                if ($photo && File::exists(public_path($this->uploadFolder . '/' . $photo))) {
+                    File::delete(public_path($this->uploadFolder . '/' . $photo));
+                }
+            }
+
             MaterialHistory::where('nama_material', $namaMaterial)
                 ->where('satuan', $item->satuan)
                 ->delete();
         }
 
-        // Hapus file fisik foto terakhir
         $path = public_path($this->uploadFolder . '/' . $item->foto_path);
-        
         if ($item->foto_path && File::exists($path)) {
             File::delete($path);
         }
