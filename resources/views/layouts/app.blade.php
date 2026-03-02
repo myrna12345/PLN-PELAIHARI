@@ -324,8 +324,19 @@
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
                     @endif
                     
-                    <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
-                    <li><a href="{{ route('siaga-kembali.create') }}" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
+                    {{-- PERBAIKAN: KHUSUS SATPAM LANGSUNG KE CREATE --}}
+                    <li>
+                        <a href="{{ strtolower(auth()->user()->role) === 'satpam' ? route('siaga-keluar.create') : route('siaga-keluar.index') }}" 
+                           class="{{ request()->routeIs('siaga-keluar.*') ? 'sub-active' : '' }}">
+                           <i class="fas fa-truck"></i> <span>Siaga Keluar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ strtolower(auth()->user()->role) === 'satpam' ? route('siaga-kembali.create') : route('siaga-kembali.index') }}" 
+                           class="{{ request()->routeIs('siaga-kembali.*') ? 'sub-active' : '' }}">
+                           <i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             @endif

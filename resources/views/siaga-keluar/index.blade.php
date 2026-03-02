@@ -65,7 +65,6 @@
 }
 
 /* 5. KHUSUS TOMBOL CARI & RESET (ABU-ABU & UKURAN SAMA) */
-/* PERBAIKAN: Menambahkan box-sizing agar ukuran identik di tampilan HP */
 .search-form .btn-primary,
 .search-form .btn-secondary {
     min-width: 80px !important;
@@ -78,12 +77,10 @@
     font-size: 14px !important;
     border: none !important;
     outline: none !important;
-    
-    /* WARNA KEDUANYA ABU-ABU */
     background-color: #6c757d !important; 
     color: white !important;
     text-decoration: none !important;
-    box-sizing: border-box !important; /* PENTING: Menyamakan perilaku lebar elemen link dan button di mobile */
+    box-sizing: border-box !important; 
 }
 .search-form .btn-primary:hover,
 .search-form .btn-secondary:hover {
@@ -125,7 +122,6 @@
     box-sizing: border-box;
 }
 
-/* Hide default browser search icons */
 .search-bar input::-webkit-search-decoration,
 .search-bar input::-webkit-search-cancel-button,
 .search-bar input::-webkit-search-results-button,
@@ -133,7 +129,6 @@
     display: none;
 }
 
-/* Style Input Tanggal */
 .form-control-tanggal {
     height: 40px !important;          
     border: 1px solid #d1d5db;       
@@ -225,13 +220,9 @@
     cursor: pointer;
     z-index: 10001;
 }
-.close-modal:hover {
-    color: #ccc;
-}
 </style>
 
 <div class="card-new">
-
     <div class="index-header">
         <h2>LAPORAN SIAGA KELUAR</h2>
         
@@ -266,7 +257,6 @@
                     <th>Tanggal (WITA)</th>
                     <th>Foto Material</th>
                     <th>Foto Petugas</th>
-                    {{-- Header Aksi untuk Admin --}}
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
                     @endif
@@ -276,29 +266,24 @@
                 @forelse ($dataSiagaKeluar as $item)
                     <tr>
                         <td>{{ $dataSiagaKeluar->firstItem() + $loop->index }}</td>
-                        
                         <td>
                             {{ $item->material->nama_material ?? 'N/A' }} 
                             @if ($item->nomor_meter) 
                                 - {{ $item->nomor_meter }} 
                             @endif
                         </td>
-                        
                         <td>{{ $item->nama_petugas }}</td>
                         <td>{{ $item->stand_meter ?? '-' }}</td>
                         <td>{{ $item->keterangan }}</td>
                         <td>{{ $item->status }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->setTimezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                         
-                        {{-- Foto Material --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_path)
                                 <img src="{{ asset('uploads/siaga_keluar/' . $item->foto_path) }}" 
                                      class="table-foto" 
                                      onclick="openModal(this)"
                                      alt="Foto Material">
-                                
-                                {{-- Tombol Download Foto untuk Admin --}}
                                 @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-keluar.download-foto', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
@@ -309,15 +294,12 @@
                             @endif
                         </td>
 
-                        {{-- Foto Petugas --}}
                         <td style="text-align: center;"> 
                             @if($item->foto_petugas)
                                 <img src="{{ asset('uploads/siaga_keluar/' . $item->foto_petugas) }}" 
                                      class="table-foto" 
                                      onclick="openModal(this)"
                                      alt="Foto Petugas">
-                                
-                                {{-- Tombol Download Foto Petugas untuk Admin --}}
                                 @if(strtolower(auth()->user()->role) !== 'satpam')
                                 <a href="{{ route('siaga-keluar.download-foto-petugas', $item->id) }}" class="btn-foto-download">
                                     <i class="fas fa-download"></i> Download
@@ -328,7 +310,6 @@
                             @endif
                         </td>
 
-                        {{-- Kolom Aksi (Edit/Hapus) untuk Admin --}}
                         @if(strtolower(auth()->user()->role) !== 'satpam')
                         <td>
                             <div class="table-actions">
@@ -360,7 +341,6 @@
         {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>
 
-    {{-- Footer Download Laporan untuk Admin --}}
     @if(strtolower(auth()->user()->role) !== 'satpam')
     <div class="index-footer-form">
         <form action="{{ route('siaga-keluar.download-report') }}" method="GET" class="form-download">
@@ -384,7 +364,6 @@
     @endif
 </div>
 
-{{-- MODAL POP-UP IMAGE --}}
 <div id="imageModal" class="image-modal">
     <span class="close-modal" onclick="closeModal()">&times;</span>
     <img class="image-modal-content" id="img01">
@@ -394,14 +373,12 @@
     function openModal(element) {
         var modal = document.getElementById("imageModal");
         var modalImg = document.getElementById("img01");
-        
         modal.style.display = "flex"; 
         modalImg.src = element.src;   
     }
 
     function closeModal() {
-        var modal = document.getElementById("imageModal");
-        modal.style.display = "none";
+        document.getElementById("imageModal").style.display = "none";
     }
 
     window.onclick = function(event) {
