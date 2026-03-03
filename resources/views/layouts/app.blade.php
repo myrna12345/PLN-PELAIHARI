@@ -317,23 +317,23 @@
             @endif
 
             @if(strtolower(auth()->user()->role) !== 'gudang')
-            <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.create') || request()->routeIs('siaga-kembali.create') ? 'active open' : '' }}">
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.*') || request()->routeIs('siaga-kembali.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Material Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
                     @endif
                     
-                    {{-- PERBAIKAN: KHUSUS SATPAM LANGSUNG KE CREATE --}}
+                    {{-- PERBAIKAN: KHUSUS SATPAM LANGSUNG KE CREATE, ADMIN/GUDANG KE CREATE JUGA --}}
                     <li>
-                        <a href="{{ strtolower(auth()->user()->role) === 'satpam' ? route('siaga-keluar.create') : route('siaga-keluar.index') }}" 
-                           class="{{ request()->routeIs('siaga-keluar.*') ? 'sub-active' : '' }}">
+                        <a href="{{ route('siaga-keluar.create') }}" 
+                           class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">
                            <i class="fas fa-truck"></i> <span>Siaga Keluar</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ strtolower(auth()->user()->role) === 'satpam' ? route('siaga-kembali.create') : route('siaga-kembali.index') }}" 
-                           class="{{ request()->routeIs('siaga-kembali.*') ? 'sub-active' : '' }}">
+                        <a href="{{ route('siaga-kembali.create') }}" 
+                           class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}">
                            <i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span>
                         </a>
                     </li>

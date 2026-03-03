@@ -25,7 +25,7 @@ class SiagaKeluarController extends Controller
             return redirect()->route('dashboard')->with('error', 'Akses ditolak. Anda tidak diperbolehkan melihat laporan.');
         }
 
-        // [PROTEKSI SATPAM] Jika Satpam coba akses laporan, lempar ke halaman input (create)
+        // [PROTEKSI SATPAM] Khusus Satpam dialihkan ke create, ADMIN tetap boleh akses index
         if (strtolower(auth()->user()->role) === 'satpam') {
             return redirect()->route('siaga-keluar.create');
         }
@@ -61,7 +61,7 @@ class SiagaKeluarController extends Controller
 
     public function create()
     {
-        // Izinkan Satpam akses Create
+        // Admin dan Satpam boleh Create, Harmet diblokir jika perlu (saat ini Harmet diizinkan sesuai kode asli)
         $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P'];
         $materials = Material::where('kategori', 'siaga')
                              ->whereIn('nama_material', $allowedMaterials)

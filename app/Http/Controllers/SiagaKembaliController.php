@@ -21,9 +21,14 @@ class SiagaKembaliController extends Controller
 
     public function index(Request $request)
     {
-        // [PROTEKSI HARMET] Blokir akses ke halaman laporan
+        // [PROTEKSI HARMET] 
         if (strtolower(auth()->user()->role) === 'harmet') {
             return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
+        }
+
+        // [PROTEKSI SATPAM] Jika Satpam akses index, arahkan ke create. ADMIN diizinkan.
+        if (strtolower(auth()->user()->role) === 'satpam') {
+            return redirect()->route('siaga-kembali.create');
         }
 
         $search = $request->query('search');
@@ -119,7 +124,6 @@ class SiagaKembaliController extends Controller
             MaterialSiagaStandBy::where('nomor_meter', $validated['nomor_meter'])
                 ->update(['stand_meter' => $validated['stand_meter'], 'status' => 'Ready']);
 
-            // [PROTEKSI HARMET & SATPAM] Redirect ke Dashboard
             if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) {
                 return redirect()->route('dashboard')->with('success', 'Material berhasil dikembalikan.');
             }
@@ -134,7 +138,7 @@ class SiagaKembaliController extends Controller
     public function edit(SiagaKembali $siagaKembali) 
     { 
         if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
-            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.'); 
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak.'); 
         } 
         $allowedMaterials = ['KWH Siaga 1P', 'KWH Siaga 3P']; 
         $materials = Material::where('kategori', 'siaga')->whereIn('nama_material', $allowedMaterials)->get()->sortBy('nama_material', SORT_NATURAL); 
@@ -144,7 +148,7 @@ class SiagaKembaliController extends Controller
     public function update(Request $request, SiagaKembali $siagaKembali) 
     { 
         if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
-            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.'); 
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak.'); 
         } 
         
         $validated = $request->validate([
@@ -202,7 +206,7 @@ class SiagaKembaliController extends Controller
     public function destroy(SiagaKembali $siagaKembali) 
     { 
         if (in_array(strtolower(auth()->user()->role), ['satpam', 'harmet'])) { 
-            return redirect()->route('siaga-kembali.index')->with('error', 'Akses ditolak.'); 
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak.'); 
         } 
         if ($siagaKembali->foto_path) { File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_path)); }
         if ($siagaKembali->foto_petugas) { File::delete(public_path($this->uploadFolder . '/' . $siagaKembali->foto_petugas)); }
