@@ -73,7 +73,6 @@
     <div class="index-header">
         <h2>LAPORAN MATERIAL SIAGA STAND BY</h2>
 
-        {{-- PERBAIKAN: Rute diubah ke material-siaga-stand-by.index --}}
         <form action="{{ route('material-siaga-stand-by.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
@@ -129,7 +128,6 @@
                                  alt="Foto Material">
                             
                             @if(strtolower(auth()->user()->role) !== 'satpam')
-                            {{-- PERBAIKAN: Rute download foto --}}
                             <a href="{{ route('material-siaga-stand-by.download-foto', $data->id) }}" class="btn-foto-download">
                                 <i class="fas fa-download"></i> Download
                             </a>
@@ -142,12 +140,10 @@
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <td>
                         <div class="table-actions">
-                            {{-- PERBAIKAN: Rute Edit --}}
                             <a href="{{ route('material-siaga-stand-by.edit', $data->id) }}" class="btn btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
 
-                            {{-- PERBAIKAN: Rute Destroy --}}
                             <form action="{{ route('material-siaga-stand-by.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-hapus">
@@ -170,13 +166,13 @@
         </table>
     </div>
 
+    {{-- PERBAIKAN: Pagination sekarang akan otomatis menggunakan simple mode --}}
     <div style="margin-top: 20px;">
         {{ $dataSiaga->appends(request()->query())->links() }}
     </div>
 
     @if(!in_array(strtolower(auth()->user()->role), ['satpam', 'harmet']))
     <div class="index-footer-form">
-        {{-- PERBAIKAN: Rute Export --}}
         <form action="{{ route('material-siaga-stand-by.export') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
                 <label>Dari Tanggal:</label>

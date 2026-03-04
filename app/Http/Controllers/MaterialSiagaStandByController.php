@@ -42,7 +42,8 @@ class MaterialSiagaStandByController extends Controller
             ]);
         }
 
-        $dataSiaga = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
+        // PERBAIKAN: Menggunakan simplePaginate agar hanya muncul tombol Previous & Next
+        $dataSiaga = $query->orderBy('id', 'DESC')->simplePaginate(10)->withQueryString();
 
         return view('material-siaga.index', compact('dataSiaga', 'search', 'start_date', 'end_date'));
     }
