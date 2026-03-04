@@ -13,4 +13,8 @@ class MaterialHistory extends Model
         'foto_path',
         'tanggal_input'
     ];
+
+    protected $casts = [
+        'tanggal_input' => 'datetime',
+    ];
 }

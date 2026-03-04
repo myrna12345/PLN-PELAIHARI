@@ -140,7 +140,7 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 5. UPDATE (DIPERBAIKI UNTUK UPDATE FOTO HISTORY)
+    // 5. UPDATE (SINKRONISASI JUMLAH & JAM KE HISTORY)
     // ===============================
     public function update(Request $request, $id)
     {
@@ -149,6 +149,8 @@ class MaterialStandByController extends Controller
         }
 
         $item = MaterialStandBy::findOrFail($id);
+        $oldPhotoPath = $item->foto_path;
+        $currentTime = now('Asia/Makassar');
 
         $validated = $request->validate([
             'jumlah' => 'required|integer|min:0',
@@ -161,7 +163,6 @@ class MaterialStandByController extends Controller
             if ($request->hasFile('foto')) {
                 $path = public_path($this->uploadFolder);
 
-                // Kita buat foto baru tanpa menghapus yang lama agar tidak crash
                 $fotoName = time() . '_' . uniqid() . '.jpg';
                 $image = Image::read($request->file('foto'));
                 $image->scale(width: 800);
@@ -172,26 +173,36 @@ class MaterialStandByController extends Controller
                 $fotoBaru = $fotoName;
             }
 
+            // Update Tabel Utama (Stand By)
             $item->jumlah = $validated['jumlah'];
-            $item->tanggal = now('Asia/Makassar'); 
+            $item->tanggal = $currentTime; 
             $item->save();
 
-            // LOGIKA UPDATE FOTO DI HISTORY:
-            // Jika ada foto baru, update juga foto di tabel history yang terkait
-            if ($fotoBaru) {
-                $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
-                
-                if ($namaMaterial) {
-                    MaterialHistory::where('nama_material', $namaMaterial)
-                        ->where('satuan', $item->satuan)
-                        // Update history yang tanggalnya sama dengan data standby ini (opsional)
-                        // atau update history terakhir yang merujuk ke foto lama
-                        ->whereDate('tanggal_input', Carbon::parse($item->tanggal)->toDateString())
-                        ->update(['foto_path' => $fotoBaru]);
+            // LOGIKA UPDATE HISTORY: Sinkronisasi Jumlah, Jam, dan Foto
+            $namaMaterial = $item->nama_material_lengkap ?? ($item->material->nama_material ?? null);
+            
+            if ($namaMaterial) {
+                // Cari data history terakhir yang merujuk ke material dan satuan yang sama
+                $history = MaterialHistory::where('nama_material', $namaMaterial)
+                    ->where('satuan', $item->satuan)
+                    ->latest('tanggal_input')
+                    ->first();
+
+                if ($history) {
+                    $updateData = [
+                        'jumlah' => $validated['jumlah'],
+                        'tanggal_input' => $currentTime // Update jam otomatis saat edit berhasil
+                    ];
+
+                    if ($fotoBaru) {
+                        $updateData['foto_path'] = $fotoBaru;
+                    }
+
+                    $history->update($updateData);
                 }
             }
 
-            return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('material-stand-by.index')->with('success', 'Data Standby dan History berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error("Update Error: " . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui data.');
