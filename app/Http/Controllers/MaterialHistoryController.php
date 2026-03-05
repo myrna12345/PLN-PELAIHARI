@@ -52,7 +52,8 @@ class MaterialHistoryController extends Controller
         }
         // ------------------------------
 
-        $histories = $query->orderBy('tanggal_input', 'desc')->paginate(10);
+        // PERBAIKAN: Menggunakan simplePaginate agar navigasi rapi (Next/Previous saja)
+        $histories = $query->orderBy('tanggal_input', 'desc')->simplePaginate(10);
 
         return view('material-history.index', compact('histories'));
     }

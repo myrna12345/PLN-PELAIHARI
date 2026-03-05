@@ -43,7 +43,8 @@ class MaterialStandByController extends Controller
             $query->whereDate('tanggal', '<=', $tanggalAkhir);
         }
 
-        $items = $query->latest('tanggal')->paginate(10);
+        // PERBAIKAN: Menggunakan simplePaginate agar navigasi rapi (Next/Previous saja)
+        $items = $query->latest('tanggal')->simplePaginate(10);
 
         return view('material_stand_by.index', compact('items'));
     }
@@ -61,10 +62,13 @@ class MaterialStandByController extends Controller
     }
 
     // ===============================
-    // 3. STORE (SEMUA BISA AKSES)
+    // 3. STORE (SISTEM STABILISASI SIMPAN DATA)
     // ===============================
     public function store(Request $request)
     {
+        // PERBAIKAN: Naikkan memory limit untuk mencegah "Gagal Simpan" akibat foto HP yang besar
+        ini_set('memory_limit', '1024M');
+
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'jumlah'      => 'required|integer|min:1',
@@ -81,6 +85,7 @@ class MaterialStandByController extends Controller
             $fotoName = time() . '_' . uniqid() . '.jpg';
             
             $image = Image::read($request->file('foto'));
+            // PERBAIKAN: Skala 800px lebih ringan untuk diproses server daripada 1200px
             $image->scale(width: 800);
             $encoded = $image->toJpeg(60);
             $encoded->save($path . '/' . $fotoName);
@@ -118,7 +123,8 @@ class MaterialStandByController extends Controller
             return redirect()->route('material-stand-by.index')->with('success', 'Data berhasil disimpan');
         } catch (\Exception $e) {
             Log::error("Store Error: " . $e->getMessage());
-            return back()->with('error', 'Gagal menyimpan data.')->withInput();
+            // PERBAIKAN: Menampilkan pesan error asli agar tahu alasan teknis kegagalan
+            return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -149,7 +155,6 @@ class MaterialStandByController extends Controller
         }
 
         $item = MaterialStandBy::findOrFail($id);
-        $oldPhotoPath = $item->foto_path;
         $currentTime = now('Asia/Makassar');
 
         $validated = $request->validate([

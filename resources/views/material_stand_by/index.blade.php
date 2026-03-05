@@ -297,7 +297,7 @@
                                 @if(auth()->user()->role !== 'satpam')
                                     <a href="{{ route('material-stand-by.download-foto', $item->id) }}"
                                        class="btn-foto-download">
-                                       <i class="fas fa-download"></i> Download
+                                        <i class="fas fa-download"></i> Download
                                     </a>
                                 @endif
                             </div>
@@ -339,6 +339,11 @@
             @endforelse
             </tbody>
         </table>
+    </div>
+
+    {{-- PERBAIKAN: Pagination mode simple agar ikon raksasa hilang --}}
+    <div style="margin-top: 20px;">
+        {{ $items->appends(request()->query())->links() }}
     </div>
 
     @if(auth()->user()->role !== 'satpam')
@@ -401,5 +406,4 @@
         }
     }
 </script>
-
 @endsection

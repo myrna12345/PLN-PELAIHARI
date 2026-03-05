@@ -239,6 +239,7 @@
         </table>
     </div>
 
+    {{-- PERBAIKAN: Navigasi Halaman simple mode --}}
     <div style="margin-top: 20px;">
         {{ $histories->appends(request()->query())->links() }}
     </div>
