@@ -265,7 +265,7 @@
             <tbody>
                 @forelse ($dataSiagaKeluar as $item)
                     <tr>
-                        <td>{{ $dataSiagaKeluar->firstItem() + $loop->index }}</td>
+                        <td>{{ $loop->iteration + ($dataSiagaKeluar->currentPage() - 1) * $dataSiagaKeluar->perPage() }}</td>
                         <td>
                             {{ $item->material->nama_material ?? 'N/A' }} 
                             @if ($item->nomor_meter) 
@@ -337,6 +337,7 @@
         </table>
     </div>
 
+    {{-- PERBAIKAN: Pagination mode simple --}}
     <div style="margin-top: 20px;">
         {{ $dataSiagaKeluar->appends(request()->query())->links() }}
     </div>

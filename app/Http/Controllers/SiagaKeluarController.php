@@ -54,7 +54,8 @@ class SiagaKeluarController extends Controller
             $query->whereDate('tanggal', '<=', $tanggalAkhir); 
         }
 
-        $dataSiagaKeluar = $query->latest('tanggal')->paginate(10);
+        // PERBAIKAN: Menggunakan simplePaginate untuk menghilangkan ikon panah raksasa
+        $dataSiagaKeluar = $query->latest('tanggal')->simplePaginate(10);
         
         return view('siaga-keluar.index', compact('dataSiagaKeluar'));
     }
