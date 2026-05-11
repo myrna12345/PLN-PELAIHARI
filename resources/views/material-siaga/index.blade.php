@@ -218,7 +218,7 @@
                     <th>Stand Meter</th>
                     <th>Tanggal (WITA)</th>
                     <th>Status</th>
-                    <th>Foto Material</th>
+                    <th>Foto Material </th>
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
                     @endif
