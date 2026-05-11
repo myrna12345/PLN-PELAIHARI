@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Perbaikan untuk tampilan input agar bersih dan menghilangkan dropdown otomatis browser */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Edit Data Material Stand By</h2>
@@ -29,7 +39,6 @@
                     <input type="number" name="jumlah" class="form-control-new" value="{{ $item->jumlah }}" style="flex: 2;" required min="1" placeholder="Jumlah">
                     
                     {{-- Input Satuan (Otomatis & Readonly) --}}
-                    {{-- Value default diambil dari database ($item->satuan) --}}
                     <input type="text" name="satuan" id="satuan" class="form-control-new" 
                            value="{{ $item->satuan }}"
                            style="flex: 1; background-color: #e9ecef; cursor: not-allowed;" 
@@ -53,10 +62,13 @@
                     <img src="{{ asset('uploads/material_stand_by/' . $item->foto_path) }}" style="max-width: 150px; display: block; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
                 @endif
                 <label for="foto">Unggah Foto Material Baru (Opsional)</label>
-                <input type="file" name="foto" id="foto" class="form-control-new-file">
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file" 
+                       accept="image/*" capture="environment" onclick="this.value=null">
+                <small style="color: #6c757d; display: block; margin-top: 5px; font-style: italic;">
+                    *Klik untuk mengambil foto baru menggunakan kamera.
+                </small>
             </div>
-
-            {{-- Input Foto Petugas SUDAH DIHAPUS --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>
@@ -74,10 +86,8 @@
 
         if (materialSelect && satuanInput) {
             function updateSatuan() {
-                // Ambil teks nama material dan ubah ke huruf besar
                 const selectedText = materialSelect.options[materialSelect.selectedIndex].text.toUpperCase();
 
-                // LOGIKA: Prioritas Buah (KWH/MCB), sisanya Meter (Kabel)
                 if (selectedText.includes('KWH') || 
                     selectedText.includes('MCB') || 
                     selectedText.includes('AMPERE') || 
@@ -101,12 +111,9 @@
                     satuanInput.value = 'Meter';
                 
                 } else {
-                    // Default jika tidak dikenali
                     satuanInput.value = 'Buah'; 
                 }
             }
-
-            // Jalankan fungsi saat dropdown material berubah (jika user mengganti material)
             materialSelect.addEventListener('change', updateSatuan);
         }
     });

@@ -26,63 +26,46 @@ Route::get('/', function () {
 });
 
 // =========================================================================
-// 1. ROUTE TAMU (GUEST) - Hanya bisa diakses jika BELUM Login
+// 1. ROUTE TAMU (GUEST)
 // =========================================================================
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-    // --- Route Google Login ---
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 
-    // --- Route Reset Password ---
     Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     
-    // Perbaikan sintaks IF di bawah ini
-    if (file_exists(resource_path('views/auth/reset-password.blade.php'))) {
-        Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
-        Route::post('reset-password', [ForgotPasswordController::class, 'store'])->name('password.update');
-    }
+    Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [ForgotPasswordController::class, 'store'])->name('password.update');
 });
 
 // Callback Google
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 // =========================================================================
-// 2. ROUTE TERPROTEKSI (AUTH) - Harus Login dulu baru bisa akses
+// 2. ROUTE TERPROTEKSI (AUTH)
 // =========================================================================
 Route::middleware('auth')->group(function () {
 
-    // --- Route Logout ---
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    // --- DASHBOARD ---
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- RUTE MATERIAL STANDBY ---
-    Route::post('/material-stand-by/pdf', [MaterialStandByController::class, 'downloadPdf'])
-        ->name('material-stand-by.pdf');
-    Route::post('/material-stand-by/excel', [MaterialStandByController::class, 'downloadExcel'])
-        ->name('material-stand-by.excel');
-    Route::get('material-stand-by/{id}/download-foto', [MaterialStandByController::class, 'downloadFoto'])
-        ->name('material-stand-by.download-foto');
-    Route::get('material-stand-by/{id}/download-petugas', [MaterialStandByController::class, 'downloadFotoPetugas'])
-        ->name('material-stand-by.download-foto-petugas');
-    Route::resource('material-stand-by', MaterialStandByController::class)
-        ->except(['show']);
-
+    Route::post('/material-stand-by/pdf', [MaterialStandByController::class, 'downloadPdf'])->name('material-stand-by.pdf');
+    Route::post('/material-stand-by/excel', [MaterialStandByController::class, 'downloadExcel'])->name('material-stand-by.excel');
+    Route::get('material-stand-by/{id}/download-foto', [MaterialStandByController::class, 'downloadFoto'])->name('material-stand-by.download-foto');
+    Route::resource('material-stand-by', MaterialStandByController::class)->except(['show']);
 
     // --- RUTE MATERIAL KELUAR ---
     Route::post('material-keluar/download-report',[MaterialKeluarController::class, 'downloadReport'])->name('material_keluar.download');
-    Route::get('material-keluar/download-report', [MaterialKeluarController::class, 'downloadReport'])->name('material_keluar.download');
     Route::get('material-keluar/{materialKeluar}/foto', [MaterialKeluarController::class, 'showFoto'])->name('material_keluar.show-foto');
     Route::get('material-keluar/{materialKeluar}/download-foto', [MaterialKeluarController::class, 'downloadFoto'])->name('material_keluar.download-foto');
     Route::get('material-keluar/{materialKeluar}/foto-petugas', [MaterialKeluarController::class, 'showFotoPetugas'])->name('material_keluar.show-foto-petugas');
     Route::get('material-keluar/{materialKeluar}/download-foto-petugas', [MaterialKeluarController::class, 'downloadFotoPetugas'])->name('material_keluar.download-foto-petugas');
     Route::get('material-keluar/{materialKeluar}/lihat', [MaterialKeluarController::class, 'lihat'])->name('material_keluar.lihat');
     Route::resource('material_keluar', MaterialKeluarController::class);
-
 
     // --- RUTE MATERIAL KEMBALI ---
     Route::post('material-kembali/download-report', [MaterialKembaliController::class, 'downloadReport'])->name('material_kembali.download');
@@ -93,76 +76,38 @@ Route::middleware('auth')->group(function () {
     Route::get('material-kembali/{materialKembali}/lihat', [MaterialKembaliController::class, 'lihat'])->name('material_kembali.lihat');
     Route::resource('material_kembali', MaterialKembaliController::class);
 
-
     // --- RUTE MATERIAL RETUR ---
-    Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])
-         ->name('material-retur.download-report');
-    Route::get('material-retur/{id}/download-foto', [MaterialReturController::class, 'downloadFoto'])
-         ->name('material-retur.download-foto');
-    Route::get('material-retur/foto/{id}', [MaterialReturController::class, 'showFoto'])
-         ->name('material-retur.show-foto');
-    Route::get('material-retur/{id}/download-petugas', [MaterialReturController::class, 'downloadFotoPetugas'])
-         ->name('material-retur.download-foto-petugas');
+    Route::get('material-retur/download-report', [MaterialReturController::class, 'downloadReport'])->name('material-retur.download-report');
+    Route::get('material-retur/{id}/download-foto', [MaterialReturController::class, 'downloadFoto'])->name('material-retur.download-foto');
+    Route::get('material-retur/foto/{id}', [MaterialReturController::class, 'showFoto']) ->name('material-retur.show-foto');
+    Route::get('material-retur/{id}/download-petugas', [MaterialReturController::class, 'downloadFotoPetugas'])->name('material-retur.download-foto-petugas');
     Route::resource('material-retur', MaterialReturController::class);
 
-
     // --- RUTE MATERIAL SIAGA STAND BY ---
-    Route::get('material-siaga-stand-by/export', [MaterialSiagaStandByController::class, 'export'])
-        ->name('material-siaga-stand-by.export'); 
-    Route::get('material-siaga-stand-by/foto/{materialSiagaStandBy}', [MaterialSiagaStandByController::class, 'showFoto'])
-        ->name('material-siaga-stand-by.show-foto');
-    Route::get('material-siaga-stand-by/{materialSiagaStandBy}/download-foto', [MaterialSiagaStandByController::class, 'downloadFoto'])
-         ->name('material-siaga-stand-by.download-foto');
-    Route::put('material-siaga-stand-by/update-status/{id}', [MaterialSiagaStandByController::class, 'updateStatus'])
-        ->name('material-siaga-stand-by.updateStatus');
+    Route::get('material-siaga-stand-by/export', [MaterialSiagaStandByController::class, 'export'])->name('material-siaga-stand-by.export'); 
+    Route::get('material-siaga-stand-by/foto/{materialSiagaStandBy}', [MaterialSiagaStandByController::class, 'showFoto'])->name('material-siaga-stand-by.show-foto');
+    Route::get('material-siaga-stand-by/{materialSiagaStandBy}/download-foto', [MaterialSiagaStandByController::class, 'downloadFoto'])->name('material-siaga-stand-by.download-foto');
+    Route::put('material-siaga-stand-by/update-status/{id}', [MaterialSiagaStandByController::class, 'updateStatus'])->name('material-siaga-stand-by.updateStatus');
     Route::resource('material-siaga-stand-by', MaterialSiagaStandByController::class);
 
-
     // --- RUTE SIAGA KELUAR ---
-    Route::get('siaga-keluar/download-report', [SiagaKeluarController::class, 'downloadReport'])
-         ->name('siaga-keluar.download-report');
-    Route::get('siaga-keluar/foto/{siagaKeluar}', [SiagaKeluarController::class, 'showFoto'])
-         ->name('siaga-keluar.show-foto');
-    Route::get('siaga-keluar/{siagaKeluar}/download-foto', [SiagaKeluarController::class, 'downloadFoto'])
-         ->name('siaga-keluar.download-foto');
-    Route::get('siaga-keluar/{siagaKeluar}/download-foto-petugas', [SiagaKeluarController::class, 'downloadFotoPetugas'])
-         ->name('siaga-keluar.download-foto-petugas');
+    Route::get('siaga-keluar/download-report', [SiagaKeluarController::class, 'downloadReport'])->name('siaga-keluar.download-report');
+    Route::get('siaga-keluar/foto/{siagaKeluar}', [SiagaKeluarController::class, 'showFoto'])->name('siaga-keluar.show-foto');
+    Route::get('siaga-keluar/{siagaKeluar}/download-foto', [SiagaKeluarController::class, 'downloadFoto'])->name('siaga-keluar.download-foto');
+    Route::get('siaga-keluar/{siagaKeluar}/download-foto-petugas', [SiagaKeluarController::class, 'downloadFotoPetugas'])->name('siaga-keluar.download-foto-petugas');
     Route::resource('siaga-keluar', SiagaKeluarController::class);
 
-
     // --- RUTE SIAGA KEMBALI ---
-    Route::get('siaga-kembali/download-report', [SiagaKembaliController::class, 'downloadReport'])
-         ->name('siaga-kembali.download-report');
-    Route::get('siaga-kembali/foto/{siagaKembali}', [SiagaKembaliController::class, 'showFoto'])
-         ->name('siaga-kembali.show-foto');
-    Route::get('siaga-kembali/{siagaKembali}/download-foto', [SiagaKembaliController::class, 'downloadFoto'])
-         ->name('siaga-kembali.download-foto'); 
-    Route::get('siaga-kembali/{siagaKembali}/download-foto-petugas', [SiagaKembaliController::class, 'downloadFotoPetugas'])
-         ->name('siaga-kembali.download-foto-petugas');
+    Route::get('siaga-kembali/download-report', [SiagaKembaliController::class, 'downloadReport'])->name('siaga-kembali.download-report');
+    Route::get('siaga-kembali/foto/{siagaKembali}', [SiagaKembaliController::class, 'showFoto'])->name('siaga-kembali.show-foto');
+    Route::get('siaga-kembali/{siagaKembali}/download-foto', [SiagaKembaliController::class, 'downloadFoto'])->name('siaga-kembali.download-foto'); 
+    Route::get('siaga-kembali/{siagaKembali}/download-foto-petugas', [SiagaKembaliController::class, 'downloadFotoPetugas'])->name('siaga-kembali.download-foto-petugas');
     Route::resource('siaga-kembali', SiagaKembaliController::class);
-
-
-    // --- RUTE MATERIAL SIAGA (PARAMETER CUSTOM) ---
-    Route::get('material-siaga/export', [MaterialSiagaStandByController::class, 'export'])
-        ->name('material-siaga.export'); 
-    Route::get('material-siaga/foto/{id}', [MaterialSiagaStandByController::class, 'showFoto'])
-        ->name('material-siaga.show-foto');
-    Route::get('material-siaga/download-foto/{id}', [MaterialSiagaStandByController::class, 'downloadFoto'])
-        ->name('material-siaga.download-foto');
-    Route::put('material-siaga/update-status/{id}', [MaterialSiagaStandByController::class, 'updateStatus'])
-        ->name('material-siaga.update-status');
-    Route::resource('material-siaga', MaterialSiagaStandByController::class)->parameters([
-        'material-siaga' => 'id'
-    ]);
-
 
     // --- RUTE MATERIAL HISTORY ---
     Route::get('/material-history', [MaterialHistoryController::class, 'index'])->name('material-history.index');
-    Route::post('/material-history/store', [MaterialHistoryController::class, 'store'])->name('material-history.store');
-    Route::get('/material-history/pdf', [MaterialHistoryController::class, 'exportPDF'])
-        ->name('material-history.pdf');
-    Route::get('/material-history/excel', [MaterialHistoryController::class, 'exportExcel'])
-        ->name('material-history.excel');
+    Route::get('/material-history/pdf', [MaterialHistoryController::class, 'exportPDF'])->name('material-history.pdf');
+    Route::get('/material-history/excel', [MaterialHistoryController::class, 'exportExcel'])->name('material-history.excel');
     Route::resource('material-history', MaterialHistoryController::class);
 
 });

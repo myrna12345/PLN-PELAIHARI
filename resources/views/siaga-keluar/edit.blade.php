@@ -75,10 +75,13 @@
                     </div>
                 @endif
                 <label for="foto" style="display: block; margin-top: 10px;">Unggah Foto Material Baru (Opsional)</label>
-                <input type="file" name="foto" id="foto" class="form-control-new-file">
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
+                <input type="file" name="foto" id="foto" class="form-control-new-file" accept="image/*" capture="environment" onclick="this.value=null">
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Klik untuk mengambil foto baru menggunakan kamera.
+                </small>
             </div>
 
-            {{-- Input Foto Petugas DITAMBAHKAN KEMBALI --}}
             <div class="form-group-new">
                 <label for="foto_petugas">Foto Petugas</label>
                 @if($item->foto_petugas)
@@ -87,9 +90,12 @@
                     </div>
                 @endif
                 <label for="foto_petugas" style="display: block; margin-top: 10px;">Unggah Foto Petugas Baru (Opsional)</label>
-                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file">
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar foto tidak terhapus otomatis setelah diambil --}}
+                <input type="file" name="foto_petugas" id="foto_petugas" class="form-control-new-file" accept="image/*" capture="environment" onclick="this.value=null">
+                <small class="text-muted" style="display: block; margin-top: 5px; color: #6c757d;">
+                    *Klik untuk mengambil foto baru menggunakan kamera.
+                </small>
             </div>
-
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Update</button>

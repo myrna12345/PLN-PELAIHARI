@@ -13,10 +13,10 @@ class MaterialStandBy extends Model
 
     protected $fillable = [
         'material_id',
+        'nama_material_lengkap',
         'jumlah',
         'satuan',
-        'foto_path', // Wajib ada
-        // 'foto_petugas' DIHAPUS
+        'foto_path', 
         'tanggal',
     ];
 

@@ -15,9 +15,9 @@ class MaterialSeeder extends Seeder
         // Daftar material umum/teknik (BUKAN Siaga)
         $materials = [
             'MCB 1P 2A', 'MCB 1P 4A', 'MCB 1P 6A', 'MCB 1P 10A', 'MCB 1P 16A',
-            'MCB 1P 20', 'MCB 1P 25', 
+            'MCB 1P 20A', 'MCB 1P 25A', 
             'MCB 1P 35A', 'MCB 1P 50A', 
-            'MCB 3P 10', 
+            'MCB 3P 10A', 
             'MCB 3P 16A', 'MCB 3P 20A', 'MCB 3P 25A',
             'MCB 3P 35A', 'MCB 3P 50A', 'MCB 3P 63A', 
             'KWH METER PASCABAYAR',

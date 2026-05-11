@@ -2,6 +2,16 @@
 
 
 @section('content')
+<style>
+    /* Perbaikan untuk tampilan input agar bersih dan menghilangkan dropdown otomatis browser */
+    .form-control-new {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: none !important;
+    }
+</style>
+
 <div class="card-form-container">
     <div class="card-form-header">
         <h2>Tambah Material Siaga Standby</h2>
@@ -20,7 +30,8 @@
     @endif
 
     <div class="card-form-body">
-        <form action="{{ route('material-siaga.store') }}" method="POST" enctype="multipart/form-data">
+        {{-- PERBAIKAN: Nama rute diseragamkan menjadi material-siaga-stand-by.store untuk menghindari Error 500 --}}
+        <form action="{{ route('material-siaga-stand-by.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <div class="form-group-new">
@@ -56,11 +67,13 @@
 
             <div class="form-group-new">
                 <label for="unggah_foto">Unggah Foto Material</label> 
-                <input type="file" name="unggah_foto" id="unggah_foto" class="form-control-new-file @error('unggah_foto') is-invalid @enderror" accept="image/*" required> 
+                {{-- PERBAIKAN: Menggunakan onclick="this.value=null" agar file tidak terhapus otomatis setelah diambil --}}
+                <input type="file" name="unggah_foto" id="unggah_foto" class="form-control-new-file @error('unggah_foto') is-invalid @enderror" 
+                       accept="image/*" capture="environment" onclick="this.value=null" required> 
                 @error('unggah_foto')
                     <span style="color: red; font-size: 12px; display: block;">{{ $message }}</span>
                 @else
-                    <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Unggah foto material adalah wajib.</small>
+                    <small style="color: red; display: block; margin-top: 5px; font-style: italic;">*Unggah foto material adalah wajib (Ambil Foto Kamera).</small>
                 @enderror
             </div>
 
@@ -79,7 +92,8 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-simpan">Simpan</button>
-                <a href="{{ route('material-siaga.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
+                {{-- PERBAIKAN: Nama rute diseragamkan menjadi material-siaga-stand-by.index --}}
+                <a href="{{ route('material-siaga-stand-by.index') }}" class="btn-batal" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px; margin-left: 10px;">Batal</a>
             </div>
         </form>
     </div>

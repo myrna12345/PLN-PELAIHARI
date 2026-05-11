@@ -3,13 +3,8 @@
 @section('content')
 
 <style>
-
 /* 1. Layout Dasar Tombol */
-.btn-pdf, 
-.btn-excel, 
-.btn-foto-download, 
-.btn-edit, 
-.btn-hapus {
+.btn-pdf, .btn-excel, .btn-foto-download, .btn-edit, .btn-hapus {
     border: none;
     padding: 8px 12px;
     border-radius: 5px;
@@ -24,46 +19,18 @@
     transition: background-color 0.2s, color 0.2s;
 }
 
-/* Ensure icons inherit color */
-.btn-pdf i, .btn-excel i, .btn-foto-download i, .btn-edit i, .btn-hapus i {
-    color: inherit !important;
-}
+.btn-pdf i, .btn-excel i, .btn-foto-download i, .btn-edit i, .btn-hapus i { color: inherit !important; }
 
-/* 2. Tombol PDF, Excel, & Download Foto (BIRU SOFT) */
-.btn-pdf, 
-.btn-excel,
-.btn-foto-download {
-    background-color: #5a8dee !important;
-    color: white !important;
-}
+/* 2. Tombol Warna */
+.btn-pdf, .btn-excel, .btn-foto-download { background-color: #5a8dee !important; color: white !important; }
+.btn-pdf:hover, .btn-excel:hover, .btn-foto-download:hover { background-color: #4a77ce !important; }
+.btn-edit { background-color: #76b596 !important; color: #333333 !important; }
+.btn-edit:hover { background-color: #62a384 !important; }
+.btn-hapus { background-color: #cc6666 !important; color: white !important; }
+.btn-hapus:hover { background-color: #b35555 !important; }
 
-.btn-pdf:hover, 
-.btn-excel:hover,
-.btn-foto-download:hover {
-    background-color: #4a77ce !important; 
-}
-
-/* 3. Tombol Edit (HIJAU PASTEL AGAK GELAP) */
-.btn-edit {
-    background-color: #76b596 !important; 
-    color: #333333 !important; 
-}
-.btn-edit:hover {
-    background-color: #62a384 !important; 
-}
-
-/* 4. Tombol Hapus (MERAH PASTEL AGAK GELAP) */
-.btn-hapus {
-    background-color: #cc6666 !important; 
-    color: white !important; 
-}
-.btn-hapus:hover {
-    background-color: #b35555 !important; 
-}
-
-/* 5. TOMBOL CARI & RESET (ABU-ABU) */
-.search-form .btn-primary,
-.search-form .btn-secondary {
+/* 3. Tombol Cari & Reset */
+.search-form .btn-primary, .search-form .btn-secondary {
     min-width: 80px !important;
     height: 40px !important; 
     display: inline-flex !important;
@@ -80,135 +47,50 @@
     text-decoration: none !important;
 }
 
-.search-form .btn-primary:hover,
-.search-form .btn-secondary:hover {
-    background-color: #5a6268 !important; 
-}
-/* 6. INPUT SEARCH & TANGGAL */
+/* 4. INPUT SEARCH & TANGGAL */
 .search-bar {
-    position: relative; 
-    height: 40px !important; 
-    border: 1px solid #d1d5db; 
-    border-radius: 10px; 
-    background-color: white;
-    box-sizing: border-box;
-    width: auto; 
-    min-width: 200px; 
+    position: relative; height: 40px !important; border: 1px solid #d1d5db; border-radius: 10px; background-color: white; box-sizing: border-box; width: auto; min-width: 200px; 
 }
+.search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6c757d; font-size: 14px; z-index: 10; pointer-events: none; }
+.search-bar input { border: none !important; height: 100%; width: 100%; outline: none; padding-left: 35px !important; padding-right: 10px; font-size: 14px; background: transparent; box-sizing: border-box; }
 
-.search-bar i {
-    position: absolute;
-    left: 12px; 
-    top: 50%;
-    transform: translateY(-50%); 
-    color: #6c757d; 
-    font-size: 14px;
-    z-index: 10;
-    pointer-events: none; 
-}
+/* Perbaikan Label HP agar tidak double */
+@media (max-width: 991.98px) { .label-manual { display: none !important; } }
+.label-manual { display: none; } /* Default sembunyi di desktop */
 
-/* CSS PERBAIKAN: Sembunyikan label manual di HP karena app.blade sudah punya otomatis */
-@media (max-width: 991.98px) {
-    .form-group-tanggal-filter label {
-        display: none !important;
-    }
-}
+.form-control-tanggal { height: 40px !important; border: 1px solid #d1d5db; border-radius: 10px; padding: 0 12px; box-sizing: border-box; font-size: 14px; outline: none; width: 100%; }
 
-/* Sembunyikan label manual di desktop secara default */
-.form-group-tanggal-filter label {
-    display: none;
-}
-
-.search-bar input {
-    border: none !important;
-    height: 100%;
-    width: 100%;
-    outline: none;
-    padding-left: 35px !important; 
-    padding-right: 10px;
-    font-size: 14px;
-    background: transparent;
-    box-sizing: border-box;
-}
-
-.search-bar input::-webkit-search-decoration,
-.search-bar input::-webkit-search-cancel-button,
-.search-bar input::-webkit-search-results-button,
-.search-bar input::-webkit-search-results-decoration {
-    display: none;
-}
-
-.form-control-tanggal {
-    height: 40px !important; 
-    border: 1px solid #d1d5db; 
-    border-radius: 10px; 
-    padding: 0 12px;
-    box-sizing: border-box;
-    font-size: 14px;
-    outline: none;
-    width: 100%;
-}
-
-/* 7. LAYOUT AKSI */
-.table-actions {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-}
-
-.table-foto {
-    max-width: 80px; 
-    display: block; 
-    margin: 0 auto 5px; 
-    border-radius: 4px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    border: 1px solid #ddd;
-}
+.table-actions { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.table-foto { max-width: 80px; display: block; margin: 0 auto 5px; border-radius: 4px; cursor: pointer; transition: opacity 0.2s; border: 1px solid #ddd; }
 
 /* MODAL STYLE */
-.image-modal {
-    display: none; 
-    position: fixed; 
-    z-index: 9999; 
-    left: 0; top: 0; width: 100%; height: 100%; 
-    background-color: rgba(0,0,0,0.85); 
-    justify-content: center; align-items: center;
-}
-.image-modal-content {
-    max-width: 90%; max-height: 90vh; border-radius: 4px;
-}
-.close-modal {
-    position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;
-}
+.image-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; }
+.image-modal-content { max-width: 90%; max-height: 90vh; border-radius: 4px; }
+.close-modal { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
 </style>
 
 <div class="card-new">
-    {{-- HEADER + FILTER --}}
     <div class="index-header">
         <h2>LAPORAN MATERIAL SIAGA STAND BY</h2>
 
-        <form action="{{ route('material-siaga.index') }}" method="GET" class="search-form">
+        <form action="{{ route('material-siaga-stand-by.index') }}" method="GET" class="search-form">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" placeholder="Cari Nama Material" value="{{ request('search') }}">
             </div>
             <div class="form-group-tanggal-filter">
+                <label class="label-manual">Dari Tanggal:</label>
                 <input type="date" name="start_date" class="form-control-tanggal" value="{{ request('start_date') }}" title="Tanggal Mulai">
             </div>
             <div class="form-group-tanggal-filter">
+                <label class="label-manual">Sampai Tanggal:</label>
                 <input type="date" name="end_date" class="form-control-tanggal" value="{{ request('end_date') }}" title="Tanggal Akhir">
             </div>
             <button type="submit" class="btn btn-primary btn-sm">Cari</button>
-            <a href="{{ route('material-siaga.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+            <a href="{{ route('material-siaga-stand-by.index') }}" class="btn btn-secondary btn-sm">Reset</a>
         </form>
     </div>
 
-    {{-- TABEL --}}
     <div class="table-container">
         <table class="table">
             <thead>
@@ -218,7 +100,11 @@
                     <th>Stand Meter</th>
                     <th>Tanggal (WITA)</th>
                     <th>Status</th>
+<<<<<<< HEAD
                     <th>Foto Material </th>
+=======
+                    <th style="text-align: center;">Foto Material</th>
+>>>>>>> 111e6cddbbcacdd04815165413bffaf6bde30b83
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <th style="min-width: 150px; text-align: center;">Aksi</th>
                     @endif
@@ -239,14 +125,14 @@
                     </td>
 
                     <td style="text-align: center;">
-                        @if($data->unggah_foto && Storage::disk('public')->exists($data->unggah_foto))
-                            <img src="{{ route('material-siaga.show-foto', $data->id) }}"
+                        @if($data->unggah_foto && File::exists(public_path('uploads/material_siaga/' . $data->unggah_foto)))
+                            <img src="{{ asset('uploads/material_siaga/' . $data->unggah_foto) }}"
                                  class="table-foto"
                                  onclick="openModal(this)"
                                  alt="Foto Material">
                             
                             @if(strtolower(auth()->user()->role) !== 'satpam')
-                            <a href="{{ route('material-siaga.download-foto', $data->id) }}" class="btn-foto-download">
+                            <a href="{{ route('material-siaga-stand-by.download-foto', $data->id) }}" class="btn-foto-download">
                                 <i class="fas fa-download"></i> Download
                             </a>
                             @endif
@@ -258,11 +144,11 @@
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <td>
                         <div class="table-actions">
-                            <a href="{{ route('material-siaga.edit', $data->id) }}" class="btn btn-edit">
+                            <a href="{{ route('material-siaga-stand-by.edit', $data->id) }}" class="btn btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
 
-                            <form action="{{ route('material-siaga.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                            <form action="{{ route('material-siaga-stand-by.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-hapus">
                                     <i class="fas fa-trash"></i> Hapus
@@ -274,7 +160,6 @@
                 </tr>
                 @empty
                 <tr>
-                    {{-- PERBAIKAN: Posisi teks di tengah vertikal (padding) dan horizontal (text-align) --}}
                     <td colspan="{{ strtolower(auth()->user()->role) !== 'satpam' ? 7 : 6 }}" 
                         style="text-align: center; vertical-align: middle; padding: 100px 0; color: #6b7280; font-weight: 500; font-size: 16px;">
                         Data tidak ditemukan.
@@ -285,45 +170,29 @@
         </table>
     </div>
 
+    {{-- PERBAIKAN: Pagination sekarang akan otomatis menggunakan simple mode --}}
     <div style="margin-top: 20px;">
         {{ $dataSiaga->appends(request()->query())->links() }}
     </div>
 
-    {{-- FOOTER EXPORT --}}
-   @if(auth()->user()->role !== 'satpam')
+    @if(!in_array(strtolower(auth()->user()->role), ['satpam', 'harmet']))
     <div class="index-footer-form">
-        <form action="{{ route('material-stand-by.pdf') }}"
-              method="POST"
-              class="form-download">
-            @csrf
-
+        <form action="{{ route('material-siaga-stand-by.export') }}" method="GET" class="form-download">
             <div class="form-group-tanggal">
                 <label>Dari Tanggal:</label>
-                <input type="date" name="tanggal_mulai"
-                       class="form-control-tanggal" required>
+                <input type="date" name="start_date" class="form-control-tanggal" required>
             </div>
-
             <div class="form-group-tanggal">
                 <label>Sampai Tanggal:</label>
-                <input type="date" name="tanggal_akhir"
-                       class="form-control-tanggal" required>
+                <input type="date" name="end_date" class="form-control-tanggal" required>
             </div>
-
-            <button type="submit" class="btn-pdf">
-                <i class="fas fa-file-pdf"></i> Unduh PDF
-            </button>
-
-            <button type="submit"
-                    formaction="{{ route('material-stand-by.excel') }}"
-                    class="btn-excel">
-                <i class="fas fa-file-excel"></i> Unduh Excel
-            </button>
+            <button type="submit" name="export" value="pdf" class="btn btn-pdf"><i class="fas fa-file-pdf"></i> Unduh PDF</button>
+            <button type="submit" name="export" value="excel" class="btn btn-excel"><i class="fas fa-file-excel"></i> Unduh Excel</button>
         </form>
     </div>
     @endif
 </div>
 
-{{-- MODAL POP-UP IMAGE --}}
 <div id="imageModal" class="image-modal">
     <span class="close-modal" onclick="closeModal()">&times;</span>
     <img class="image-modal-content" id="img01">
@@ -336,11 +205,7 @@
         modal.style.display = "flex"; 
         modalImg.src = element.src;   
     }
-
-    function closeModal() {
-        document.getElementById("imageModal").style.display = "none";
-    }
-
+    function closeModal() { document.getElementById("imageModal").style.display = "none"; }
     window.onclick = function(event) {
         var modal = document.getElementById("imageModal");
         if (event.target == modal) { modal.style.display = "none"; }

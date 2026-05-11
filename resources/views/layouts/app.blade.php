@@ -192,18 +192,6 @@
         .submenu a { font-size: 0.95rem !important; padding: 10px 12px !important; color: #ced4da !important; }
         .submenu a:hover, .submenu a.sub-active { color: #ffffff !important; background-color: transparent !important; }
 
-        /* === 6. CSS WIDGET DASHBOARD === */
-        .widget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .widget-card { padding: 25px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: none; }
-        .widget-card.salmon-red { background-color: #d06368ff; color: white; }
-        .widget-card.blue { background-color: #88c7d2ff; color: #212529; }
-        .widget-card.purple { background-color: #88c7d2ff; color: #212529; }
-        .widget-card.green { background-color: #88c7d2ff; color: #212529; }
-        .widget-card.mauve { background-color: #dad664ff; color: #212529; }
-        .widget-icon { font-size: 3rem; margin-right: 25px; opacity: 0.7; }
-        .widget-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; }
-        .widget-info p { margin: 0; font-size: 0.95rem; }
-
         /* === 8. RESPONSIVE (HP & TABLET) === */
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
@@ -226,13 +214,28 @@
             .form-group-tanggal-filter:nth-of-type(2)::before { content: "Dari Tanggal:"; display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; color: #333; }
             .form-group-tanggal-filter:nth-of-type(3)::before { content: "Sampai Tanggal:"; display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; color: #333; }
             .form-download .form-group-tanggal label { font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; color: #333; }
-            .search-bar input[type="text"], .form-group-tanggal-filter input[type="date"], .form-group-tanggal input[type="date"], .search-form button.btn-primary, .search-form a.btn-secondary, .form-download button.btn-pdf, .form-download button.btn-excel { width: 100% !important; height: 50px !important; font-size: 1rem !important; border-radius: 10px !important; }
+            
+            /* PERBAIKAN BUTTON MOBILE: JANGAN DIUBAH */
+            .search-bar input[type="text"], 
+            .form-group-tanggal-filter input[type="date"], 
+            .form-group-tanggal input[type="date"], 
+            .search-form button.btn-primary, 
+            .search-form a.btn-secondary, 
+            .form-download button.btn-pdf, 
+            .form-download button.btn-excel { 
+                width: 100% !important; 
+                height: 50px !important; 
+                font-size: 1rem !important; 
+                border-radius: 10px !important; 
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
             .search-bar input[type="text"] { padding: 0 15px 0 40px !important; }
-            .form-group-tanggal-filter input[type="date"], .form-group-tanggal input[type="date"] { display: flex !important; align-items: center !important; padding: 0 15px !important; }
             .search-bar, .form-group-tanggal-filter, .form-group-tanggal { width: 100% !important; }
         }
 
-        /* === 9. CSS LOGOUT BUTTON (TAMBAHAN BARU) === */
+        /* === 9. CSS LOGOUT BUTTON === */
         .sidebar-footer {
             margin-top: auto; 
             border-top: 1px solid #4f565d;
@@ -284,13 +287,9 @@
             <button class="sidebar-close-btn" id="sidebarCloseBtn">&times;</button>
         </div>
         
-        {{-- MENU SIDEBAR START --}}
         <ul class="sidebar-menu">
             <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
             
-            {{-- MENU GANTI PASSWORD DIHAPUS DARI SINI SESUAI PERMINTAAN --}}
-
-            {{-- History Material Standby HANYA UNTUK ADMIN --}}
             @if(strtolower(auth()->user()->role) === 'admin')
             <li>
                 <a href="{{ route('material-history.index') }}" class="{{ request()->routeIs('material-history.index') ? 'active' : '' }}">
@@ -299,16 +298,15 @@
             </li>
             @endif
 
+            {{-- MATERIAL FAST MOVING - DISEMBUNYIKAN DARI HARMET --}}
+            @if(strtolower(auth()->user()->role) !== 'harmet')
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.create') || request()->routeIs('material-retur.create') || request()->routeIs('material_keluar.create') || request()->routeIs('material_kembali.create') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-file-export"></i> <span>Material Fast Moving</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    
-                    {{-- Sembunyikan Material Stand By dari Satpam --}}
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-stand-by.create') }}" class="{{ request()->routeIs('material-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-open"></i> <span>Material Stand By</span></a></li>
                     @endif
                     
-                    {{-- Sembunyikan dari Gudang --}}
                     @if(strtolower(auth()->user()->role) !== 'gudang')
                     <li><a href="{{ route('material_keluar.create') }}" class="{{ request()->routeIs('material_keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-tools"></i> <span>Material Keluar</span></a></li>
                     <li><a href="{{ route('material_kembali.create') }}" class="{{ request()->routeIs('material_kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Material Kembali</span></a></li>
@@ -316,26 +314,35 @@
                     @endif
                 </ul>
             </li>
+            @endif
 
-            {{-- Sembunyikan Halaman Material Siaga sepenuhnya dari Gudang --}}
             @if(strtolower(auth()->user()->role) !== 'gudang')
-            <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.create') || request()->routeIs('siaga-kembali.create') ? 'active open' : '' }}">
+            <li class="menu-item-has-dropdown {{ request()->routeIs('material-siaga-stand-by.create') || request()->routeIs('siaga-keluar.*') || request()->routeIs('siaga-kembali.*') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-bolt"></i> <span>Material Siaga</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
-                    
-                    {{-- TAMBAHAN: Sembunyikan Form Siaga Stand By dari Satpam --}}
                     @if(strtolower(auth()->user()->role) !== 'satpam')
                     <li><a href="{{ route('material-siaga-stand-by.create') }}" class="{{ request()->routeIs('material-siaga-stand-by.create') ? 'sub-active' : '' }}"><i class="fas fa-box-archive"></i> <span>Siaga Stand By</span></a></li>
                     @endif
                     
-                    <li><a href="{{ route('siaga-keluar.create') }}" class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}"><i class="fas fa-truck"></i> <span>Siaga Keluar</span></a></li>
-                    <li><a href="{{ route('siaga-kembali.create') }}" class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}"><i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span></a></li>
+                    {{-- PERBAIKAN: KHUSUS SATPAM LANGSUNG KE CREATE, ADMIN/GUDANG KE CREATE JUGA --}}
+                    <li>
+                        <a href="{{ route('siaga-keluar.create') }}" 
+                           class="{{ request()->routeIs('siaga-keluar.create') ? 'sub-active' : '' }}">
+                           <i class="fas fa-truck"></i> <span>Siaga Keluar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('siaga-kembali.create') }}" 
+                           class="{{ request()->routeIs('siaga-kembali.create') ? 'sub-active' : '' }}">
+                           <i class="fas fa-sync-alt"></i> <span>Siaga Kembali</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             @endif
 
-            {{-- MENU LAPORAN DISEMBUNYIKAN DARI SATPAM --}}
-            @if(strtolower(auth()->user()->role) !== 'satpam')
+            {{-- MENU LAPORAN DISEMBUNYIKAN DARI SATPAM DAN HARMET --}}
+            @if(!in_array(strtolower(auth()->user()->role), ['satpam', 'harmet']))
             <li class="menu-item-has-dropdown {{ request()->routeIs('material-stand-by.index') || request()->routeIs('material-retur.index') || request()->routeIs('material_keluar.index') || request()->routeIs('material_kembali.index') || request()->routeIs('material-siaga-stand-by.index') || request()->routeIs('siaga-keluar.index') || request()->routeIs('siaga-kembali.index') ? 'active open' : '' }}">
                 <a class="dropdown-toggle"><i class="fas fa-scroll"></i> <span>Laporan</span><i class="fas fa-chevron-right arrow-icon"></i></a>
                 <ul class="submenu">
@@ -355,9 +362,7 @@
             </li>
             @endif
         </ul>
-        {{-- MENU SIDEBAR END --}}
 
-        {{-- BAGIAN TOMBOL LOGOUT --}}
         <div class="sidebar-footer">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
@@ -366,8 +371,6 @@
                 </button>
             </form>
         </div>
-        {{-- AKHIR BAGIAN LOGOUT --}}
-
     </aside>
 
     <main class="main-content">
@@ -378,7 +381,6 @@
         <div class="main-content-inner">
             @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
             @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
-            
             @yield('content')
         </div>
     </main>
@@ -392,28 +394,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const overlay = document.getElementById('sidebarOverlay');
     const toggleBtn = document.getElementById('toggleSidebarBtn');
     const closeBtn = document.getElementById('sidebarCloseBtn');
+    
     function toggleSidebar() { sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
-    if(toggleBtn) toggleBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleSidebar(); });
+    if(toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if(closeBtn) closeBtn.addEventListener('click', toggleSidebar);
     if(overlay) overlay.addEventListener('click', toggleSidebar);
-    window.addEventListener('resize', () => { if (window.innerWidth > 991.98 && sidebar.classList.contains('active')) { sidebar.classList.remove('active'); overlay.classList.remove('active'); } });
 
     document.querySelectorAll('.sidebar-menu .dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
             const parent = this.closest('li.menu-item-has-dropdown');
-            if (!parent) return; 
-            const isNested = parent.classList.contains('nested-dropdown');
-            if (!isNested) {
-                document.querySelectorAll('.sidebar-menu > li.menu-item-has-dropdown.open').forEach(open => {
-                    if (open !== parent) { open.classList.remove('open'); }
-                });
-            }
-            if (isNested) {
-                 document.querySelectorAll('.submenu > li.nested-dropdown.open').forEach(open => {
-                    if (open !== parent) { open.classList.remove('open'); }
-                });
-            }
             parent.classList.toggle('open');
         });
     });
